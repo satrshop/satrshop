@@ -3,6 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useCartStore } from "@/store/useCartStore";
 import { useEffect, useState } from "react";
 
@@ -116,9 +117,13 @@ export default function CartDrawer() {
                   <span className="text-primary-foreground/80">الإجمالي:</span>
                   <span className="text-2xl text-secondary">{total.toFixed(2)} د.ا</span>
                 </div>
-                <button className="w-full bg-secondary text-white py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2">
+                <Link 
+                  href="/checkout" 
+                  onClick={() => setIsOpen(false)}
+                  className="w-full bg-secondary text-white py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2"
+                >
                   إتمام الطلب
-                </button>
+                </Link>
               </div>
             )}
           </motion.div>

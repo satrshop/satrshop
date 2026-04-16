@@ -5,10 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Search, Menu, User, X, ArrowLeft } from "lucide-react";
+import { ShoppingBag, Search, Menu, User, X, ArrowLeft, Loader2 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useCartStore } from "@/store/useCartStore";
-import { searchProducts, type Product } from "@/data/products";
+import { searchProductsRemote } from "@/lib/db/products";
+import { Product } from "@/types/models/product";
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -16,6 +17,7 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -52,7 +54,6 @@ export default function Header() {
   // Focus search input when opened
   useEffect(() => {
     if (isSearchOpen) {
-      // Small delay to allow the animation to start
       const timer = setTimeout(() => {
         searchInputRef.current?.focus();
       }, 100);
@@ -60,10 +61,27 @@ export default function Header() {
     }
   }, [isSearchOpen]);
 
-  // Live search as user types
+  // Live search as user types (with remote fetch)
   useEffect(() => {
-    const results = searchProducts(searchQuery);
-    setSearchResults(results);
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await searchProductsRemote(searchQuery);
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Search failed:", error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300); // 300ms debounce for database queries
+
+    return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
   const closeMobileMenu = useCallback(() => {
@@ -74,6 +92,7 @@ export default function Header() {
     setIsSearchOpen(false);
     setSearchQuery("");
     setSearchResults([]);
+    setIsSearching(false);
   }, []);
 
   const handleSearchSubmit = useCallback((e: React.FormEvent) => {
@@ -237,7 +256,10 @@ export default function Header() {
                     className="w-full bg-transparent text-foreground text-base sm:text-lg font-medium focus:outline-none placeholder:text-muted-foreground/60"
                     autoComplete="off"
                   />
-                  {searchQuery && (
+                  {isSearching && (
+                    <Loader2 size={18} className="text-primary animate-spin flex-shrink-0" />
+                  )}
+                  {searchQuery && !isSearching && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
@@ -331,7 +353,7 @@ export default function Header() {
                       </motion.div>
                     </Link>
                   </div>
-                ) : (
+                ) : !isSearching ? (
                   /* No results */
                   <div className="text-center py-16 space-y-4">
                     <div className="w-20 h-20 bg-red-50 dark:bg-red-500/10 rounded-full flex items-center justify-center mx-auto">
@@ -339,6 +361,12 @@ export default function Header() {
                     </div>
                     <p className="text-lg font-bold text-foreground">لا توجد نتائج</p>
                     <p className="text-muted-foreground text-sm">لم نجد أي منتج مطابق لـ &quot;{searchQuery}&quot;. جرب كلمات مختلفة.</p>
+                  </div>
+                ) : (
+                  /* Searching indicator */
+                  <div className="text-center py-16">
+                    <Loader2 size={36} className="text-primary animate-spin mx-auto mb-4" />
+                    <p className="text-muted-foreground">جاري البحث...</p>
                   </div>
                 )}
               </div>
@@ -351,7 +379,6 @@ export default function Header() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Simplified overlay - no heavy blur for better mobile performance */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
