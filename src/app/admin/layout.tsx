@@ -14,7 +14,8 @@ import {
   Loader2,
   Menu,
   X,
-  ChevronLeft
+  ChevronLeft,
+  Mail
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -54,11 +55,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (pathname === "/admin/login") {
     return <>{children}</>;
   }
-
   const navItems = [
     { name: "الإحصائيات", href: "/admin", icon: LayoutDashboard },
     { name: "المنتجات", href: "/admin/products", icon: Package },
     { name: "الطلبات", href: "/admin/orders", icon: ShoppingBag },
+    { name: "الرسائل", href: "/admin/messages", icon: Mail },
   ];
 
   return (
