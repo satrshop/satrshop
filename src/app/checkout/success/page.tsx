@@ -78,7 +78,7 @@ function SuccessContent() {
           className="flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link href="/" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-secondary text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-[#a87d2b] transition-all shadow-lg shadow-secondary/20">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white hover:text-secondary group transition-all shadow-lg shadow-secondary/20">
               الرئيسية
               <Home size={20} />
             </button>

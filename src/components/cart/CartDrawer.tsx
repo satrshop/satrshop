@@ -132,7 +132,7 @@ export default function CartDrawer() {
                 <Link 
                   href="/checkout" 
                   onClick={() => setIsOpen(false)}
-                  className="w-full bg-secondary text-white py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2"
+                  className="w-full bg-secondary text-primary-foreground py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2"
                 >
                   إتمام الطلب
                 </Link>

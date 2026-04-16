@@ -130,7 +130,7 @@ function ShopContent() {
                       onClick={() => { setSelectedSort(opt); setIsSortOpen(false); }}
                       className={`w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
                         selectedSort === opt 
-                          ? 'bg-primary text-background shadow-md translate-x-[-4px]' 
+                          ? 'bg-primary text-primary-foreground shadow-md translate-x-[-4px]' 
                           : 'text-primary hover:bg-primary/5 hover:translate-x-[-4px]'
                       } mb-1 last:mb-0`}
                     >
@@ -163,7 +163,7 @@ function ShopContent() {
           <p className="text-muted-foreground font-medium max-w-md mx-auto">
             {products.length === 0 ? "قاعدة البيانات فارغة حالياً. يرجى تشغيل سكربت الرفع." : `لم نجد أي منتج يطابق بحثك "${queryParam}". جرب البحث بكلمات مختلفة.`}
           </p>
-          <a href="/shop" className="inline-block mt-4 bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:bg-[#22556d] transition-colors">
+          <a href="/shop" className="inline-block mt-4 bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:bg-primary/90 transition-colors">
             عرض كل المنتجات
           </a>
         </motion.div>

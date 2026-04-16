@@ -79,7 +79,7 @@ export default function Home() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="bg-gradient-to-r from-secondary to-[#c79122] text-white h-12 sm:h-14 w-full sm:w-auto px-8 sm:px-10 rounded-2xl font-bold text-lg sm:text-xl transition-all shadow-lg hover:shadow-xl border border-white/10 relative overflow-hidden group"
+                className="bg-gradient-to-r from-secondary to-[#c79122] text-secondary-foreground h-12 sm:h-14 w-full sm:w-auto px-8 sm:px-10 rounded-2xl font-bold text-lg sm:text-xl transition-all shadow-lg hover:shadow-xl border border-white/10 relative overflow-hidden group"
               >
                 <div className="absolute inset-0 bg-white/20 w-[200%] translate-x-[-150%] skew-x-[-30deg] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out" />
                 <span className="relative z-10">تصفح التشكيلة</span>
@@ -87,10 +87,10 @@ export default function Home() {
             </Link>
             <Link href="/collections" className="w-full sm:w-auto">
               <motion.button
-                whileHover={{ x: -5, backgroundColor: "rgba(202, 152, 55, 0.15)" }}
-                className="h-12 sm:h-14 w-full sm:w-auto px-6 sm:px-8 rounded-2xl font-bold text-lg sm:text-xl text-secondary border-2 border-secondary flex items-center justify-center gap-3 transition-colors hover:bg-secondary/10 backdrop-blur-md shadow-sm"
+                whileHover={{ x: -5, backgroundColor: "rgba(255, 255, 255, 0.15)" }}
+                className="h-12 sm:h-14 w-full sm:w-auto px-6 sm:px-8 rounded-2xl font-bold text-lg sm:text-xl text-white border-2 border-white/30 flex items-center justify-center gap-3 transition-colors hover:bg-white/10 backdrop-blur-md shadow-sm"
               >
-                استكشف الماركة
+                استكشف
                 <span className="text-2xl leading-none">&larr;</span>
               </motion.button>
             </Link>

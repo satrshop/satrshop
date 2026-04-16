@@ -43,7 +43,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
       {/* Badges */}
       <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 flex flex-col gap-2">
         {product.isNew && (
-          <div className="bg-secondary text-white text-[10px] sm:text-xs font-extrabold px-2 sm:px-3 py-1 rounded-full shadow-md">
+          <div className="bg-secondary text-secondary-foreground text-[10px] sm:text-xs font-extrabold px-2 sm:px-3 py-1 rounded-full shadow-md">
             جديد
           </div>
         )}
@@ -84,7 +84,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-primary-foreground text-primary px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-secondary hover:text-primary-foreground transition-colors"
+            className="bg-primary-foreground text-primary dark:text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-secondary hover:text-white transition-colors"
           >
             <ShoppingBag size={18} />
             أضف للسلة
@@ -110,7 +110,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         <div className="sm:hidden mt-auto">
           <button 
             onClick={() => addItem(product)}
-            className="w-full bg-secondary text-primary-foreground py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all text-sm"
+            className="w-full bg-secondary text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all text-sm"
           >
             <ShoppingBag size={16} />
             أضف للسلة
