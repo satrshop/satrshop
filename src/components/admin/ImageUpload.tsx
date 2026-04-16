@@ -106,7 +106,7 @@ export default function ImageUpload({ onUploadComplete, initialValue }: ImageUpl
       >
         {preview ? (
           <>
-            <Image src={preview} alt="Preview" fill className="object-cover" />
+            <Image src={preview} alt="Preview" fill sizes="(max-width: 768px) 100vw, 300px" className="object-cover" />
             
             {/* Uploading Overlay */}
             {uploading && (

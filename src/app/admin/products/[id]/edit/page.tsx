@@ -230,7 +230,7 @@ export default function EditProductPage() {
           <div className="bg-[#1e293b] p-6 rounded-[2.5rem] border border-white/10">
             <div className="relative aspect-[4/5] bg-white/5 rounded-2xl overflow-hidden mb-6">
               {formData.image && (
-                <Image src={formData.image} alt="Preview" fill className="object-cover" />
+                <Image src={formData.image} alt="Preview" fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
               )}
             </div>
             <div className="space-y-4 text-right">

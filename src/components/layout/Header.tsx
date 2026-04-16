@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Search, Menu, User, X, ArrowLeft, Loader2, Heart } from "lucide-react";
+import { ShoppingBag, Search, Menu, X, ArrowLeft, Loader2, Heart } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
@@ -229,14 +229,7 @@ export default function Header() {
               )}
             </motion.button>
 
-            <div className="h-6 w-px bg-primary/20 hidden sm:block mx-1" />
 
-            <Link href="/login">
-              <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="hidden sm:flex items-center gap-2 bg-primary text-primary-foreground px-4 md:px-5 py-2 rounded-full font-bold hover:bg-[#22556d] shadow-md transition-all text-sm md:text-base">
-                <User size={18} strokeWidth={2.5} />
-                دخول
-              </motion.button>
-            </Link>
 
             <button onClick={() => setIsMobileMenuOpen(true)} className="lg:hidden p-2 text-primary active:scale-90 transition-transform touch-manipulation">
               <Menu size={24} className="stroke-[2.5px]" />
@@ -347,7 +340,13 @@ export default function Header() {
                             className="flex items-center gap-4 p-3 sm:p-4 bg-primary text-white rounded-2xl border border-primary/20 hover:bg-[#22556d] hover:border-secondary/30 hover:shadow-md transition-all group touch-manipulation cursor-pointer"
                           >
                             <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
-                              <Image src={product.image} alt={product.name} fill className="object-cover" />
+                              <Image 
+                                src={product.image} 
+                                alt={product.name} 
+                                fill 
+                                sizes="(max-width: 640px) 64px, 80px"
+                                className="object-cover" 
+                              />
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-bold text-white group-hover:text-secondary transition-colors truncate text-sm sm:text-base">
@@ -444,12 +443,7 @@ export default function Header() {
               </nav>
 
               <div className="p-5 sm:p-6 border-t border-border">
-                <Link href="/login" onClick={closeMobileMenu}>
-                  <button className="w-full flex items-center justify-center gap-2 bg-primary text-white py-4 rounded-xl font-bold text-lg hover:bg-secondary active:scale-[0.98] transition-all touch-manipulation">
-                    <User size={20} />
-                    تسجيل الدخول / إنشاء حساب
-                  </button>
-                </Link>
+
               </div>
             </motion.div>
           </>

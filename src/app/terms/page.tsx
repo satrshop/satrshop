@@ -6,7 +6,7 @@ import { FileText } from "lucide-react";
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-background selection:bg-secondary selection:text-white pb-20 relative">
+    <div className="min-h-screen bg-background selection:bg-secondary selection:text-white relative">
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">

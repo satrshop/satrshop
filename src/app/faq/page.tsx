@@ -16,7 +16,7 @@ export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (
-    <div className="min-h-screen bg-background selection:bg-secondary selection:text-white pb-20 relative">
+    <div className="min-h-screen bg-background selection:bg-secondary selection:text-white relative">
       <Header />
       <div className="absolute top-20 left-10 w-[400px] h-[400px] bg-primary/5 rounded-full filter blur-[100px] -z-10" />
 

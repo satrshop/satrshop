@@ -73,7 +73,13 @@ export default function CartDrawer() {
                     className="flex gap-4 bg-primary text-primary-foreground p-3 rounded-2xl border border-primary/20 shadow-sm group"
                   >
                     <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0">
-                      <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      <Image 
+                        src={item.image} 
+                        alt={item.name} 
+                        fill 
+                        sizes="100px"
+                        className="object-cover" 
+                      />
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-1">
                       <div className="flex justify-between items-start">
