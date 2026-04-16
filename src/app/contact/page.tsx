@@ -9,26 +9,26 @@ export default function ContactPage() {
     <div className="min-h-screen bg-background selection:bg-secondary selection:text-white pb-20">
       <Header />
       
-      <main className="max-w-7xl mx-auto px-6 pt-36 lg:pt-48 pb-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-2xl mx-auto mb-16"
+          className="text-center max-w-2xl mx-auto mb-10 sm:mb-16"
         >
-          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6">تواصل معنا</h1>
-          <p className="text-lg text-muted-foreground font-medium">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-4 sm:mb-6">تواصل معنا</h1>
+          <p className="text-base sm:text-lg text-muted-foreground font-medium">
             فريق سطر متواجد دائماً لمساعدتك. سواء كان لديك استفسار عن مقاسات المنتجات التقنية، أو مشكلة في الطلب، يسعدنا التحدث إليك.
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 sm:gap-16">
           {/* Contact Form */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-primary p-8 md:p-12 rounded-[2rem] shadow-xl border border-primary/20"
+            className="bg-primary p-6 sm:p-8 md:p-12 rounded-2xl sm:rounded-[2rem] shadow-xl border border-primary/20"
           >
             <h2 className="text-2xl font-bold text-primary-foreground mb-8">أرسل لنا رسالة</h2>
             <form className="space-y-6">

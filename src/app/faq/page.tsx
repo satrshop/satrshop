@@ -20,19 +20,19 @@ export default function FAQPage() {
       <Header />
       <div className="absolute top-20 left-10 w-[400px] h-[400px] bg-primary/5 rounded-full filter blur-[100px] -z-10" />
 
-      <main className="max-w-4xl mx-auto px-6 pt-36 lg:pt-48 pb-16">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-10 sm:mb-16"
         >
           <span className="text-secondary font-bold tracking-widest text-sm mb-4 inline-block">عن المتجر</span>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-6">الأسئلة الشائعة</h1>
-          <p className="text-lg text-muted-foreground font-medium">كل ما تحتاج معرفته عن التسوق في متجر سطر، جمعناه لك هنا.</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-4 sm:mb-6">الأسئلة الشائعة</h1>
+          <p className="text-base sm:text-lg text-muted-foreground font-medium">كل ما تحتاج معرفته عن التسوق في متجر سطر، جمعناه لك هنا.</p>
         </motion.div>
 
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {FAQS.map((faq, index) => {
             const isOpen = openIndex === index;
             return (
@@ -41,15 +41,15 @@ export default function FAQPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="bg-primary rounded-[1.5rem] shadow-xl border border-primary/20 overflow-hidden"
+              className="bg-primary rounded-xl sm:rounded-[1.5rem] shadow-xl border border-primary/20 overflow-hidden"
             >
               <button
                 onClick={() => setOpenIndex(isOpen ? null : index)}
-                className="w-full text-right p-6 md:p-8 flex items-center justify-between gap-4 focus:outline-none"
+                className="w-full text-right p-4 sm:p-6 md:p-8 flex items-center justify-between gap-3 sm:gap-4 focus:outline-none touch-manipulation"
               >
                 <div className="flex items-center gap-4">
                   <span className="text-secondary font-mono bg-primary-foreground/10 px-3 py-1 rounded-lg shadow-inner flex-shrink-0">{(index + 1).toString().padStart(2, '0')}.</span> 
-                  <h3 className="text-lg md:text-xl font-bold text-primary-foreground">{faq.q}</h3>
+                  <h3 className="text-base sm:text-lg md:text-xl font-bold text-primary-foreground">{faq.q}</h3>
                 </div>
                 <motion.div animate={{ rotate: isOpen ? 180 : 0 }} className="flex-shrink-0">
                   <ChevronDown className="text-secondary" size={24} />
