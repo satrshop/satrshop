@@ -17,8 +17,37 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "متجر سطر | Satr Shop",
-  description: "المتجر الأول لطلبة تكنولوجيا المعلومات والمبرمجين",
+  title: {
+    default: "متجر سطر | Satr Shop - متجر المبرمجين الأول",
+    template: "%s | متجر سطر"
+  },
+  description: "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة في الأردن.",
+  keywords: ["متجر سطر", "ملابس مبرمجين", "هوديز برمجة", "تيشرتات مبرمجين", "Satr Shop", "Programmer Fashion", "Coding Apparel Jordan"],
+  authors: [{ name: "Satr Shop Team" }],
+  creator: "Satr Shop",
+  publisher: "Satr Shop",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: "متجر سطر | Satr Shop",
+    description: "المتجر الأول لطلبة تكنولوجيا المعلومات والمبرمجين في الأردن والعالم العربي.",
+    url: "https://satrshop-8ad70.web.app",
+    siteName: "متجر سطر",
+    locale: "ar_JO",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "متجر سطر | Satr Shop",
+    description: "الأزياء التقنية للمبرمجين والمطورين.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";

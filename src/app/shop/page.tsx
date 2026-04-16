@@ -1,31 +1,46 @@
 "use client";
 
-import { useState, useMemo, Suspense } from "react";
+import { useState, useMemo, Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Header from "@/components/layout/Header";
 import ProductCard from "@/components/product/ProductCard";
-import { ChevronDown, SlidersHorizontal, SearchX } from "lucide-react";
-import { ALL_PRODUCTS } from "@/data/products";
+import { ChevronDown, SlidersHorizontal, SearchX, Loader2 } from "lucide-react";
+import { getProducts } from "@/lib/db/products";
+import { Product } from "@/types/models/product";
 
 function ShopContent() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("q") || "";
   
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [selectedSort, setSelectedSort] = useState("ترتيب حسب: الأحدث");
+  
   const sortOptions = ["ترتيب حسب: الأحدث", "السعر: من الأقل للأعلى", "السعر: من الأعلى للأقل", "الأعلى تقييماً"];
+
+  // Fetch products from Firestore
+  useEffect(() => {
+    async function loadProducts() {
+      setLoading(true);
+      const data = await getProducts();
+      setProducts(data);
+      setLoading(false);
+    }
+    loadProducts();
+  }, []);
 
   // Filter by search query
   const filteredProducts = useMemo(() => {
-    if (!queryParam.trim()) return ALL_PRODUCTS;
+    if (!queryParam.trim()) return products;
     const q = queryParam.trim().toLowerCase();
-    return ALL_PRODUCTS.filter(
+    return products.filter(
       (p) =>
         p.name.toLowerCase().includes(q) ||
         p.category.toLowerCase().includes(q)
     );
-  }, [queryParam]);
+  }, [queryParam, products]);
 
   // Sort the filtered products
   const sortedProducts = useMemo(() => {
@@ -41,11 +56,21 @@ function ShopContent() {
         sorted.sort((a, b) => b.rating - a.rating);
         break;
       default:
+        // Sort by 'isNew' or just use the order from DB
         sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
         break;
     }
     return sorted;
   }, [filteredProducts, selectedSort]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-4">
+        <Loader2 className="w-10 h-10 text-primary animate-spin" />
+        <p className="text-muted-foreground font-medium">جاري تحميل المنتجات...</p>
+      </div>
+    );
+  }
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
@@ -136,7 +161,7 @@ function ShopContent() {
           </div>
           <h2 className="text-2xl font-extrabold text-foreground">لا توجد نتائج</h2>
           <p className="text-muted-foreground font-medium max-w-md mx-auto">
-            لم نجد أي منتج يطابق بحثك &quot;{queryParam}&quot;. جرب البحث بكلمات مختلفة أو تصفح كل المنتجات.
+            {products.length === 0 ? "قاعدة البيانات فارغة حالياً. يرجى تشغيل سكربت الرفع." : `لم نجد أي منتج يطابق بحثك "${queryParam}". جرب البحث بكلمات مختلفة.`}
           </p>
           <a href="/shop" className="inline-block mt-4 bg-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:bg-[#22556d] transition-colors">
             عرض كل المنتجات
