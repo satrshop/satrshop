@@ -20,20 +20,20 @@ export default function CollectionsPage() {
       {/* Decorative Blob */}
       <div className="absolute top-40 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full filter blur-[120px] -z-10" />
 
-      <main className="max-w-7xl mx-auto px-6 pt-36 lg:pt-48 pb-16">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center max-w-3xl mx-auto mb-20"
+          className="text-center max-w-3xl mx-auto mb-12 sm:mb-20"
         >
-          <h1 className="text-4xl md:text-6xl font-extrabold text-foreground mb-6">مجموعاتنا التقنية</h1>
-          <p className="text-xl text-muted-foreground font-medium leading-relaxed">
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground mb-4 sm:mb-6">مجموعاتنا التقنية</h1>
+          <p className="text-base sm:text-xl text-muted-foreground font-medium leading-relaxed">
             استكشف تصنيفاتنا المصممة خصيصاً لتناسب أسلوب حياتك البرمجي والتقني. كل مجموعة لها طابع، وكل طابع يعكس سطر كود مختلف.
           </p>
         </motion.div>
 
-        <div className="space-y-12 lg:space-y-24">
+        <div className="space-y-10 sm:space-y-12 lg:space-y-24">
           {COLLECTIONS.map((col, index) => (
             <motion.div 
               key={col.id}
@@ -41,10 +41,10 @@ export default function CollectionsPage() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.8 }}
-              className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-12 lg:gap-20`}
+              className={`flex flex-col ${index % 2 === 1 ? 'lg:flex-row-reverse' : 'lg:flex-row'} items-center gap-8 sm:gap-12 lg:gap-20`}
             >
               {/* Image Side */}
-              <div className="flex-1 relative w-full aspect-[4/3] rounded-[2.5rem] overflow-hidden shadow-2xl border-4 border-white group">
+              <div className="flex-1 relative w-full aspect-[4/3] rounded-2xl sm:rounded-[2.5rem] overflow-hidden shadow-2xl border-2 sm:border-4 border-white group">
                 <Image
                   src={col.image}
                   alt={col.title}
@@ -57,8 +57,8 @@ export default function CollectionsPage() {
               {/* Text Side */}
               <div className="flex-1 text-right w-full">
                 <span className="text-secondary font-bold tracking-widest text-sm mb-4 inline-block">{col.subtitle}</span>
-                <h2 className="text-4xl lg:text-5xl font-extrabold text-foreground mb-6">{col.title}</h2>
-                <p className="text-lg text-muted-foreground leading-relaxed mb-8 font-medium">
+                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground mb-4 sm:mb-6">{col.title}</h2>
+                <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6 sm:mb-8 font-medium">
                   {col.desc}
                 </p>
                 

@@ -16,7 +16,7 @@ const IconGithub = () => (
 export default function Footer() {
   return (
     <footer className="bg-primary pt-16 pb-8 mt-16 relative z-10 block">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12 mb-12">
         <div className="col-span-1 md:col-span-1">
           {/* Logo updated for dark/blue background (inverted visually if needed) */}
           <div className="bg-primary-foreground/90 p-3 rounded-2xl w-fit mb-6 flex gap-2">
@@ -65,7 +65,7 @@ export default function Footer() {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto px-6 pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/70 font-medium">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8 border-t border-primary-foreground/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-primary-foreground/70 font-medium text-center md:text-right">
         <p>&copy; {new Date().getFullYear()} متجر سطر. جميع الحقوق محفوظة.</p>
         <div className="flex gap-6">
           <Link href="/privacy" className="hover:text-secondary transition-colors">سياسة الخصوصية</Link>

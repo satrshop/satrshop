@@ -27,11 +27,11 @@ export default function ProductCard({ product, index }: ProductCardProps) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="group relative bg-primary rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-primary/20"
+      className="group relative bg-primary rounded-2xl sm:rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-primary/20"
     >
       {/* Badges */}
       {product.isNew && (
-        <div className="absolute top-4 right-4 z-10 bg-secondary text-white text-xs font-extrabold px-3 py-1 rounded-full shadow-md">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-secondary text-white text-[10px] sm:text-xs font-extrabold px-2 sm:px-3 py-1 rounded-full shadow-md">
           جديد
         </div>
       )}
@@ -46,30 +46,30 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         />
         
         {/* Quick Add Button Overlay */}
-        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-6 backdrop-blur-[2px]">
+        <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-center pb-4 sm:pb-6 backdrop-blur-[2px]">
           <motion.button 
             onClick={() => addItem(product)}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="bg-primary-foreground text-primary px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-secondary hover:text-primary-foreground transition-colors"
+            className="bg-primary-foreground text-primary px-4 sm:px-6 py-2.5 sm:py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-secondary hover:text-primary-foreground transition-colors text-sm sm:text-base"
           >
-            <ShoppingBag size={18} />
+            <ShoppingBag size={16} className="sm:w-[18px] sm:h-[18px]" />
             أضف للسلة
           </motion.button>
         </div>
       </div>
 
       {/* Content Area */}
-      <div className="p-5">
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-secondary font-mono text-xs tracking-widest uppercase">{product.category}</p>
-          <div className="flex items-center gap-1 text-secondary">
-            <Star size={14} fill="currentColor" />
-            <span className="text-sm font-bold text-primary-foreground/90">{product.rating}</span>
+      <div className="p-3 sm:p-5">
+        <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+          <p className="text-secondary font-mono text-[10px] sm:text-xs tracking-widest uppercase truncate">{product.category}</p>
+          <div className="flex items-center gap-0.5 sm:gap-1 text-secondary flex-shrink-0">
+            <Star size={12} className="sm:w-[14px] sm:h-[14px]" fill="currentColor" />
+            <span className="text-xs sm:text-sm font-bold text-primary-foreground/90">{product.rating}</span>
           </div>
         </div>
-        <h3 className="text-xl font-bold text-primary-foreground mb-3 line-clamp-1 group-hover:text-secondary transition-colors">{product.name}</h3>
-        <p className="text-xl font-extrabold text-primary-foreground/90">{product.price.toFixed(2)} د.ا</p>
+        <h3 className="text-sm sm:text-xl font-bold text-primary-foreground mb-2 sm:mb-3 line-clamp-1 group-hover:text-secondary transition-colors">{product.name}</h3>
+        <p className="text-base sm:text-xl font-extrabold text-primary-foreground/90">{product.price.toFixed(2)} د.ا</p>
       </div>
     </motion.div>
   );
