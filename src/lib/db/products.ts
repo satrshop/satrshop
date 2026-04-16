@@ -1,8 +1,41 @@
 import { db } from "../firebase";
-import { collection, getDocs, doc, getDoc, query, where, orderBy } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, query, where, orderBy, addDoc, updateDoc, deleteDoc } from "firebase/firestore";
 import { Product } from "@/types/models/product";
 
 const PRODUCTS_COLLECTION = "products";
+
+export async function createProduct(productData: Omit<Product, "id">): Promise<string | null> {
+  try {
+    const productsRef = collection(db, PRODUCTS_COLLECTION);
+    const docRef = await addDoc(productsRef, productData);
+    return docRef.id;
+  } catch (error) {
+    console.error("Error creating product:", error);
+    return null;
+  }
+}
+
+export async function updateProduct(id: string, productData: Partial<Product>): Promise<boolean> {
+  try {
+    const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    await updateDoc(docRef, productData);
+    return true;
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return false;
+  }
+}
+
+export async function deleteProduct(id: string): Promise<boolean> {
+  try {
+    const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    await deleteDoc(docRef);
+    return true;
+  } catch (error) {
+    console.error("Error deleting product:", error);
+    return false;
+  }
+}
 
 export async function getProducts(): Promise<Product[]> {
   try {

@@ -5,9 +5,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, useScroll, AnimatePresence } from "framer-motion";
-import { ShoppingBag, Search, Menu, User, X, ArrowLeft, Loader2 } from "lucide-react";
+import { ShoppingBag, Search, Menu, User, X, ArrowLeft, Loader2, Heart } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useCartStore } from "@/store/useCartStore";
+import { useWishlistStore } from "@/store/useWishlistStore";
 import { searchProductsRemote } from "@/lib/db/products";
 import { Product } from "@/types/models/product";
 
@@ -24,11 +25,13 @@ export default function Header() {
   const { scrollY } = useScroll();
   const setIsCartOpen = useCartStore((state) => state.setIsOpen);
   const cartItems = useCartStore((state) => state.items);
+  const wishlistItems = useWishlistStore((state) => state.items);
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
+  const totalWishlistItems = wishlistItems.length;
 
   useEffect(() => {
     return scrollY.onChange((latest) => {
@@ -186,6 +189,26 @@ export default function Header() {
             </motion.button>
 
             <ThemeToggle />
+
+            <Link href="/wishlist">
+              <motion.button
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2 text-primary hover:text-secondary transition-colors relative"
+              >
+                <Heart size={20} className="sm:w-[22px] sm:h-[22px] stroke-[2.5px]" />
+                {mounted && totalWishlistItems > 0 && (
+                  <motion.span
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                    className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-white"
+                  >
+                    {totalWishlistItems}
+                  </motion.span>
+                )}
+              </motion.button>
+            </Link>
 
             <motion.button
               onClick={() => setIsCartOpen(true)}
