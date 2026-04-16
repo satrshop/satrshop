@@ -24,8 +24,8 @@ export default function Footer() {
 
   return (
     <footer className="bg-primary pt-16 pb-8 mt-16 relative z-10 block">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 sm:gap-12 mb-12">
-        <div className="col-span-1 md:col-span-1">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 sm:gap-12 mb-12">
+        <div className="col-span-1">
           {/* Logo updated for dark/blue background (inverted visually if needed) */}
           <div className="bg-primary-foreground/90 p-3 rounded-2xl w-fit mb-6 flex gap-2">
              <Image src="/images/SatrLogo.png" alt="شعار سطر" width={90} height={30} className="object-contain dark:hidden block" />
@@ -41,7 +41,7 @@ export default function Footer() {
           </div>
         </div>
         
-        <div>
+        <div className="md:text-center">
           <h4 className="font-bold text-primary-foreground mb-6 text-lg">روابط سريعة</h4>
           <ul className="space-y-4 text-sm text-primary-foreground/80 font-medium">
             <li><Link href="/" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الرئيسية</Link></li>
@@ -51,7 +51,7 @@ export default function Footer() {
           </ul>
         </div>
         
-        <div>
+        <div className="md:text-left">
           <h4 className="font-bold text-primary-foreground mb-6 text-lg">الدعم والمساعدة</h4>
           <ul className="space-y-4 text-sm text-primary-foreground/80 font-medium">
             <li><Link href="/faq" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الأسئلة الشائعة</Link></li>
@@ -59,17 +59,6 @@ export default function Footer() {
             <li><Link href="/returns" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">سياسة الاسترجاع</Link></li>
             <li><Link href="/size-guide" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">دليل المقاسات</Link></li>
           </ul>
-        </div>
-        
-        <div>
-          <h4 className="font-bold text-primary-foreground mb-6 text-lg">النشرة البريدية</h4>
-          <p className="text-sm text-primary-foreground/80 mb-4 font-medium">اشترك ليصلك أحدث الإصدارات البرمجية والأكواد الترويجية.</p>
-          <div className="flex gap-2">
-            <input type="email" placeholder="البريد الإلكتروني" className="w-full bg-primary-foreground/10 border border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-secondary transition-colors text-left" dir="ltr" />
-            <button className="bg-secondary text-white px-4 py-2 rounded-lg font-bold hover:bg-[#a87d2b] shadow-md transition-colors whitespace-nowrap">
-              اشترك
-            </button>
-          </div>
         </div>
       </div>
       
