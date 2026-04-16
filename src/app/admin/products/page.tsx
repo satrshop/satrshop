@@ -101,7 +101,13 @@ export default function AdminProductsPage() {
                 className="bg-[#1e293b] rounded-[2rem] border border-white/5 overflow-hidden group hover:border-secondary/30 transition-all flex flex-col"
               >
                 <div className="relative aspect-[4/5] bg-white/5">
-                  <Image src={product.image} alt={product.name} fill className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <Image 
+                    src={product.image} 
+                    alt={product.name} 
+                    fill 
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
+                    className="object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                  />
                   <div className="absolute top-4 right-4 bg-primary/80 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full border border-white/10">
                     {product.category}
                   </div>

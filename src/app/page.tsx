@@ -52,8 +52,8 @@ export default function Home() {
       <div className="px-3 sm:px-4 md:px-8 pt-24 sm:pt-28 md:pt-32 pb-10 sm:pb-16">
         <div className="w-full max-w-[1500px] mx-auto relative rounded-2xl sm:rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl">
           {/* Full-width Background Images */}
-          <Image src="/images/bgblue.png" alt="خلفية سطر" fill className="object-cover z-0 pointer-events-none dark:hidden block" priority />
-          <Image src="/images/bg2.png" alt="خلفية سطر" fill className="object-cover z-0 pointer-events-none hidden dark:block" priority />
+          <Image src="/images/bgblue.png" alt="خلفية سطر" fill sizes="100vw" className="object-cover z-0 pointer-events-none dark:hidden block" priority />
+          <Image src="/images/bg2.png" alt="خلفية سطر" fill sizes="100vw" className="object-cover z-0 pointer-events-none hidden dark:block" priority />
 
           <main className="w-full px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-28 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16 relative z-10">
             {/* Background decorative blur - hidden on mobile for performance */}
@@ -108,6 +108,7 @@ export default function Home() {
             src="/images/background.png"
             alt="تشكيلة سطر"
             fill
+            sizes="(max-width: 1024px) 100vw, 500px"
             className="object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
             priority
           />
@@ -172,18 +173,20 @@ export default function Home() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8, ease: "easeOut" }}
-        className="w-full text-white py-16 sm:py-24 mt-8 sm:mt-16 relative overflow-hidden shadow-inner"
+        className="w-full text-white py-16 sm:py-24 relative overflow-hidden shadow-inner"
       >
         <Image
           src="/images/bgblue.png"
           alt="خلفية سطر"
           fill
+          sizes="100vw"
           className="object-cover z-0 pointer-events-none dark:hidden block"
         />
         <Image
           src="/images/bg2.png"
           alt="خلفية سطر"
           fill
+          sizes="100vw"
           className="object-cover z-0 pointer-events-none hidden dark:block"
         />
 
@@ -210,6 +213,7 @@ export default function Home() {
               src="/images/img.png"
               alt="عينات المتجر"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className="object-cover"
             />
           </motion.div>

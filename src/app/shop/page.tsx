@@ -174,7 +174,7 @@ function ShopContent() {
 
 export default function ShopPage() {
   return (
-    <div className="min-h-screen bg-background selection:bg-secondary selection:text-white pb-20 relative">
+    <div className="min-h-screen bg-background selection:bg-secondary selection:text-white relative">
       <Header />
       
       {/* Background decorative element */}

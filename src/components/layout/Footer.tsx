@@ -23,7 +23,7 @@ export default function Footer() {
   if (pathname?.startsWith("/admin")) return null;
 
   return (
-    <footer className="bg-primary pt-16 pb-8 mt-16 relative z-10 block">
+    <footer className="bg-primary pt-16 pb-8 relative z-10 block">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10 sm:gap-12 mb-12">
         <div className="col-span-1">
           {/* Logo updated for dark/blue background (inverted visually if needed) */}
