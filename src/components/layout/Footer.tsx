@@ -47,7 +47,6 @@ export default function Footer() {
             <li><Link href="/" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الرئيسية</Link></li>
             <li><Link href="/shop" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">المتجر</Link></li>
             <li><Link href="/contact" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">تواصل معنا</Link></li>
-            <li><Link href="/login" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">تسجيل الدخول</Link></li>
           </ul>
         </div>
         
