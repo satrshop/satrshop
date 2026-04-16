@@ -90,7 +90,13 @@ export default function CartDrawer() {
                         
                         <div className="flex items-center gap-3 bg-white/10 dark:bg-black/10 rounded-full px-2 py-1">
                           <button 
-                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                             onClick={() => {
+                               if (item.quantity === 1) {
+                                 removeItem(item.id);
+                               } else {
+                                 updateQuantity(item.id, item.quantity - 1);
+                               }
+                             }}
                              className="text-primary-foreground hover:text-secondary transition"
                           >
                              <Minus size={14} />

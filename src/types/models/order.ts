@@ -15,11 +15,11 @@ export interface CustomerInfo {
 }
 
 export interface Order {
-  id?: string;
+  id: string; // Changed from id? to id
   items: OrderItem[];
   total: number;
   customer: CustomerInfo;
-  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending' | 'shipping' | 'completed' | 'cancelled';
   paymentMethod: 'cod';
   shippingFee: number;
   createdAt: any; // Firestore Timestamp

@@ -100,7 +100,7 @@ function ShopContent() {
           )}
         </div>
         
-        <div className="flex items-center gap-4 relative z-20">
+        <div className="flex items-center gap-4 relative z-30">
           <div className="relative w-full">
             <motion.button 
               onClick={() => setIsSortOpen(!isSortOpen)}
