@@ -256,7 +256,7 @@ export default function CheckoutPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full h-14 bg-secondary text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-secondary/20 hover:bg-[#a87d2b] transition-all relative overflow-hidden group ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    className={`w-full h-14 bg-secondary text-secondary-foreground rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg shadow-secondary/20 hover:bg-white hover:text-secondary hover:border-secondary transition-all relative overflow-hidden group border border-transparent ${isSubmitting ? 'opacity-70 cursor-not-allowed' : ''}`}
                   >
                     {isSubmitting ? (
                       <>

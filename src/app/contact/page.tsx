@@ -123,7 +123,7 @@ export default function ContactPage() {
                       disabled={loading}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className="w-full bg-secondary text-white py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="w-full bg-secondary text-secondary-foreground py-4 rounded-xl font-bold text-lg hover:bg-white hover:text-secondary group transition-all shadow-lg shadow-secondary/20 flex items-center justify-center gap-2 disabled:opacity-50 border border-transparent"
                     >
                       {loading ? (
                         <Loader2 className="animate-spin" size={20} />

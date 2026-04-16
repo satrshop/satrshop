@@ -313,7 +313,7 @@ export default function Header() {
                         <button
                           key={cat}
                           onClick={() => setSearchQuery(cat)}
-                          className="px-4 py-2 bg-primary text-white font-bold text-sm rounded-full shadow-sm border border-primary hover:bg-[#22556d] transition-all touch-manipulation"
+                          className="px-4 py-2 bg-primary text-primary-foreground font-bold text-sm rounded-full shadow-sm border border-primary hover:bg-primary/90 transition-all touch-manipulation"
                         >
                           {cat}
                         </button>
@@ -337,7 +337,7 @@ export default function Header() {
                           <motion.div
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex items-center gap-4 p-3 sm:p-4 bg-primary text-white rounded-2xl border border-primary/20 hover:bg-[#22556d] hover:border-secondary/30 hover:shadow-md transition-all group touch-manipulation cursor-pointer"
+                            className="flex items-center gap-4 p-3 sm:p-4 bg-primary text-primary-foreground rounded-2xl border border-primary/20 hover:bg-primary/90 hover:border-secondary/30 hover:shadow-md transition-all group touch-manipulation cursor-pointer"
                           >
                             <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-white/10 flex-shrink-0">
                               <Image 
@@ -349,13 +349,13 @@ export default function Header() {
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-bold text-white group-hover:text-secondary transition-colors truncate text-sm sm:text-base">
+                              <p className="font-bold text-primary-foreground group-hover:text-secondary transition-colors truncate text-sm sm:text-base">
                                 {product.name}
                               </p>
-                              <p className="text-xs sm:text-sm text-white/70 font-medium mt-1">{product.category}</p>
+                              <p className="text-xs sm:text-sm text-primary-foreground/70 font-medium mt-1">{product.category}</p>
                               <p className="text-base sm:text-lg font-extrabold text-secondary mt-1">{product.price.toFixed(2)} د.ا</p>
                             </div>
-                            <ArrowLeft size={18} className="text-white/50 group-hover:text-secondary transition-colors flex-shrink-0" />
+                            <ArrowLeft size={18} className="text-primary-foreground/50 group-hover:text-secondary transition-colors flex-shrink-0" />
                           </motion.div>
                         </Link>
                       ))}

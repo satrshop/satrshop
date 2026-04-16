@@ -74,7 +74,7 @@ function ProductDetails() {
         <h1 className="text-3xl font-black text-primary mb-4">المنتج غير موجود</h1>
         <p className="text-muted-foreground mb-8">عذراً، لم نتمكن من العثور على المنتج الذي تبحث عنه.</p>
         <Link href="/shop">
-          <button className="bg-primary text-white px-8 py-3 rounded-full font-bold">العودة للمتجر</button>
+          <button className="bg-primary text-primary-foreground px-8 py-3 rounded-full font-bold hover:bg-primary/90 transition-all">العودة للمتجر</button>
         </Link>
       </div>
     );
@@ -139,8 +139,8 @@ function ProductDetails() {
                 </span>
                 <div className="flex items-center gap-1.5 text-secondary">
                   <Star size={18} fill="currentColor" />
-                  <span className="font-black text-lg text-white">{product.rating}</span>
-                  <span className="text-white/60 text-sm font-bold mr-1">(12+ تقييم)</span>
+                  <span className="font-black text-lg text-primary-foreground">{product.rating}</span>
+                  <span className="text-primary-foreground/60 text-sm font-bold mr-1">(12+ تقييم)</span>
                 </div>
               </div>
 
@@ -153,7 +153,7 @@ function ProductDetails() {
                   {product.price.toFixed(2)} د.ا
                 </p>
                 {product.isNew && (
-                  <p className="text-lg text-white/40 line-through font-bold">
+                  <p className="text-lg text-primary-foreground/40 line-through font-bold">
                     {(product.price * 1.25).toFixed(2)} د.ا
                   </p>
                 )}
@@ -163,7 +163,7 @@ function ProductDetails() {
             {/* Description */}
             <div className="space-y-4">
               <h3 className="text-xl font-black text-secondary border-r-4 border-secondary pr-4">وصف المنتج</h3>
-              <p className="text-lg text-white/80 leading-relaxed font-medium">
+              <p className="text-lg text-primary-foreground/80 leading-relaxed font-medium">
                 {product.description || `تمتع بالأناقة والراحة مع ${product.name}. صُمم هذا المنتج خصيصاً ليناسب نمط حياة المبرمجين والمبدعين، حيث يجمع بين الجودة العالية في التصنيع والشكل العصري الذي يعكس هويتك التقنية. خامات قطنية 100% تضمن لك الراحة طوال اليوم.`}
               </p>
             </div>
@@ -191,7 +191,7 @@ function ProductDetails() {
                 {/* Add to Cart Button */}
                 <button 
                   onClick={() => addItem(product, quantity)}
-                  className="flex-1 w-full flex items-center justify-center gap-3 bg-secondary text-primary py-4 rounded-2xl font-black text-xl shadow-xl shadow-black/20 hover:bg-white transition-all active:scale-[0.98]"
+                  className="flex-1 w-full flex items-center justify-center gap-3 bg-secondary text-secondary-foreground py-4 rounded-2xl font-black text-xl shadow-xl shadow-black/20 hover:bg-white hover:text-secondary hover:border-secondary transition-all active:scale-[0.98] border border-transparent"
                 >
                   <ShoppingBag size={24} />
                   إضافة للسلة
@@ -205,19 +205,19 @@ function ProductDetails() {
                 <div className="w-10 h-10 bg-white/10 text-secondary rounded-full flex items-center justify-center">
                   <Truck size={20} />
                 </div>
-                <span className="text-sm font-bold text-white/90">توصيل سريع لكافة المحافظات</span>
+                <span className="text-sm font-bold text-primary-foreground/90">توصيل سريع لكافة المحافظات</span>
               </div>
               <div className="flex items-center gap-3 sm:flex-col sm:text-center sm:gap-2">
                 <div className="w-10 h-10 bg-white/10 text-secondary rounded-full flex items-center justify-center">
                   <RotateCcw size={20} />
                 </div>
-                <span className="text-sm font-bold text-white/90">تبديل سهل خلال 3 أيام</span>
+                <span className="text-sm font-bold text-primary-foreground/90">تبديل سهل خلال 3 أيام</span>
               </div>
               <div className="flex items-center gap-3 sm:flex-col sm:text-center sm:gap-2">
                 <div className="w-10 h-10 bg-white/10 text-secondary rounded-full flex items-center justify-center">
                   <ShieldCheck size={20} />
                 </div>
-                <span className="text-sm font-bold text-white/90">جودة مضمونة 100%</span>
+                <span className="text-sm font-bold text-primary-foreground/90">جودة مضمونة 100%</span>
               </div>
             </div>
           </div>
