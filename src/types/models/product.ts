@@ -7,5 +7,9 @@ export interface Product {
   rating: number;
   isNew?: boolean;
   description?: string;
-  inStock?: boolean;
+  stock: number; // Available quantity. 0 = out of stock
+  costPrice?: number; // The cost to the shop for this product (admin only)
 }
+
+/** Default stock value for products that don't have stock set in DB yet */
+export const DEFAULT_STOCK = 10;

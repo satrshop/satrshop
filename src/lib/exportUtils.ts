@@ -1,7 +1,7 @@
 /**
  * Utility to export JSON data to CSV and trigger a download.
  */
-export function exportToCSV(data: any[], filename: string, headers: { key: string; label: string }[]) {
+export function exportToCSV<T extends object>(data: T[], filename: string, headers: { key: string; label: string }[]) {
   if (!data || data.length === 0) return;
 
   // Create the header row
@@ -10,7 +10,7 @@ export function exportToCSV(data: any[], filename: string, headers: { key: strin
   // Create the data rows
   const rows = data.map(item => {
     return headers.map(h => {
-      let value = h.key.split('.').reduce((obj, key) => obj?.[key], item) ?? '';
+      const value = h.key.split('.').reduce((obj: any, key) => obj?.[key], item) ?? '';
       
       // Handle values that might contain commas or newlines
       const stringValue = String(value).replace(/"/g, '""');

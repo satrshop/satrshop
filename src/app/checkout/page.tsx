@@ -96,7 +96,8 @@ export default function CheckoutPage() {
           name: item.name,
           price: item.price,
           image: item.image,
-          quantity: item.quantity
+          quantity: item.quantity,
+          costPrice: 0 // Will be injected server-side for security
         })),
         total: total,
         customer: {
@@ -117,9 +118,15 @@ export default function CheckoutPage() {
       } else {
         throw new Error("Failed to create order");
       }
-    } catch (err) {
-      setError("حدث خطأ أثناء إتمام الطلب. يرجى المحاولة مرة أخرى.");
-      console.error(err);
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.message?.startsWith("INSUFFICIENT_STOCK:")) {
+        const details = error.message.replace("INSUFFICIENT_STOCK:", "");
+        setError(`عذراً، بعض المنتجات لم تعد متوفرة بالكمية المطلوبة: ${details}`);
+      } else {
+        setError("حدث خطأ أثناء إتمام الطلب. يرجى المحاولة مرة أخرى.");
+      }
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
