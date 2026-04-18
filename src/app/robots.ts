@@ -5,7 +5,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/checkout/success', '/admin'],
+      disallow: ['/admin', '/api'],
     },
     sitemap: 'https://satrshop-8ad70.web.app/sitemap.xml',
   }
