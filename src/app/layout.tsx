@@ -18,12 +18,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://satrshop-8ad70.web.app"),
   title: {
-    default: "متجر سطر | Satr Shop - متجر المبرمجين الأول",
+    default: "متجر سطر | Satr Shop - متجر المبرمجين الأول في الأردن",
     template: "%s | متجر سطر"
   },
-  description: "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة في الأردن.",
-  keywords: ["متجر سطر", "ملابس مبرمجين", "هوديز برمجة", "تيشرتات مبرمجين", "Satr Shop", "Programmer Fashion", "Coding Apparel Jordan"],
+  description: "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة في الأردن. توصيل لجميع المحافظات.",
+  keywords: ["متجر سطر", "ملابس مبرمجين", "هوديز برمجة", "تيشرتات مبرمجين", "Satr Shop", "Programmer Fashion", "Coding Apparel Jordan", "ملابس تقنية", "متجر أردني", "ملابس IT", "هوديز كود", "أزياء المبرمجين"],
   authors: [{ name: "Satr Shop Team" }],
   creator: "Satr Shop",
   publisher: "Satr Shop",
@@ -32,22 +33,41 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "متجر سطر | Satr Shop",
-    description: "المتجر الأول لطلبة تكنولوجيا المعلومات والمبرمجين في الأردن والعالم العربي.",
+    title: "متجر سطر | Satr Shop - أزياء المبرمجين",
+    description: "المتجر الأول لطلبة تكنولوجيا المعلومات والمبرمجين في الأردن والعالم العربي. هوديز، تيشرتات، وإكسسوارات تقنية بجودة عالية.",
     url: "https://satrshop-8ad70.web.app",
     siteName: "متجر سطر",
     locale: "ar_JO",
     type: "website",
+    images: [
+      {
+        url: "/images/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "متجر سطر - المتجر التقني الأول للمبرمجين في الأردن",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "متجر سطر | Satr Shop",
-    description: "الأزياء التقنية للمبرمجين والمطورين.",
+    description: "الأزياء التقنية للمبرمجين والمطورين. توصيل لجميع محافظات الأردن.",
+    images: ["/images/og-image.png"],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 };
 
@@ -58,21 +78,46 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "متجر سطر | Satr Shop",
-    "url": "https://satrshop-8ad70.web.app",
-    "logo": "https://satrshop-8ad70.web.app/images/SatrLogo.png",
-    "description": "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة.",
-    "address": {
-      "@type": "PostalAddress",
-      "addressCountry": "JO"
+  const jsonLd = [
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "متجر سطر | Satr Shop",
+      "url": "https://satrshop-8ad70.web.app",
+      "logo": "https://satrshop-8ad70.web.app/images/SatrLogo.png",
+      "description": "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+962798419463",
+        "contactType": "customer service",
+        "email": "satrshopp@gmail.com",
+        "availableLanguage": ["Arabic", "English"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "عمّان",
+        "addressCountry": "JO"
+      },
+      "sameAs": [
+        "https://www.instagram.com/satr.shopp/"
+      ]
     },
-    "sameAs": [
-      "https://www.instagram.com/satr.shopp/"
-    ]
-  };
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "متجر سطر",
+      "alternateName": "Satr Shop",
+      "url": "https://satrshop-8ad70.web.app",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://satrshop-8ad70.web.app/shop?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ];
 
   return (
     <html lang="ar" dir="rtl" className={`${madaFont.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
