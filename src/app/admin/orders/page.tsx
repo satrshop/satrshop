@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { getOrders, updateOrderStatus } from "@/lib/db/orders";
 import { Order } from "@/types/models/order";
 import { motion, AnimatePresence } from "framer-motion";
@@ -11,11 +11,15 @@ import {
   ExternalLink,
   Loader2,
   CheckCircle2,
-  Truck,
   Clock,
-  ChevronDown
+  ChevronDown,
+  MapPin,
+  Truck,
+  MessageCircle,
+  FileSpreadsheet
 } from "lucide-react";
 import Link from "next/link";
+import { exportToCSV } from "@/lib/exportUtils";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -23,6 +27,22 @@ export default function AdminOrdersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [activeUpdateId, setActiveUpdateId] = useState<string | null>(null);
+  const filterRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
+        setIsFilterOpen(false);
+      }
+      if (activeUpdateId) {
+        setActiveUpdateId(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [activeUpdateId]);
 
   useEffect(() => {
     loadOrders();
@@ -59,6 +79,31 @@ export default function AdminOrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const handleExport = () => {
+    const headers = [
+      { key: "id", label: "رقم الطلب" },
+      { key: "customer.name", label: "اسم العميل" },
+      { key: "customer.phone", label: "رقم الهاتف" },
+      { key: "customer.city", label: "المدينة" },
+      { key: "customer.address", label: "العنوان" },
+      { key: "total", label: "المجموع" },
+      { key: "shippingFee", label: "رسوم التوصيل" },
+      { key: "status", label: "الحالة" },
+      { key: "customer.gender", label: "الجنس" }
+    ];
+    exportToCSV(filteredOrders, "orders", headers);
+  };
+
+  const getWhatsAppLink = (phone: string) => {
+    // Remove any non-numeric characters
+    let cleanPhone = phone.replace(/\D/g, '');
+    // If it starts with 07..., change to 9627...
+    if (cleanPhone.startsWith('07') && cleanPhone.length === 10) {
+      cleanPhone = '962' + cleanPhone.substring(1);
+    }
+    return `https://wa.me/${cleanPhone}`;
+  };
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -68,31 +113,70 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-        <div className="md:col-span-8 bg-[#1e293b] p-4 rounded-2xl border border-white/5 flex items-center gap-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
+        <div className="flex-1 bg-[#1e293b] p-4 rounded-2xl border border-white/5 flex items-center gap-4">
           <Search className="text-white/20 mr-2" size={20} />
           <input 
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="البحث برقم الطلب، اسم العميل، أو رقم الهاتف..."
-            className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder:text-white/20"
+            className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder:text-white/20 font-bold"
           />
         </div>
-        <div className="md:col-span-4 bg-[#1e293b] p-4 rounded-2xl border border-white/5 flex items-center gap-4 relative">
-          <Filter className="text-white/20 mr-2" size={20} />
-          <select 
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="flex-1 bg-[#1e293b] border-none text-white focus:outline-none cursor-pointer font-bold appearance-none relative z-10"
+        <div className="md:w-48 relative" ref={filterRef}>
+          <button 
+            onClick={() => setIsFilterOpen(!isFilterOpen)}
+            className="w-full bg-[#1e293b] p-4 rounded-2xl border border-white/5 flex items-center gap-4 transition-all hover:border-secondary/20"
           >
-            <option value="all" className="bg-[#1e293b] text-white">كل الحالات</option>
-            <option value="pending" className="bg-[#1e293b] text-white">قيد الانتظار</option>
-            <option value="shipping" className="bg-[#1e293b] text-white">جاري الشحن</option>
-            <option value="completed" className="bg-[#1e293b] text-white">مكتمل</option>
-          </select>
-          <ChevronDown size={16} className="text-white/20 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <Filter className={statusFilter !== 'all' ? "text-secondary" : "text-white/20"} size={20} />
+            <span className="flex-1 text-right font-black text-white">
+              {statusFilter === 'all' ? "كل الحالات" : 
+               statusFilter === 'pending' ? "قيد الانتظار" :
+               statusFilter === 'shipping' ? "جاري الشحن" : "مكتمل"}
+            </span>
+            <ChevronDown size={16} className={`text-white/20 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
+          </button>
+          
+          <AnimatePresence>
+            {isFilterOpen && (
+              <motion.div 
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                className="absolute top-full right-0 left-0 mt-2 bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden backdrop-blur-xl"
+              >
+                {[
+                  { id: 'all', label: 'كل الحالات', icon: Filter, color: 'text-white' },
+                  { id: 'pending', label: 'قيد الانتظار', icon: Clock, color: 'text-amber-500' },
+                  { id: 'shipping', label: 'جاري الشحن', icon: Truck, color: 'text-blue-500' },
+                  { id: 'completed', label: 'مكتمل', icon: CheckCircle2, color: 'text-emerald-500' },
+                ].map((opt) => (
+                  <button
+                    key={opt.id}
+                    onClick={() => {
+                      setStatusFilter(opt.id);
+                      setIsFilterOpen(false);
+                    }}
+                    className={`w-full flex items-center gap-3 px-5 py-4 text-right transition-colors hover:bg-white/5 ${
+                      statusFilter === opt.id ? "bg-white/10" : ""
+                    }`}
+                  >
+                    <opt.icon size={18} className={opt.color} />
+                    <span className={`font-black text-sm ${statusFilter === opt.id ? 'text-secondary' : 'text-white/60'}`}>{opt.label}</span>
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
+        <button 
+          onClick={handleExport}
+          className="bg-secondary/10 hover:bg-secondary text-secondary hover:text-primary transition-all p-4 rounded-2xl border border-secondary/20 font-black flex items-center justify-center gap-2 group"
+        >
+          <FileSpreadsheet size={20} className="group-hover:scale-110 transition-transform" />
+          <span>تصدير لإكسل</span>
+        </button>
       </div>
 
       {/* Orders Table */}
@@ -102,8 +186,9 @@ export default function AdminOrdersPage() {
           <p className="text-white/60 font-bold text-lg">جاري تحميل الطلبات...</p>
         </div>
       ) : (
-        <div className="bg-[#1e293b] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
-          <div className="overflow-x-auto">
+        <div className="bg-[#1e293b]/50 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
+          <div className="overflow-x-auto relative z-10">
             <table className="w-full text-right">
               <thead>
                 <tr className="bg-white/5 text-white/40 text-sm font-bold uppercase tracking-widest">
@@ -117,13 +202,14 @@ export default function AdminOrdersPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 <AnimatePresence mode="popLayout">
-                  {filteredOrders.map((order) => (
+                  {filteredOrders.map((order, index) => (
                     <React.Fragment key={order.id}>
                       <motion.tr 
                         layout
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
                         onClick={() => toggleExpand(order.id)}
                         className={`hover:bg-white/5 transition-colors group cursor-pointer ${
                           expandedId === order.id ? "bg-white/5" : ""
@@ -137,8 +223,28 @@ export default function AdminOrdersPage() {
                         </td>
                         <td className="px-8 py-6">
                           <div className="flex flex-col">
-                            <span className="font-bold text-lg text-white group-hover:text-secondary transition-colors">{order.customer.name}</span>
-                            <span className="text-xs text-white/40 font-bold">{order.customer.phone}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-lg text-white group-hover:text-secondary transition-colors">{order.customer.name}</span>
+                              {order.customer.isZaytoonah && (
+                                <span className="bg-secondary/20 text-secondary text-[10px] font-black px-2 py-1 rounded-md border border-secondary/20 flex items-center gap-1">
+                                  <MapPin size={10} />
+                                  جامعة الزيتونة
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm text-white/60 font-black tracking-wider">{order.customer.phone}</span>
+                              <a 
+                                href={getWhatsAppLink(order.customer.phone)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-1 px-2 bg-emerald-500/20 hover:bg-emerald-500 hover:text-white transition-all rounded-md flex items-center gap-1 text-[10px] font-black text-emerald-400 border border-emerald-500/20 shadow-lg shadow-emerald-500/10"
+                              >
+                                <MessageCircle size={10} />
+                                واتساب
+                              </a>
+                            </div>
                           </div>
                         </td>
                         <td className="px-8 py-6 font-black text-xl text-secondary">{order.total.toFixed(2)} د.ا</td>
@@ -146,32 +252,62 @@ export default function AdminOrdersPage() {
                           {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
                         </td>
                         <td className="px-8 py-6">
-                          <div className="flex items-center gap-2">
-                             {order.status === "pending" && <Clock size={16} className="text-amber-500" />}
-                             {order.status === "shipping" && <Truck size={16} className="text-blue-500" />}
-                             {order.status === "completed" && <CheckCircle2 size={16} className="text-emerald-500" />}
-                             <span className={`text-xs font-black uppercase tracking-widest ${
-                               order.status === "pending" ? "text-amber-500" :
-                               order.status === "shipping" ? "text-blue-500" :
-                               "text-emerald-500"
+                          <div className="flex items-center gap-3">
+                             <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm ${
+                               order.status === "pending" ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                               order.status === "shipping" ? "bg-blue-500/10 border-blue-500/20 text-blue-500" :
+                               "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
                              }`}>
-                               {order.status === "pending" ? "قيد الانتظار" :
-                                order.status === "shipping" ? "جاري الشحن" : "مكتمل"}
-                             </span>
+                               {order.status === "pending" && <Clock size={14} className="animate-pulse" />}
+                               {order.status === "shipping" && <Truck size={14} className="animate-bounce" style={{ animationDuration: '3s' }} />}
+                               {order.status === "completed" && <CheckCircle2 size={14} />}
+                               <span className="text-[10px] font-black uppercase tracking-widest">
+                                 {order.status === "pending" ? "قيد الانتظار" :
+                                  order.status === "shipping" ? "جاري الشحن" : "مكتمل"}
+                               </span>
+                             </div>
                           </div>
                         </td>
                         <td className="px-8 py-6" onClick={(e) => e.stopPropagation()}>
-                          <div className="flex items-center gap-2 relative">
-                            <select 
-                              value={order.status}
-                              onChange={(e) => handleStatusUpdate(order.id, e.target.value as any)}
-                              className="bg-[#1e293b] border border-white/10 text-xs font-black px-4 py-2 rounded-lg focus:outline-none focus:border-secondary transition-all appearance-none text-white cursor-pointer relative z-10"
+                          <div className="relative">
+                            <button
+                              onClick={() => setActiveUpdateId(activeUpdateId === order.id ? null : order.id)}
+                              className="bg-[#1e293b] border border-white/10 text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-3 hover:border-secondary transition-all text-white group"
                             >
-                              <option value="pending" className="bg-[#1e293b] text-white">معلق</option>
-                              <option value="shipping" className="bg-[#1e293b] text-white">شحن</option>
-                              <option value="completed" className="bg-[#1e293b] text-white">مكتمل</option>
-                            </select>
-                            <ChevronDown size={14} className="text-white/20 absolute left-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                              <span>تحديث</span>
+                              <ChevronDown size={14} className={`text-white/20 transition-transform ${activeUpdateId === order.id ? 'rotate-180' : ''}`} />
+                            </button>
+
+                            <AnimatePresence>
+                              {activeUpdateId === order.id && (
+                                <motion.div
+                                  initial={{ opacity: 0, scale: 0.9, x: 10 }}
+                                  animate={{ opacity: 1, scale: 1, x: 0 }}
+                                  exit={{ opacity: 0, scale: 0.9, x: 10 }}
+                                  className="absolute left-full top-0 mr-2 min-w-[140px] bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl z-[110] overflow-hidden backdrop-blur-2xl"
+                                >
+                                  {[
+                                    { id: 'pending', label: 'معلق', icon: Clock, color: 'text-amber-500' },
+                                    { id: 'shipping', label: 'شحن', icon: Truck, color: 'text-blue-500' },
+                                    { id: 'completed', label: 'مكتمل', icon: CheckCircle2, color: 'text-emerald-500' },
+                                  ].map((opt) => (
+                                    <button
+                                      key={opt.id}
+                                      onClick={() => {
+                                        handleStatusUpdate(order.id, opt.id as any);
+                                        setActiveUpdateId(null);
+                                      }}
+                                      className={`w-full flex items-center gap-3 px-4 py-3 text-right hover:bg-white/5 transition-colors ${
+                                        order.status === opt.id ? "bg-white/10" : ""
+                                      }`}
+                                    >
+                                      <opt.icon size={14} className={opt.color} />
+                                      <span className="font-black text-[10px] text-white/80">{opt.label}</span>
+                                    </button>
+                                  ))}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
                           </div>
                         </td>
                       </motion.tr>
@@ -184,7 +320,7 @@ export default function AdminOrdersPage() {
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
                           >
-                            <td colSpan={6} className="px-8 py-8 bg-black/20">
+                            <td colSpan={6} className="px-8 py-8 bg-black/40 backdrop-blur-xl border-t border-white/5">
                               <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
                                 {/* Order Items */}
                                 <div className="lg:col-span-8 space-y-4">
@@ -223,7 +359,19 @@ export default function AdminOrdersPage() {
                                         <span className="text-[10px] text-white/40 font-bold uppercase">العنوان التفصيلي</span>
                                         <span className="font-bold leading-relaxed text-white">{order.customer.address}</span>
                                       </div>
-                                      <div className="pt-4 border-t border-white/5">
+                                      {order.customer.gender && (
+                                        <div className="flex flex-col">
+                                          <span className="text-[10px] text-white/40 font-bold uppercase">الجنس</span>
+                                          <span className="font-bold text-white">{order.customer.gender}</span>
+                                        </div>
+                                      )}
+                                      <div className="pt-4 border-t border-white/5 space-y-3">
+                                        {order.customer.isZaytoonah && (
+                                          <div className="flex items-center justify-between bg-secondary/10 p-3 rounded-xl border border-secondary/20 mb-2">
+                                            <span className="text-secondary font-bold text-xs">نوع التوصيل</span>
+                                            <span className="font-black text-secondary text-sm">داخل جامعة الزيتونة</span>
+                                          </div>
+                                        )}
                                         <div className="flex items-center justify-between bg-primary/20 p-3 rounded-xl">
                                           <span className="text-white/60 font-bold text-sm">رسوم التوصيل</span>
                                           <span className="font-black text-amber-400">{order.shippingFee.toFixed(2)} د.ا</span>

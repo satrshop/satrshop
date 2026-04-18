@@ -15,7 +15,8 @@ import {
   Menu,
   X,
   ChevronLeft,
-  Mail
+  Mail,
+  Users
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -27,11 +28,21 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user && pathname !== "/admin/login") {
-        router.push("/admin/login");
-      } else {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        // Session Duration Check (1 Hour)
+        const sessionStart = localStorage.getItem("adminSessionStart");
+        if (sessionStart && Date.now() - parseInt(sessionStart) > 3600000) {
+          await signOut(auth);
+          localStorage.removeItem("adminSessionStart");
+          router.push("/admin/login?error=expired");
+          setLoading(false);
+          return;
+        }
+
         setUser(user);
+      } else if (pathname !== "/admin/login") {
+        router.push("/admin/login");
       }
       setLoading(false);
     });
@@ -59,6 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "الإحصائيات", href: "/admin", icon: LayoutDashboard },
     { name: "المنتجات", href: "/admin/products", icon: Package },
     { name: "الطلبات", href: "/admin/orders", icon: ShoppingBag },
+    { name: "الزبائن", href: "/admin/customers", icon: Users },
     { name: "الرسائل", href: "/admin/messages", icon: Mail },
   ];
 
@@ -75,22 +87,33 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </span>
         </div>
 
-        <nav className="flex-1 p-6 space-y-2">
-          {navItems.map((item) => {
+        <nav className="flex-1 p-6 space-y-3">
+          {navItems.map((item, index) => {
             const isActive = pathname === item.href;
             return (
               <Link key={item.name} href={item.href}>
                 <motion.div
-                  whileHover={{ x: -10 }}
-                  className={`flex items-center gap-4 px-5 py-4 rounded-2xl font-bold transition-all ${
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ x: -8, backgroundColor: isActive ? "" : "rgba(255, 255, 255, 0.03)" }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`relative flex items-center gap-4 px-6 py-4 rounded-2xl font-black transition-all ${
                     isActive 
-                      ? "bg-secondary text-primary shadow-lg shadow-secondary/10" 
-                      : "text-white/60 hover:text-white hover:bg-white/5"
+                      ? "bg-gradient-to-r from-secondary to-secondary/80 text-primary shadow-xl shadow-secondary/20" 
+                      : "text-white/40 hover:text-white"
                   }`}
                 >
-                  <item.icon size={22} />
-                  <span>{item.name}</span>
-                  {isActive && <ChevronLeft size={18} className="mr-auto rotate-180" />}
+                  {isActive && (
+                    <motion.div 
+                      layoutId="activeTab"
+                      className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-8 bg-primary/40 rounded-l-full"
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    />
+                  )}
+                  <item.icon size={22} className={isActive ? "scale-110" : "opacity-30 group-hover:opacity-100"} />
+                  <span className="tracking-wide text-[15px]">{item.name}</span>
+                  {isActive && <ChevronLeft size={18} className="mr-auto rotate-180 opacity-50" />}
                 </motion.div>
               </Link>
             );
@@ -149,17 +172,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   <X size={24} />
                 </button>
               </div>
-              <nav className="flex-1 p-6 space-y-2 text-right">
-                {navItems.map((item) => (
-                  <Link key={item.name} href={item.href} onClick={() => setIsSidebarOpen(false)}>
-                    <div className={`flex items-center justify-end gap-4 px-5 py-4 rounded-2xl font-bold ${
-                      pathname === item.href ? "bg-secondary text-primary" : "text-white/60"
-                    }`}>
-                      <span>{item.name}</span>
-                      <item.icon size={22} />
-                    </div>
-                  </Link>
-                ))}
+              <nav className="flex-1 p-6 space-y-3 text-right">
+                {navItems.map((item) => {
+                  const isActive = pathname === item.href;
+                  return (
+                    <Link key={item.name} href={item.href} onClick={() => setIsSidebarOpen(false)}>
+                      <div className={`flex items-center justify-end gap-4 px-6 py-4 rounded-2xl font-black transition-all ${
+                        isActive ? "bg-secondary text-primary shadow-lg" : "text-white/40"
+                      }`}>
+                        <span className="text-lg">{item.name}</span>
+                        <item.icon size={24} className={isActive ? "" : "opacity-30"} />
+                      </div>
+                    </Link>
+                  );
+                })}
               </nav>
               <div className="p-6 border-t border-white/5">
                 <button 

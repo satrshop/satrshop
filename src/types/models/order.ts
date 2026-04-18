@@ -12,6 +12,8 @@ export interface CustomerInfo {
   phone: string;
   city: string;
   address: string;
+  isZaytoonah?: boolean;
+  gender?: 'ذكر' | 'أنثى';
 }
 
 export interface Order {
