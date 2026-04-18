@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://satrshop-8ad70.web.app"),
+  metadataBase: new URL("https://satrshop.vercel.app"),
   title: {
     default: "متجر سطر | Satr Shop - متجر المبرمجين الأول في الأردن",
     template: "%s | متجر سطر"
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "متجر سطر | Satr Shop - أزياء المبرمجين",
     description: "المتجر الأول لطلبة تكنولوجيا المعلومات والمبرمجين في الأردن والعالم العربي. هوديز، تيشرتات، وإكسسوارات تقنية بجودة عالية.",
-    url: "https://satrshop-8ad70.web.app",
+    url: "https://satrshop.vercel.app",
     siteName: "متجر سطر",
     locale: "ar_JO",
     type: "website",
@@ -86,8 +86,8 @@ export default function RootLayout({
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "متجر سطر | Satr Shop",
-      "url": "https://satrshop-8ad70.web.app",
-      "logo": "https://satrshop-8ad70.web.app/images/SatrLogo.png",
+      "url": "https://satrshop.vercel.app",
+      "logo": "https://satrshop.vercel.app/images/SatrLogo.png",
       "description": "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة.",
       "contactPoint": {
         "@type": "ContactPoint",
@@ -110,12 +110,12 @@ export default function RootLayout({
       "@type": "WebSite",
       "name": "متجر سطر",
       "alternateName": "Satr Shop",
-      "url": "https://satrshop-8ad70.web.app",
+      "url": "https://satrshop.vercel.app",
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://satrshop-8ad70.web.app/shop?q={search_term_string}"
+          "urlTemplate": "https://satrshop.vercel.app/shop?q={search_term_string}"
         },
         "query-input": "required name=search_term_string"
       }
