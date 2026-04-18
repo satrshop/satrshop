@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Loader2, Lock, Mail, AlertCircle } from "lucide-react";
@@ -14,6 +14,17 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+  const unauthorizedError = searchParams.get("error") === "unauthorized";
+
+  useEffect(() => {
+    if (unauthorizedError) {
+      setError("ليس لديك صلاحيات للوصول إلى لوحة التحكم.");
+    } else if (searchParams.get("error") === "expired") {
+      setError("انتهت مدة الجلسة (ساعة واحدة). يرجى تسجيل الدخول مرة أخرى.");
+    }
+  }, [unauthorizedError, searchParams]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -31,6 +42,7 @@ export default function AdminLoginPage() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      localStorage.setItem("adminSessionStart", Date.now().toString());
       router.push("/admin");
     } catch (err: any) {
       console.error("Login failed:", err);
