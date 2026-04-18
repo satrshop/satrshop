@@ -13,7 +13,8 @@ import {
   Image as ImageIcon, 
   AlignLeft,
   Loader2,
-  CheckCircle2
+  CheckCircle2,
+  PackageCheck
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -31,7 +32,9 @@ export default function NewProductPage() {
     image: "",
     description: "",
     rating: 5.0,
-    isNew: true
+    isNew: true,
+    stock: "10",
+    costPrice: ""
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +44,9 @@ export default function NewProductPage() {
     const productData = {
       ...formData,
       price: parseFloat(formData.price),
-      rating: parseFloat(formData.rating.toString())
+      rating: parseFloat(formData.rating.toString()),
+      stock: parseInt(formData.stock) || 10,
+      costPrice: parseFloat(formData.costPrice || "0")
     };
 
     const id = await createProduct(productData);
@@ -139,6 +144,43 @@ export default function NewProductPage() {
                     <option value="إكسسوارات">إكسسوارات</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Cost Price */}
+              <div className="space-y-2">
+                <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
+                  <DollarSign size={16} className="text-amber-500" />
+                  سعر التكلفة (د.ا)
+                </label>
+                <input 
+                  required
+                  type="number"
+                  step="0.01"
+                  name="costPrice"
+                  value={formData.costPrice}
+                  onChange={handleChange}
+                  placeholder="15.00"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
+                />
+                <p className="text-[10px] text-white/30 mr-2">هذا السعر لن يظهر للزبون، يستخدم فقط لحساب الأرباح.</p>
+              </div>
+
+              {/* Stock Quantity */}
+              <div className="space-y-2">
+                <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
+                  <PackageCheck size={16} className="text-secondary" />
+                  الكمية المتاحة
+                </label>
+                <input 
+                  required
+                  type="number"
+                  min="0"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
+                  placeholder="10"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
+                />
               </div>
 
               {/* Image Upload */}

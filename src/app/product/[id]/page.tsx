@@ -16,7 +16,9 @@ import {
   Truck, 
   RotateCcw,
   Loader2,
-  ArrowRight
+  ArrowRight,
+  PackageX,
+  AlertTriangle
 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { getProductById, getProducts } from "@/lib/db/products";
@@ -81,6 +83,8 @@ function ProductDetails() {
   }
 
   const isFavorited = mounted ? isInWishlist(product.id) : false;
+  const isOutOfStock = product.stock === 0;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-40 pb-20">
@@ -158,6 +162,26 @@ function ProductDetails() {
                   </p>
                 )}
               </div>
+
+              {/* Stock Status */}
+              <div className="flex items-center gap-3">
+                {isOutOfStock ? (
+                  <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2 rounded-xl font-bold text-sm">
+                    <PackageX size={18} />
+                    نفذت الكمية
+                  </div>
+                ) : isLowStock ? (
+                  <div className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 text-amber-400 px-4 py-2 rounded-xl font-bold text-sm">
+                    <AlertTriangle size={18} />
+                    كمية محدودة ({product.stock} قطعة متاحة)
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-2 rounded-xl font-bold text-sm">
+                    <ShieldCheck size={18} />
+                    متوفر في المخزون
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Description */}
@@ -172,7 +196,7 @@ function ProductDetails() {
             <div className="space-y-6 pt-4">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 {/* Quantity Selector */}
-                <div className="flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-1 w-full sm:w-auto">
+                <div className={`flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-1 w-full sm:w-auto ${isOutOfStock ? 'opacity-50 pointer-events-none' : ''}`}>
                   <button 
                     onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
                     className="w-12 h-12 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-all"
@@ -181,7 +205,7 @@ function ProductDetails() {
                   </button>
                   <span className="w-12 text-center font-black text-xl text-white">{quantity}</span>
                   <button 
-                    onClick={() => setQuantity(prev => prev + 1)}
+                    onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
                     className="w-12 h-12 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-all"
                   >
                     <Plus size={20} />
@@ -189,13 +213,20 @@ function ProductDetails() {
                 </div>
 
                 {/* Add to Cart Button */}
-                <button 
-                  onClick={() => addItem(product, quantity)}
-                  className="flex-1 w-full flex items-center justify-center gap-3 bg-secondary text-secondary-foreground py-4 rounded-2xl font-black text-xl shadow-xl shadow-black/20 hover:bg-white hover:text-secondary hover:border-secondary transition-all active:scale-[0.98] border border-transparent"
-                >
-                  <ShoppingBag size={24} />
-                  إضافة للسلة
-                </button>
+                {isOutOfStock ? (
+                  <div className="flex-1 w-full flex items-center justify-center gap-3 bg-red-500/20 text-red-400 py-4 rounded-2xl font-black text-xl border border-red-500/20">
+                    <PackageX size={24} />
+                    نفذت الكمية
+                  </div>
+                ) : (
+                  <button 
+                    onClick={() => addItem(product, quantity)}
+                    className="flex-1 w-full flex items-center justify-center gap-3 bg-secondary text-secondary-foreground py-4 rounded-2xl font-black text-xl shadow-xl shadow-black/20 hover:bg-white hover:text-secondary hover:border-secondary transition-all active:scale-[0.98] border border-transparent"
+                  >
+                    <ShoppingBag size={24} />
+                    إضافة للسلة
+                  </button>
+                )}
               </div>
             </div>
 

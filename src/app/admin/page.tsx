@@ -15,7 +15,9 @@ import {
   Clock, 
   Loader2,
   Mail,
-  ChevronLeft
+  ChevronLeft,
+  AlertTriangle,
+  Warehouse
 } from "lucide-react";
 import Link from "next/link";
 
@@ -54,18 +56,32 @@ export default function AdminDashboard() {
     );
   }
 
-  const totalSales = orders
-    .filter(o => o.status === "completed" || o.status === "shipping")
-    .reduce((acc, current) => acc + current.total, 0);
+  const successfulOrders = orders.filter(
+    (o) => o.status === "completed" || o.status === "shipping" || o.status === "confirmed"
+  );
+
+  const totalSales = successfulOrders.reduce((acc, current) => acc + current.total, 0);
+
+  const totalProfit = successfulOrders.reduce((acc, order) => {
+    const orderProfit = order.items.reduce((itemAcc, item) => {
+      // If costPrice is missing for some reason, assume 0 for safety but ideally it should be there
+      const itemProfit = (item.price - (item.costPrice ?? 0)) * item.quantity;
+      return itemAcc + itemProfit;
+    }, 0);
+    return acc + orderProfit;
+  }, 0);
 
   const pendingOrders = orders.filter(o => o.status === "pending").length;
   const unreadMessages = messages.filter(m => !m.isRead).length;
+  const outOfStockCount = products.filter(p => p.stock === 0).length;
+  const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length;
 
   const stats = [
     { name: "إجمالي المبيعات", value: `${totalSales.toFixed(2)} د.ا`, icon: TrendingUp, color: "text-emerald-400", bg: "bg-emerald-500/10" },
-    { name: "عدد الطلبات", value: orders.length, icon: ShoppingBag, color: "text-blue-400", bg: "bg-blue-500/10" },
-    { name: "الرسائل الواردة", value: messages.length, icon: Mail, color: "text-rose-400", bg: "bg-rose-500/10", unread: unreadMessages },
+    { name: "صافي الربح", value: `${totalProfit.toFixed(2)} د.ا`, icon: ShoppingBag, color: "text-amber-400", bg: "bg-amber-500/10" },
     { name: "طلبات معلقة", value: pendingOrders, icon: Clock, color: "text-purple-400", bg: "bg-purple-500/10" },
+    { name: "تنبيهات المخزون", value: outOfStockCount + lowStockCount, icon: AlertTriangle, color: (outOfStockCount > 0 ? "text-red-400" : "text-amber-400"), bg: (outOfStockCount > 0 ? "bg-red-500/10" : "bg-amber-500/10"), detail: outOfStockCount > 0 ? `${outOfStockCount} نفذت` : `${lowStockCount} منخفضة` },
+    { name: "الرسائل الواردة", value: messages.length, icon: Mail, color: "text-rose-400", bg: "bg-rose-500/10", unread: unreadMessages },
   ];
 
   return (
@@ -95,6 +111,11 @@ export default function AdminDashboard() {
               {stat.unread !== undefined && stat.unread > 0 && (
                 <span className="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-full font-black animate-pulse">
                   {stat.unread} جديد
+                </span>
+              )}
+              {stat.detail && (
+                <span className={`text-[10px] px-2 py-1 rounded-full font-black ${stat.color} bg-white/5`}>
+                  {stat.detail}
                 </span>
               )}
             </div>
@@ -132,9 +153,11 @@ export default function AdminDashboard() {
                     <td className="px-6 py-5">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
                         order.status === "pending" ? "bg-amber-500/20 text-amber-500" :
+                        order.status === "cancelled" ? "bg-red-500/20 text-red-500" :
                         "bg-emerald-500/20 text-emerald-500"
                       }`}>
-                        {order.status === "pending" ? "معلق" : "نشط"}
+                        {order.status === "pending" ? "معلق" : 
+                         order.status === "cancelled" ? "ملغي" : "نشط"}
                       </span>
                     </td>
                   </tr>

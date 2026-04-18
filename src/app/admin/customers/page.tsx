@@ -63,7 +63,9 @@ export default function AdminCustomersPage() {
     
     orders.forEach(order => {
       // Clean phone number for grouping
-      const phone = order.customer.phone.replace(/\D/g, '');
+      const phone = (order.customer?.phone || '').replace(/\D/g, '');
+      if (!phone) return; // Skip invalid entries
+      
       const existing = customerMap.get(phone);
       
       if (existing) {

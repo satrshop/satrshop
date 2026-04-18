@@ -1,9 +1,12 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface OrderItem {
   id: string;
   name: string;
   price: number;
   image: string;
   quantity: number;
+  costPrice: number; // Snapshot of cost at order time
 }
 
 export interface CustomerInfo {
@@ -21,8 +24,8 @@ export interface Order {
   items: OrderItem[];
   total: number;
   customer: CustomerInfo;
-  status: 'pending' | 'shipping' | 'completed' | 'cancelled';
+  status: 'pending' | 'confirmed' | 'shipping' | 'completed' | 'cancelled';
   paymentMethod: 'cod';
   shippingFee: number;
-  createdAt: any; // Firestore Timestamp
+  createdAt: Timestamp; // Firestore Timestamp
 }

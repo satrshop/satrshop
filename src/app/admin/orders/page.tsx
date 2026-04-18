@@ -16,7 +16,10 @@ import {
   MapPin,
   Truck,
   MessageCircle,
-  FileSpreadsheet
+  FileSpreadsheet,
+  XCircle,
+  CheckCircle,
+  ThumbsUp
 } from "lucide-react";
 import Link from "next/link";
 import { exportToCSV } from "@/lib/exportUtils";
@@ -68,16 +71,30 @@ export default function AdminOrdersPage() {
     }
   };
 
-  const filteredOrders = orders.filter(o => {
-    const matchesSearch = 
-      o.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      o.customer.phone.includes(searchQuery);
-    
-    const matchesStatus = statusFilter === "all" || o.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const filteredOrders = orders
+    .filter(o => {
+      const matchesSearch = 
+        o.customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        o.customer.phone.includes(searchQuery);
+      
+      const matchesStatus = statusFilter === "all" || o.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      // 1. Grouping: completed/cancelled at the bottom
+      const isAFinished = a.status === 'completed' || a.status === 'cancelled';
+      const isBFinished = b.status === 'completed' || b.status === 'cancelled';
+
+      if (isAFinished && !isBFinished) return 1;
+      if (!isAFinished && isBFinished) return -1;
+
+      // 2. Chronological within groups (newest first)
+      const dateA = a.createdAt?.toMillis?.() || 0;
+      const dateB = b.createdAt?.toMillis?.() || 0;
+      return dateB - dateA;
+    });
 
   const handleExport = () => {
     const headers = [
@@ -133,7 +150,9 @@ export default function AdminOrdersPage() {
             <span className="flex-1 text-right font-black text-white">
               {statusFilter === 'all' ? "كل الحالات" : 
                statusFilter === 'pending' ? "قيد الانتظار" :
-               statusFilter === 'shipping' ? "جاري الشحن" : "مكتمل"}
+               statusFilter === 'confirmed' ? "تم التأكيد" :
+               statusFilter === 'shipping' ? "جاري الشحن" :
+               statusFilter === 'completed' ? "مكتمل" : "ملغي"}
             </span>
             <ChevronDown size={16} className={`text-white/20 transition-transform ${isFilterOpen ? 'rotate-180' : ''}`} />
           </button>
@@ -149,8 +168,10 @@ export default function AdminOrdersPage() {
                 {[
                   { id: 'all', label: 'كل الحالات', icon: Filter, color: 'text-white' },
                   { id: 'pending', label: 'قيد الانتظار', icon: Clock, color: 'text-amber-500' },
+                  { id: 'confirmed', label: 'تم التأكيد', icon: ThumbsUp, color: 'text-indigo-400' },
                   { id: 'shipping', label: 'جاري الشحن', icon: Truck, color: 'text-blue-500' },
                   { id: 'completed', label: 'مكتمل', icon: CheckCircle2, color: 'text-emerald-500' },
+                  { id: 'cancelled', label: 'ملغي', icon: XCircle, color: 'text-red-500' },
                 ].map((opt) => (
                   <button
                     key={opt.id}
@@ -255,15 +276,21 @@ export default function AdminOrdersPage() {
                           <div className="flex items-center gap-3">
                              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border shadow-sm ${
                                order.status === "pending" ? "bg-amber-500/10 border-amber-500/20 text-amber-500" :
+                               order.status === "confirmed" ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400" :
                                order.status === "shipping" ? "bg-blue-500/10 border-blue-500/20 text-blue-500" :
-                               "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                               order.status === "completed" ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" :
+                               "bg-red-500/10 border-red-500/20 text-red-500"
                              }`}>
                                {order.status === "pending" && <Clock size={14} className="animate-pulse" />}
+                               {order.status === "confirmed" && <ThumbsUp size={14} />}
                                {order.status === "shipping" && <Truck size={14} className="animate-bounce" style={{ animationDuration: '3s' }} />}
                                {order.status === "completed" && <CheckCircle2 size={14} />}
+                               {order.status === "cancelled" && <XCircle size={14} />}
                                <span className="text-[10px] font-black uppercase tracking-widest">
                                  {order.status === "pending" ? "قيد الانتظار" :
-                                  order.status === "shipping" ? "جاري الشحن" : "مكتمل"}
+                                  order.status === "confirmed" ? "تم التأكيد" :
+                                  order.status === "shipping" ? "جاري الشحن" :
+                                  order.status === "completed" ? "مكتمل" : "ملغي"}
                                </span>
                              </div>
                           </div>
@@ -286,15 +313,19 @@ export default function AdminOrdersPage() {
                                   exit={{ opacity: 0, scale: 0.9, x: 10 }}
                                   className="absolute left-full top-0 mr-2 min-w-[140px] bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl z-[110] overflow-hidden backdrop-blur-2xl"
                                 >
-                                  {[
-                                    { id: 'pending', label: 'معلق', icon: Clock, color: 'text-amber-500' },
-                                    { id: 'shipping', label: 'شحن', icon: Truck, color: 'text-blue-500' },
-                                    { id: 'completed', label: 'مكتمل', icon: CheckCircle2, color: 'text-emerald-500' },
-                                  ].map((opt) => (
+                                  {(
+                                    [
+                                      { id: 'pending', label: 'معلق', icon: Clock, color: 'text-amber-500' },
+                                      { id: 'confirmed', label: 'تأكيد', icon: ThumbsUp, color: 'text-indigo-400' },
+                                      { id: 'shipping', label: 'شحن', icon: Truck, color: 'text-blue-500' },
+                                      { id: 'completed', label: 'مكتمل', icon: CheckCircle2, color: 'text-emerald-500' },
+                                      { id: 'cancelled', label: 'ملغي', icon: XCircle, color: 'text-red-500' },
+                                    ] as const
+                                  ).map((opt) => (
                                     <button
                                       key={opt.id}
                                       onClick={() => {
-                                        handleStatusUpdate(order.id, opt.id as any);
+                                        handleStatusUpdate(order.id, opt.id);
                                         setActiveUpdateId(null);
                                       }}
                                       className={`w-full flex items-center gap-3 px-4 py-3 text-right hover:bg-white/5 transition-colors ${
@@ -316,71 +347,85 @@ export default function AdminOrdersPage() {
                       <AnimatePresence>
                         {expandedId === order.id && (
                           <motion.tr
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: "auto" }}
-                            exit={{ opacity: 0, height: 0 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                           >
-                            <td colSpan={6} className="px-8 py-8 bg-black/40 backdrop-blur-xl border-t border-white/5">
-                              <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                                {/* Order Items */}
-                                <div className="lg:col-span-8 space-y-4">
-                                  <h3 className="text-white/40 font-black text-xs uppercase tracking-widest mb-4">المنتجات المطلوبة</h3>
-                                  <div className="space-y-3">
-                                    {order.items.map((item, idx) => (
-                                      <div key={idx} className="bg-white/5 p-4 rounded-2xl flex items-center justify-between border border-white/5">
-                                        <div className="flex items-center gap-4">
-                                          <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-white/5">
-                                            <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
+                            <td colSpan={6} className="p-0 border-none">
+                              <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: "auto", opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                transition={{ duration: 0.4, ease: [0.04, 0.62, 0.23, 0.98] }}
+                                className="overflow-hidden bg-black/40 backdrop-blur-xl border-t border-white/5"
+                              >
+                                <div className="px-8 py-10">
+                                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                                    {/* Order Items */}
+                                    <div className="lg:col-span-8 space-y-4">
+                                      <h3 className="text-white/40 font-black text-xs uppercase tracking-widest mb-4 border-r-2 border-secondary pr-3">المنتجات المطلوبة</h3>
+                                      <div className="space-y-3">
+                                        {order.items.map((item, idx) => (
+                                          <div key={idx} className="bg-white/5 p-4 rounded-3xl flex items-center justify-between border border-white/5 hover:border-white/10 transition-colors">
+                                            <div className="flex items-center gap-4">
+                                              <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-white/5 border border-white/10 ring-4 ring-black/20">
+                                                <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
+                                              </div>
+                                              <div>
+                                                <p className="font-bold text-white text-lg">{item.name}</p>
+                                                <div className="flex items-center gap-2 mt-0.5">
+                                                  <span className="text-xs text-secondary font-black">الكمية: {item.quantity}</span>
+                                                  <span className="w-1 h-1 rounded-full bg-white/10" />
+                                                  <span className="text-xs text-white/40 font-bold">#{item.id.slice(0, 6)}</span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                            <div className="text-left bg-black/20 px-4 py-2 rounded-2xl border border-white/5">
+                                              <p className="font-black text-secondary text-lg">{item.price.toFixed(2)} د.ا</p>
+                                              <p className="text-[10px] text-white/20 font-bold">للقطعة الواحدة</p>
+                                            </div>
                                           </div>
-                                          <div>
-                                            <p className="font-bold text-white">{item.name}</p>
-                                            <p className="text-xs text-white/40 font-bold">الكمية: {item.quantity}</p>
-                                          </div>
-                                        </div>
-                                        <div className="text-left">
-                                          <p className="font-black text-secondary">{item.price.toFixed(2)} د.ا</p>
-                                          <p className="text-[10px] text-white/20 font-bold">للقطعة الواحدة</p>
-                                        </div>
+                                        ))}
                                       </div>
-                                    ))}
-                                  </div>
-                                </div>
+                                    </div>
 
-                                {/* Customer Details */}
-                                <div className="lg:col-span-4 space-y-6">
-                                  <div>
-                                    <h3 className="text-white/40 font-black text-xs uppercase tracking-widest mb-4">تفاصيل التوصيل</h3>
-                                    <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 space-y-4">
-                                      <div className="flex flex-col">
-                                        <span className="text-[10px] text-white/40 font-bold uppercase">المدينة</span>
-                                        <span className="font-bold text-lg text-white">{order.customer.city}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-[10px] text-white/40 font-bold uppercase">العنوان التفصيلي</span>
-                                        <span className="font-bold leading-relaxed text-white">{order.customer.address}</span>
-                                      </div>
-                                      {order.customer.gender && (
-                                        <div className="flex flex-col">
-                                          <span className="text-[10px] text-white/40 font-bold uppercase">الجنس</span>
-                                          <span className="font-bold text-white">{order.customer.gender}</span>
-                                        </div>
-                                      )}
-                                      <div className="pt-4 border-t border-white/5 space-y-3">
-                                        {order.customer.isZaytoonah && (
-                                          <div className="flex items-center justify-between bg-secondary/10 p-3 rounded-xl border border-secondary/20 mb-2">
-                                            <span className="text-secondary font-bold text-xs">نوع التوصيل</span>
-                                            <span className="font-black text-secondary text-sm">داخل جامعة الزيتونة</span>
+                                    {/* Customer Details */}
+                                    <div className="lg:col-span-4 space-y-6">
+                                      <div>
+                                        <h3 className="text-white/40 font-black text-xs uppercase tracking-widest mb-4 border-r-2 border-secondary pr-3">تفاصيل التوصيل</h3>
+                                        <div className="bg-white/5 p-8 rounded-[2.5rem] border border-white/5 space-y-5 shadow-inner">
+                                          <div className="flex flex-col">
+                                            <span className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">المدينة</span>
+                                            <span className="font-black text-xl text-white mt-1">{order.customer.city}</span>
                                           </div>
-                                        )}
-                                        <div className="flex items-center justify-between bg-primary/20 p-3 rounded-xl">
-                                          <span className="text-white/60 font-bold text-sm">رسوم التوصيل</span>
-                                          <span className="font-black text-amber-400">{order.shippingFee.toFixed(2)} د.ا</span>
+                                          <div className="flex flex-col">
+                                            <span className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">العنوان التفصيلي</span>
+                                            <span className="font-bold leading-relaxed text-white/90 mt-1">{order.customer.address}</span>
+                                          </div>
+                                          {order.customer.gender && (
+                                            <div className="flex flex-col">
+                                              <span className="text-[10px] text-white/40 font-bold uppercase tracking-tighter">الجنس</span>
+                                              <span className="font-black text-white mt-1">{order.customer.gender}</span>
+                                            </div>
+                                          )}
+                                          <div className="pt-6 border-t border-white/5 space-y-3">
+                                            {order.customer.isZaytoonah && (
+                                              <div className="flex items-center justify-between bg-secondary/10 p-4 rounded-2xl border border-secondary/20 mb-2">
+                                                <span className="text-secondary font-bold text-xs">نوع التوصيل</span>
+                                                <span className="font-black text-secondary text-sm">داخل جامعة الزيتونة</span>
+                                              </div>
+                                            )}
+                                            <div className="flex items-center justify-between bg-primary/40 p-4 rounded-2xl border border-white/5">
+                                              <span className="text-white/60 font-bold text-sm">رسوم التوصيل</span>
+                                              <span className="font-black text-amber-400 text-lg">{order.shippingFee.toFixed(2)} د.ا</span>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
                                   </div>
                                 </div>
-                              </div>
+                              </motion.div>
                             </td>
                           </motion.tr>
                         )}
