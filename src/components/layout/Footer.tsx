@@ -28,8 +28,8 @@ export default function Footer() {
         <div className="col-span-1">
           {/* Logo updated for dark/blue background (inverted visually if needed) */}
           <div className="bg-primary-foreground/90 p-3 rounded-2xl w-fit mb-6 flex gap-2">
-            <Image src="/images/SatrLogo.png" alt="شعار سطر" width={90} height={30} className="object-contain dark:hidden block" />
-            <Image src="/images/whitelogo.png" alt="شعار سطر" width={90} height={30} className="object-contain hidden dark:block" />
+            <Image src="/images/SatrLogo.png" alt="شعار متجر سطر الرسمي - الوضع الفاتح" width={90} height={30} className="object-contain dark:hidden block" />
+            <Image src="/images/whitelogo.png" alt="شعار متجر سطر الرسمي - الوضع الداكن" width={90} height={30} className="object-contain hidden dark:block" />
           </div>
           <p className="text-primary-foreground/90 text-sm leading-relaxed mb-6 font-medium">
             متجر سطر، وجهتك الأولى للأزياء التقنية. صُنع لطلبة تكنولوجيا المعلومات والمبرمجين الذين يقدرون الجودة وفخامة الكود.

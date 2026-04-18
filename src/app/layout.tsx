@@ -4,6 +4,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import CartDrawer from "@/components/cart/CartDrawer";
 import Footer from "@/components/layout/Footer";
+import Script from "next/script";
 
 const madaFont = localFont({
   src: "../../public/fonts/SFMADA.ttf",
@@ -57,8 +58,31 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "متجر سطر | Satr Shop",
+    "url": "https://satrshop-8ad70.web.app",
+    "logo": "https://satrshop-8ad70.web.app/images/SatrLogo.png",
+    "description": "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "JO"
+    },
+    "sameAs": [
+      "https://www.instagram.com/satr.shopp/"
+    ]
+  };
+
   return (
     <html lang="ar" dir="rtl" className={`${madaFont.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300">
         <ThemeProvider
           attribute="class"

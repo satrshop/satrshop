@@ -52,8 +52,8 @@ export default function Home() {
       <div className="px-3 sm:px-4 md:px-8 pt-24 sm:pt-28 md:pt-32 pb-10 sm:pb-16">
         <div className="w-full max-w-[1500px] mx-auto relative rounded-2xl sm:rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl">
           {/* Full-width Background Images */}
-          <Image src="/images/bgblue.png" alt="خلفية سطر" fill sizes="100vw" className="object-cover z-0 pointer-events-none dark:hidden block" priority />
-          <Image src="/images/bg2.png" alt="خلفية سطر" fill sizes="100vw" className="object-cover z-0 pointer-events-none hidden dark:block" priority />
+          <Image src="/images/bgblue.png" alt="خلفية متجر سطر الرسمية - سطوع عالي" fill sizes="100vw" className="object-cover z-0 pointer-events-none dark:hidden block" priority />
+          <Image src="/images/bg2.png" alt="خلفية متجر سطر الرسمية - الوضع الداكن" fill sizes="100vw" className="object-cover z-0 pointer-events-none hidden dark:block" priority />
 
           <main className="w-full px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-28 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16 relative z-10">
             {/* Background decorative blur - hidden on mobile for performance */}
@@ -67,7 +67,8 @@ export default function Home() {
           animate="visible"
         >
           <motion.h1 variants={fadeInUp} className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold leading-[1.2] text-white tracking-tight">
-            الجودة بلغة <br /><span className="text-transparent bg-clip-text bg-gradient-to-l from-white to-secondary block mt-2 pb-2">تليق بك.</span>
+            مرحباً بك في <span className="text-secondary">متجر سطر</span> <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-l from-white to-secondary block mt-2 pb-2">الجودة تليق بك.</span>
           </motion.h1>
 
           <motion.p variants={fadeInUp} className="text-base sm:text-lg md:text-xl text-white/90 font-medium max-w-lg leading-relaxed border-r-4 border-secondary pr-4 drop-shadow-md">
@@ -106,7 +107,7 @@ export default function Home() {
         >
           <Image
             src="/images/background.png"
-            alt="تشكيلة سطر"
+            alt="أحدث تشكيلة ملابس ومستلزمات المبرمجين من متجر سطر"
             fill
             sizes="(max-width: 1024px) 100vw, 500px"
             className="object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
