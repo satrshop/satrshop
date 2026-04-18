@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: '/',
       disallow: ['/admin', '/api'],
     },
-    sitemap: 'https://satrshop-8ad70.web.app/sitemap.xml',
+    sitemap: 'https://satrshop.vercel.app/sitemap.xml',
   }
 }

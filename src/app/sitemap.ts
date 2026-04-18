@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next'
 import { getProducts } from '@/lib/db/products'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://satrshop-8ad70.web.app'
+  const baseUrl = 'https://satrshop.vercel.app'
   
   // Static pages with appropriate priorities and change frequencies
   const staticRoutes: MetadataRoute.Sitemap = [
