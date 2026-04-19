@@ -19,14 +19,14 @@ export default function WishlistPage() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-[#FDF4E3] flex items-center justify-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin" />
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-12 h-12 text-foreground animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDF4E3]">
+    <div className="min-h-screen bg-background">
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-40 pb-20">
@@ -36,14 +36,14 @@ export default function WishlistPage() {
             <motion.div 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              className="flex items-center gap-4 text-[#2C6A87]"
+              className="flex items-center gap-4 text-foreground"
             >
-              <Heart size={32} className="fill-[#2C6A87]" />
+              <Heart size={32} className="fill-foreground text-foreground" />
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight">
                 المفضلة
               </h1>
             </motion.div>
-            <p className="text-lg text-[#2C6A87] font-medium max-w-xl opacity-90">
+            <p className="text-lg text-foreground font-medium max-w-xl opacity-90">
               هنا تجد كل المنتجات التي نالت إعجابك. يمكنك إضافتها للسلة في أي وقت لتكتمل أناقتك.
             </p>
           </div>
@@ -82,19 +82,19 @@ export default function WishlistPage() {
             >
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
-                <Ghost size={120} className="text-[#2C6A87]/30 relative animate-bounce" />
-                <Heart size={40} className="absolute -top-2 -right-2 text-[#2C6A87] fill-[#2C6A87] animate-pulse" />
+                <Ghost size={120} className="text-foreground/30 relative animate-bounce" />
+                <Heart size={40} className="absolute -top-2 -right-2 text-foreground fill-foreground animate-pulse" />
               </div>
               
               <div className="space-y-4">
-                <h2 className="text-3xl font-black text-[#2C6A87]">قائمتك فارغة الآن</h2>
-                <p className="text-[#2C6A87]/70 max-w-xs mx-auto font-medium">
+                <h2 className="text-3xl font-black text-foreground">قائمتك فارغة الآن</h2>
+                <p className="text-foreground/70 max-w-xs mx-auto font-medium">
                   لم تقم بإضافة أي منتج للمفضلة بعد. انتقل للمتجر واكتشف تشكيلتنا الجديدة!
                 </p>
               </div>
 
               <Link href="/shop">
-                <button className="flex items-center gap-3 bg-[#2C6A87] text-white px-10 py-4 rounded-2xl font-black text-xl shadow-xl shadow-[#2C6A87]/20 hover:bg-[#1e4a5e] transition-all active:scale-[0.98]">
+                <button className="flex items-center gap-3 bg-foreground text-background px-10 py-4 rounded-2xl font-black text-xl shadow-xl shadow-foreground/20 hover:opacity-90 transition-all active:scale-[0.98]">
                   اكتشف المتجر
                   <ArrowRight size={20} className="rotate-180" />
                 </button>
