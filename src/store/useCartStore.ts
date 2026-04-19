@@ -8,15 +8,25 @@ export interface CartItem {
   image: string;
   quantity: number;
   stock?: number; // Optional to maintain compatibility, but should be passed
+  selectedColor?: { name: string; code: string };
+  selectedSize?: string;
 }
+
+/** 
+ * Unique key for cart items that accounts for variants 
+ */
+export const getCartItemKey = (item: { id: string; selectedColor?: { code: string }; selectedSize?: string }) => {
+  return `${item.id}-${item.selectedColor?.code || 'default'}-${item.selectedSize || 'default'}`;
+};
+
 
 interface CartState {
   items: CartItem[];
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void;
-  removeItem: (id: string) => void;
-  updateQuantity: (id: string, quantity: number) => void;
+  removeItem: (key: string) => void;
+  updateQuantity: (key: string, quantity: number) => void;
   clearCart: () => void;
 }
 
@@ -28,14 +38,15 @@ export const useCartStore = create<CartState>()(
       setIsOpen: (isOpen) => set({ isOpen }),
       addItem: (item, quantity = 1) => {
         const currentItems = get().items;
-        const existingItem = currentItems.find((i) => i.id === item.id);
+        const itemKey = getCartItemKey(item);
+        const existingItem = currentItems.find((i) => getCartItemKey(i) === itemKey);
         const maxStock = item.stock ?? 999;
         
         if (existingItem) {
           const newQuantity = Math.min(existingItem.quantity + quantity, maxStock);
           set({
             items: currentItems.map((i) =>
-              i.id === item.id ? { ...i, quantity: newQuantity } : i
+              getCartItemKey(i) === itemKey ? { ...i, quantity: newQuantity } : i
             ),
             isOpen: true,
           });
@@ -46,13 +57,13 @@ export const useCartStore = create<CartState>()(
           });
         }
       },
-      removeItem: (id) =>
+      removeItem: (key) =>
         set((state) => ({
-          items: state.items.filter((i) => i.id !== id),
+          items: state.items.filter((i) => getCartItemKey(i) !== key),
         })),
-      updateQuantity: (id, quantity) =>
+      updateQuantity: (key, quantity) =>
         set((state) => {
-          const item = state.items.find(i => i.id === id);
+          const item = state.items.find(i => getCartItemKey(i) === key);
           if (!item) return state;
           
           const maxStock = item.stock ?? 999;
@@ -60,7 +71,7 @@ export const useCartStore = create<CartState>()(
           
           return {
             items: state.items.map((i) =>
-              i.id === id ? { ...i, quantity: newQuantity } : i
+              getCartItemKey(i) === key ? { ...i, quantity: newQuantity } : i
             ),
           };
         }),

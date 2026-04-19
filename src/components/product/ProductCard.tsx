@@ -18,6 +18,8 @@ interface ProductCardProps {
     rating: number;
     isNew?: boolean;
     stock: number;
+    hasColors?: boolean;
+    hasSizes?: boolean;
   };
   index: number;
 }
@@ -28,6 +30,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -77,35 +80,43 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         />
       </button>
 
-      {/* Image Area - Linked to Product Page */}
-      <Link href={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-white/5 border-b border-white/10 cursor-pointer">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-          className={`object-cover group-hover:scale-105 transition-transform duration-700 ${isOutOfStock ? 'opacity-50 grayscale' : ''}`}
-        />
+      {/* Image Area - Container */}
+      <div className="relative aspect-[4/5] overflow-hidden bg-white/5 border-b border-white/10">
+        <Link href={`/product/${product.id}`} className="block w-full h-full cursor-pointer">
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className={`object-cover group-hover:scale-105 transition-transform duration-700 ${isOutOfStock ? 'opacity-50 grayscale' : ''}`}
+          />
+        </Link>
         
         {/* Quick Add Button Overlay (Desktop Only) */}
         {!isOutOfStock && (
-          <div className="hidden sm:flex absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 backdrop-blur-[2px]">
-            <motion.button 
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                addItem(product);
-              }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className="bg-primary-foreground text-primary dark:text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-secondary hover:text-white transition-colors"
-            >
-              <ShoppingBag size={18} />
-              أضف للسلة
-            </motion.button>
+          <div className="hidden sm:flex absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 backdrop-blur-[2px] pointer-events-none">
+            {product.hasColors || product.hasSizes ? (
+              <Link href={`/product/${product.id}`} className="bg-secondary text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-white hover:text-secondary transition-colors z-30 pointer-events-auto">
+                {product.hasSizes ? "اختر مقاسك" : "اختر اللون"}
+              </Link>
+            ) : (
+              <motion.button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  addItem(product);
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="bg-primary-foreground text-primary dark:text-white px-6 py-3 rounded-full font-bold flex items-center gap-2 shadow-lg hover:bg-secondary hover:text-white transition-colors z-30 pointer-events-auto"
+              >
+                <ShoppingBag size={18} />
+                أضف للسلة
+              </motion.button>
+            )}
           </div>
         )}
-      </Link>
+      </div>
 
       {/* Content Area */}
       <div className="p-3 sm:p-5 flex flex-col flex-1">
@@ -127,6 +138,13 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             <div className="w-full bg-red-500/10 text-red-400 py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 text-sm border border-red-500/20">
               نفذت الكمية
             </div>
+          ) : product.hasColors || product.hasSizes ? (
+            <Link 
+              href={`/product/${product.id}`}
+              className="w-full bg-transparent border-2 border-secondary text-secondary py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all text-sm"
+            >
+              {product.hasSizes ? "اختر مقاسك" : "اختر اللون"}
+            </Link>
           ) : (
             <button 
               onClick={() => addItem(product)}

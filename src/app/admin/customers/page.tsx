@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { getOrders } from "@/lib/db/orders";
-import { Order } from "@/types/models/order";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -10,7 +9,6 @@ import {
   Filter, 
   Loader2,
   Mail,
-  Phone,
   MessageCircle,
   ChevronDown,
   User,
@@ -29,7 +27,7 @@ interface Customer {
   city: string;
   orderCount: number;
   totalSpent: number;
-  lastOrderDate: any;
+  lastOrderDate?: { seconds: number; nanoseconds?: number } | null;
 }
 
 export default function AdminCustomersPage() {
@@ -48,10 +46,6 @@ export default function AdminCustomersPage() {
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    loadCustomers();
   }, []);
 
   async function loadCustomers() {
@@ -100,6 +94,11 @@ export default function AdminCustomersPage() {
     setCustomers(Array.from(customerMap.values()));
     setLoading(false);
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadCustomers();
+  }, []);
 
   const getWhatsAppLink = (phone: string) => {
     let cleanPhone = phone.replace(/\D/g, '');
@@ -311,7 +310,7 @@ export default function AdminCustomersPage() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-2 text-white/60 font-bold text-sm">
                           <Calendar size={14} className="text-white/20" />
-                          {customer.lastOrderDate ? new Date(customer.lastOrderDate.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
+                          {customer.lastOrderDate?.seconds ? new Date(customer.lastOrderDate.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
                         </div>
                       </td>
                     </motion.tr>

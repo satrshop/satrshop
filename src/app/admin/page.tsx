@@ -3,41 +3,32 @@
 import { useState, useEffect } from "react";
 import { getProducts } from "@/lib/db/products";
 import { getOrders } from "@/lib/db/orders";
-import { getMessages } from "@/lib/db/messages";
 import { Product } from "@/types/models/product";
 import { Order } from "@/types/models/order";
-import { ContactMessage } from "@/types/models/message";
 import { motion } from "framer-motion";
 import { 
   ShoppingBag, 
-  Package, 
   TrendingUp, 
   Clock, 
   Loader2,
-  Mail,
-  ChevronLeft,
-  AlertTriangle,
-  Warehouse
+  AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const [prodData, orderData, msgData] = await Promise.all([
-          getProducts(),
-          getOrders(),
-          getMessages()
+        const [prodData, orderData] = await Promise.all([
+          getProducts(true),
+          getOrders()
         ]);
         setProducts(prodData);
         setOrders(orderData);
-        setMessages(msgData);
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       } finally {
@@ -72,7 +63,7 @@ export default function AdminDashboard() {
   }, 0);
 
   const pendingOrders = orders.filter(o => o.status === "pending").length;
-  const unreadMessages = messages.filter(m => !m.isRead).length;
+
   const outOfStockCount = products.filter(p => p.stock === 0).length;
   const lowStockCount = products.filter(p => p.stock > 0 && p.stock <= 5).length;
 
@@ -81,7 +72,6 @@ export default function AdminDashboard() {
     { name: "صافي الربح", value: `${totalProfit.toFixed(2)} د.ا`, icon: ShoppingBag, color: "text-amber-400", bg: "bg-amber-500/10" },
     { name: "طلبات معلقة", value: pendingOrders, icon: Clock, color: "text-purple-400", bg: "bg-purple-500/10" },
     { name: "تنبيهات المخزون", value: outOfStockCount + lowStockCount, icon: AlertTriangle, color: (outOfStockCount > 0 ? "text-red-400" : "text-amber-400"), bg: (outOfStockCount > 0 ? "bg-red-500/10" : "bg-amber-500/10"), detail: outOfStockCount > 0 ? `${outOfStockCount} نفذت` : `${lowStockCount} منخفضة` },
-    { name: "الرسائل الواردة", value: messages.length, icon: Mail, color: "text-rose-400", bg: "bg-rose-500/10", unread: unreadMessages },
   ];
 
   return (
@@ -108,11 +98,6 @@ export default function AdminDashboard() {
             <p className="text-white/40 font-bold mb-2">{stat.name}</p>
             <div className="flex items-end justify-between">
               <h2 className="text-3xl font-black">{stat.value}</h2>
-              {stat.unread !== undefined && stat.unread > 0 && (
-                <span className="bg-rose-500 text-white text-[10px] px-2 py-1 rounded-full font-black animate-pulse">
-                  {stat.unread} جديد
-                </span>
-              )}
               {stat.detail && (
                 <span className={`text-[10px] px-2 py-1 rounded-full font-black ${stat.color} bg-white/5`}>
                   {stat.detail}
@@ -123,7 +108,7 @@ export default function AdminDashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 gap-8">
         {/* Recent Orders Section */}
         <div className="bg-[#1e293b] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
           <div className="p-8 border-b border-white/5 flex items-center justify-between">
@@ -171,43 +156,9 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
-
-        {/* Recent Messages Section */}
-        <div className="bg-[#1e293b] rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl">
-          <div className="p-8 border-b border-white/5 flex items-center justify-between">
-            <h2 className="text-xl font-black flex items-center gap-3">
-              <Mail className="text-rose-400" />
-              أحدث الرسائل
-            </h2>
-            <Link href="/admin/messages" className="text-rose-400 font-bold hover:underline py-2">
-              عرض الكل
-            </Link>
-          </div>
-
-          <div className="divide-y divide-white/5">
-            {messages.slice(0, 5).map((msg) => (
-              <div key={msg.id} className="p-6 hover:bg-white/5 transition-all group">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-white group-hover:text-rose-400 transition-colors">{msg.name}</h3>
-                  <span className="text-[10px] text-white/20 font-bold">
-                    {msg.createdAt ? new Date(msg.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
-                  </span>
-                </div>
-                <p className="text-sm text-white/40 line-clamp-1 font-medium">{msg.content}</p>
-                {!msg.isRead && (
-                  <div className="mt-2 flex">
-                    <span className="w-2 h-2 bg-rose-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(244,63,94,0.5)]" />
-                  </div>
-                )}
-              </div>
-            ))}
-            {messages.length === 0 && (
-              <div className="py-20 text-center text-white/40 font-bold">لا توجد رسائل جديدة</div>
-            )}
-          </div>
-        </div>
       </div>
     </div>
   );
 }
+
 

@@ -9,6 +9,10 @@ export interface Product {
   description?: string;
   stock: number; // Available quantity. 0 = out of stock
   costPrice?: number; // The cost to the shop for this product (admin only)
+  hasColors?: boolean;
+  colors?: { name: string; code: string }[];
+  hasSizes?: boolean;
+  sizes?: string[];
 }
 
 /** Default stock value for products that don't have stock set in DB yet */

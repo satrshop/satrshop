@@ -22,6 +22,7 @@ import { Product } from "@/types/models/product";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
 import ProductCard from "@/components/product/ProductCard";
+import { useRef } from "react";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -30,11 +31,17 @@ interface ProductDetailClientProps {
 
 export default function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
   const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState<{ name: string; code: string } | null>(null);
+  const [selectedSize, setSelectedSize] = useState<string | null>(null);
+  const [showError, setShowError] = useState(false);
+  const variantsRef = useRef<HTMLDivElement>(null);
+  
   const addItem = useCartStore((state) => state.addItem);
   const { toggleWishlist, isInWishlist } = useWishlistStore();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
@@ -87,14 +94,14 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
         </div>
 
         {/* Right: Product Info */}
-        <div className="lg:col-span-5 bg-primary text-white p-8 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] shadow-2xl relative overflow-hidden border border-white/10">
+        <div className="lg:col-span-5 bg-primary text-white dark:text-primary-foreground p-8 sm:p-10 rounded-[2.5rem] sm:rounded-[4rem] shadow-2xl relative overflow-hidden border border-white/10">
           {/* Decorative background element */}
           <div className="absolute top-0 left-0 w-64 h-64 bg-secondary/10 blur-[100px] -ml-32 -mt-32" />
           
           <div className="relative z-10 space-y-8 sm:space-y-10">
             <div className="space-y-4 sm:space-y-6">
               <div className="flex items-center gap-4">
-                <span className="bg-white/10 text-white text-xs sm:text-sm font-black px-4 py-1.5 rounded-full tracking-widest uppercase backdrop-blur-md">
+                <span className="bg-white/10 text-white dark:text-secondary text-xs sm:text-sm font-black px-4 py-1.5 rounded-full tracking-widest uppercase backdrop-blur-md">
                   {product.category}
                 </span>
                 <div className="flex items-center gap-1.5 text-secondary">
@@ -104,7 +111,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 </div>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white dark:text-primary-foreground leading-tight">
                 {product.name}
               </h1>
 
@@ -148,6 +155,82 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
               </p>
             </div>
 
+            {/* Variants Selection */}
+            <div ref={variantsRef} className="space-y-6 pt-2">
+              {/* Color Selection */}
+              {product.hasColors && product.colors && product.colors.length > 0 && (
+                <div className={`space-y-4 p-4 rounded-3xl transition-all duration-300 ${showError && !selectedColor ? 'bg-red-500/10 border-2 border-red-500/50' : 'bg-transparent border-2 border-transparent'}`}>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-black text-white dark:text-primary-foreground flex items-center gap-2">
+                      الألوان المتاحة
+                      {selectedColor && <span className="text-secondary text-sm font-bold">({selectedColor.name})</span>}
+                    </h3>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    {product.colors.map((color) => (
+                      <button
+                        key={color.code}
+                        onClick={() => {
+                          setSelectedColor(color);
+                          setShowError(false);
+                        }}
+                        className={`w-10 h-10 rounded-full border-2 transition-all p-0.5 ${
+                          selectedColor?.code === color.code 
+                            ? "border-secondary scale-110 shadow-lg" 
+                            : "border-white/10 hover:border-white/40"
+                        }`}
+                        title={color.name}
+                      >
+                        <div 
+                          className="w-full h-full rounded-full" 
+                          style={{ backgroundColor: color.code }}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Size Selection */}
+              {product.hasSizes && product.sizes && product.sizes.length > 0 && (
+                <div className={`space-y-4 p-4 rounded-3xl transition-all duration-300 ${showError && !selectedSize ? 'bg-red-500/10 border-2 border-red-500/50' : 'bg-transparent border-2 border-transparent'}`}>
+                  <h3 className="text-lg font-black text-white dark:text-primary-foreground flex items-center gap-2">
+                    المقاس
+                    {selectedSize && <span className="text-secondary text-sm font-bold">({selectedSize})</span>}
+                  </h3>
+                  <div className="flex flex-wrap gap-3">
+                    {product.sizes.map((size) => (
+                      <button
+                        key={size}
+                        onClick={() => {
+                          setSelectedSize(size);
+                          setShowError(false);
+                        }}
+                        className={`min-w-[50px] px-4 py-2 rounded-xl font-bold text-sm transition-all border-2 ${
+                          selectedSize === size
+                            ? "bg-secondary text-secondary-foreground border-secondary shadow-lg scale-105"
+                            : "bg-white/5 border-white/10 text-white dark:text-primary-foreground hover:border-white/40"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {showError && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-xl text-sm font-bold flex items-center gap-2"
+                >
+                  <AlertTriangle size={18} />
+                  يرجى اختيار اللون والمقاس أولاً
+                </motion.div>
+              )}
+            </div>
+
             {/* Actions */}
             <div className="space-y-6 pt-4">
               <div className="flex flex-col sm:flex-row items-center gap-6">
@@ -155,14 +238,14 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                 <div className={`flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-1 w-full sm:w-auto ${isOutOfStock ? 'opacity-50 pointer-events-none' : ''}`}>
                   <button 
                     onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
-                    className="w-12 h-12 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-all"
+                    className="w-12 h-12 flex items-center justify-center text-white dark:text-primary-foreground hover:bg-white/10 rounded-xl transition-all"
                   >
                     <Minus size={20} />
                   </button>
-                  <span className="w-12 text-center font-black text-xl text-white">{quantity}</span>
+                  <span className="w-12 text-center font-black text-xl text-white dark:text-primary-foreground">{quantity}</span>
                   <button 
                     onClick={() => setQuantity(prev => Math.min(product.stock, prev + 1))}
-                    className="w-12 h-12 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-all"
+                    className="w-12 h-12 flex items-center justify-center text-white dark:text-primary-foreground hover:bg-white/10 rounded-xl transition-all"
                   >
                     <Plus size={20} />
                   </button>
@@ -176,7 +259,18 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
                   </div>
                 ) : (
                   <button 
-                    onClick={() => addItem(product, quantity)}
+                    onClick={() => {
+                      if ((product.hasColors && !selectedColor) || (product.hasSizes && !selectedSize)) {
+                        setShowError(true);
+                        variantsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        return;
+                      }
+                      addItem({
+                        ...product,
+                        selectedColor: selectedColor || undefined,
+                        selectedSize: selectedSize || undefined
+                      }, quantity);
+                    }}
                     className="flex-1 w-full flex items-center justify-center gap-3 bg-secondary text-secondary-foreground py-4 rounded-2xl font-black text-xl shadow-xl shadow-black/20 hover:bg-white hover:text-secondary hover:border-secondary transition-all active:scale-[0.98] border border-transparent"
                   >
                     <ShoppingBag size={24} />

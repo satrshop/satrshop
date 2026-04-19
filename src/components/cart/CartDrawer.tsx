@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Trash2, Plus, Minus, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useCartStore } from "@/store/useCartStore";
+import { useCartStore, getCartItemKey } from "@/store/useCartStore";
 import { useEffect, useState } from "react";
 
 export default function CartDrawer() {
@@ -12,6 +12,7 @@ export default function CartDrawer() {
   
   // Fix hydration mismatch for zustand persist
   const [mounted, setMounted] = useState(false);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => setMounted(true), []);
 
   if (!mounted) return null;
@@ -69,7 +70,7 @@ export default function CartDrawer() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: -20 }}
-                    key={item.id} 
+                    key={getCartItemKey(item)} 
                     className="flex gap-4 bg-primary text-primary-foreground p-3 rounded-2xl border border-primary/20 shadow-sm group"
                   >
                     <div className="relative w-20 h-24 rounded-xl overflow-hidden bg-white flex-shrink-0">
@@ -83,9 +84,24 @@ export default function CartDrawer() {
                     </div>
                     <div className="flex-1 flex flex-col justify-between py-1">
                       <div className="flex justify-between items-start">
-                        <h4 className="font-bold text-primary-foreground line-clamp-2 text-sm">{item.name}</h4>
+                        <div>
+                          <h4 className="font-bold text-primary-foreground line-clamp-1 text-sm">{item.name}</h4>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {item.selectedColor && (
+                              <div className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded-md border border-white/10">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.code }} />
+                                <span className="text-[10px] text-white/60">{item.selectedColor.name}</span>
+                              </div>
+                            )}
+                            {item.selectedSize && (
+                              <div className="flex items-center bg-white/5 px-1.5 py-0.5 rounded-md border border-white/10">
+                                <span className="text-[10px] text-white/60">{item.selectedSize}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                         <button 
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(getCartItemKey(item))}
                           className="text-primary-foreground/70 hover:text-red-400 transition-colors ml-1"
                         >
                           <Trash2 size={16} />
@@ -98,9 +114,9 @@ export default function CartDrawer() {
                           <button 
                              onClick={() => {
                                if (item.quantity === 1) {
-                                 removeItem(item.id);
+                                 removeItem(getCartItemKey(item));
                                } else {
-                                 updateQuantity(item.id, item.quantity - 1);
+                                 updateQuantity(getCartItemKey(item), item.quantity - 1);
                                }
                              }}
                              className="text-primary-foreground hover:text-secondary transition"
@@ -109,7 +125,7 @@ export default function CartDrawer() {
                           </button>
                           <span className="text-sm font-bold w-4 text-center">{item.quantity}</span>
                           <button 
-                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                             onClick={() => updateQuantity(getCartItemKey(item), item.quantity + 1)}
                              className="text-primary-foreground hover:text-secondary transition"
                           >
                              <Plus size={14} />

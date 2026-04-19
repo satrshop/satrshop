@@ -6,7 +6,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  ChevronRight, 
   MapPin, 
   Phone, 
   User, 
@@ -27,11 +26,11 @@ const JORDAN_CITIES = [
   "المفرق", "جرش", "عجلون", "الكرك", "الطفيلة", "معان"
 ];
 
-const SHIPPING_FEE = 2.00;
+const SHIPPING_FEE = 2.50;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items, clearCart } = useCartStore();
+  const { items } = useCartStore();
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCityOpen, setIsCityOpen] = useState(false);
@@ -49,6 +48,20 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setMounted(true);
+    
+    // Load saved customer data from localStorage
+    const savedData = localStorage.getItem("satr_customer_info");
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        if (parsed.formData) setFormData(parsed.formData);
+        if (parsed.isZaytoonah !== undefined) setIsZaytoonah(parsed.isZaytoonah);
+        if (parsed.gender) setGender(parsed.gender);
+      } catch (e) {
+        console.error("Error parsing saved customer data", e);
+      }
+    }
+
     // If cart is empty, redirect to shop
     if (mounted && items.length === 0) {
       router.push("/shop");
@@ -83,8 +96,8 @@ export default function CheckoutPage() {
     setError(null);
 
     // Basic Validation
-    if (!formData.name || !formData.phone || !formData.address) {
-      setError("يرجى ملء جميع الحقول المطلوبة");
+    if (!formData.name || !formData.phone || !formData.address || !gender) {
+      setError("يرجى ملء جميع الحقول المطلوبة واختيار الجنس");
       setIsSubmitting(false);
       return;
     }
@@ -97,7 +110,9 @@ export default function CheckoutPage() {
           price: item.price,
           image: item.image,
           quantity: item.quantity,
-          costPrice: 0 // Will be injected server-side for security
+          costPrice: 0, // Will be injected server-side for security
+          selectedColor: item.selectedColor,
+          selectedSize: item.selectedSize
         })),
         total: total,
         customer: {
@@ -106,14 +121,21 @@ export default function CheckoutPage() {
           email: formData.email,
           city: formData.city,
           address: formData.address,
-          isZaytoonah: isZaytoonah,
-          gender: gender || undefined
+          isZaytoonah: !!isZaytoonah,
+          gender: gender || null
         },
         paymentMethod: 'cod',
-        shippingFee: currentShippingFee
+        shippingFee: currentShippingFee || 0
       });
 
       if (orderId) {
+        // Save customer data to localStorage for next time
+        localStorage.setItem("satr_customer_info", JSON.stringify({
+          formData,
+          isZaytoonah,
+          gender
+        }));
+        
         router.push(`/checkout/success?id=${orderId}`);
       } else {
         throw new Error("Failed to create order");
@@ -133,7 +155,7 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF4E3] pb-20 selection:bg-secondary selection:text-white">
+    <div className="min-h-screen bg-background pb-20 selection:bg-secondary selection:text-white">
       <Header />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-44">
@@ -356,22 +378,35 @@ export default function CheckoutPage() {
                 <ShoppingBag size={22} className="text-secondary" />
               </h2>
 
-              <div className="space-y-4 mb-6 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-6 mb-8 max-h-[350px] overflow-y-auto pl-4 custom-scrollbar" dir="rtl">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-4 items-center border-b border-primary-foreground/10 pb-4 last:border-0 last:pb-0">
-                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0">
+                  <div key={item.id} className="flex gap-4 items-center bg-white/5 p-4 rounded-2xl border border-white/10 hover:bg-white/10 transition-all group">
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-white shadow-md flex-shrink-0">
                       <Image 
                         src={item.image} 
                         alt={item.name} 
                         fill 
-                        sizes="64px"
-                        className="object-cover" 
+                        sizes="80px"
+                        className="object-cover group-hover:scale-110 transition-transform duration-500" 
                       />
                     </div>
                     <div className="flex-1 min-w-0 text-right">
-                      <h4 className="font-bold text-sm text-primary-foreground line-clamp-1">{item.name}</h4>
-                      <p className="text-xs text-primary-foreground/60 mt-1">
-                        الكمية: {item.quantity} × {item.price.toFixed(2)} د.ا
+                      <h4 className="font-black text-sm text-primary-foreground line-clamp-1 group-hover:text-secondary transition-colors">{item.name}</h4>
+                      <div className="flex flex-wrap justify-end gap-2 mt-1">
+                        {item.selectedColor && (
+                          <div className="flex items-center gap-1 bg-primary-foreground/5 px-1.5 py-0.5 rounded-md border border-primary-foreground/10">
+                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.code }} />
+                            <span className="text-[10px] text-primary-foreground/60">{item.selectedColor.name}</span>
+                          </div>
+                        )}
+                        {item.selectedSize && (
+                          <div className="flex items-center bg-secondary/20 px-2 py-0.5 rounded-md border border-secondary/30">
+                            <span className="text-[10px] text-secondary font-black">{item.selectedSize}</span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm font-black text-secondary mt-2">
+                        {item.quantity} × {item.price.toFixed(2)} د.ا
                       </p>
                     </div>
                   </div>

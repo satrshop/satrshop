@@ -8,14 +8,26 @@ const PRODUCTS_COLLECTION = "products";
  * Normalizes a Firestore document into a Product, ensuring `stock` has a value.
  * Products that predate the stock field get DEFAULT_STOCK.
  */
-function docToProduct(docSnap: DocumentSnapshot): Product {
+/**
+ * Normalizes a Firestore document into a Product, ensuring `stock` has a value.
+ * Products that predate the stock field get DEFAULT_STOCK.
+ */
+function docToProduct(docSnap: DocumentSnapshot, includeSensitive: boolean = false): Product {
   const data = docSnap.data() || {};
-  return {
+  const product = {
     id: docSnap.id,
     ...data,
     stock: typeof data.stock === "number" ? data.stock : DEFAULT_STOCK,
-    costPrice: typeof data.costPrice === "number" ? data.costPrice : 0,
   } as Product;
+
+  // Protect sensitive financial data unless explicitly requested
+  if (!includeSensitive) {
+    delete (product as Partial<Product> & { costPrice?: number }).costPrice;
+  } else {
+    product.costPrice = typeof data.costPrice === "number" ? data.costPrice : 0;
+  }
+
+  return product;
 }
 
 export async function createProduct(productData: Omit<Product, "id">): Promise<string | null> {
@@ -54,17 +66,17 @@ export async function deleteProduct(id: string): Promise<boolean> {
   }
 }
 
-export async function getProducts(): Promise<Product[]> {
+export async function getProducts(includeSensitive: boolean = false): Promise<Product[]> {
   try {
     const productsRef = collection(db, PRODUCTS_COLLECTION);
     const q = query(productsRef);
     const querySnapshot = await getDocs(q);
-    
+
     const products: Product[] = [];
     querySnapshot.forEach((docSnap) => {
-      products.push(docToProduct(docSnap));
+      products.push(docToProduct(docSnap, includeSensitive));
     });
-    
+
     return products;
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -72,13 +84,13 @@ export async function getProducts(): Promise<Product[]> {
   }
 }
 
-export async function getProductById(id: string): Promise<Product | null> {
+export async function getProductById(id: string, includeSensitive: boolean = false): Promise<Product | null> {
   try {
     const docRef = doc(db, PRODUCTS_COLLECTION, id);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
-      return docToProduct(docSnap);
+      return docToProduct(docSnap, includeSensitive);
     } else {
       return null;
     }
@@ -144,7 +156,7 @@ export async function incrementStockForItems(items: { id: string; quantity: numb
  */
 export async function validateStock(items: { id: string; quantity: number; name: string }[]): Promise<{ id: string; name: string; requested: number; available: number }[]> {
   const insufficientItems: { id: string; name: string; requested: number; available: number }[] = [];
-  
+
   for (const item of items) {
     const product = await getProductById(item.id);
     if (!product || product.stock < item.quantity) {
@@ -156,7 +168,7 @@ export async function validateStock(items: { id: string; quantity: number; name:
       });
     }
   }
-  
+
   return insufficientItems;
 }
 
@@ -167,12 +179,28 @@ export async function validateStock(items: { id: string; quantity: number; name:
  */
 export async function searchProductsRemote(queryString: string): Promise<Product[]> {
   if (!queryString.trim()) return [];
-  
+
   const all = await getProducts();
   const lower = queryString.trim().toLowerCase();
-  
-  return all.filter(p => 
-    p.name.toLowerCase().includes(lower) || 
+
+  return all.filter(p =>
+    p.name.toLowerCase().includes(lower) ||
     p.category.toLowerCase().includes(lower)
   );
+}
+
+/**
+ * Fetches unique categories from all existing products.
+ */
+export async function getCategories(): Promise<string[]> {
+  try {
+    const products = await getProducts();
+    const categories = Array.from(new Set(products.map(p => p.category)));
+    // Default categories if list is empty
+    const defaults = ["هوديز", "تيشرتات", "جواكيت", "حقائب", "إكسسوارات"];
+    return Array.from(new Set([...defaults, ...categories])).filter(Boolean);
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    return ["هوديز", "تيشرتات", "جواكيت", "حقائب", "إكسسوارات"];
+  }
 }

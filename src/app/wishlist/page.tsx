@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Heart, ShoppingBag, ArrowRight, Ghost, Loader2 } from "lucide-react";
+import { Heart, ArrowRight, Ghost, Loader2 } from "lucide-react";
 import Header from "@/components/layout/Header";
 import ProductCard from "@/components/product/ProductCard";
 import { useWishlistStore } from "@/store/useWishlistStore";
@@ -13,6 +13,7 @@ export default function WishlistPage() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 

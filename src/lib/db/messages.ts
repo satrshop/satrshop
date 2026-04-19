@@ -7,12 +7,24 @@ import {
   doc, 
   query, 
   orderBy, 
-  serverTimestamp 
+  serverTimestamp,
+  onSnapshot,
+  where
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { ContactMessage } from "@/types/models/message";
 
 const COLLECTION_NAME = "messages";
+
+/**
+ * Subscribes to the count of unread messages.
+ */
+export function subscribeToUnreadCount(callback: (count: number) => void) {
+  const q = query(collection(db, COLLECTION_NAME), where("isRead", "==", false));
+  return onSnapshot(q, (snapshot) => {
+    callback(snapshot.size);
+  });
+}
 
 export async function sendMessage(message: Omit<ContactMessage, "id" | "createdAt" | "isRead">) {
   try {

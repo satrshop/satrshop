@@ -5,12 +5,10 @@ import { getProducts, deleteProduct } from "@/lib/db/products";
 import { Product } from "@/types/models/product";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Package, 
   Plus, 
   Search, 
   Edit2, 
   Trash2, 
-  ExternalLink,
   Loader2,
   AlertCircle
 } from "lucide-react";
@@ -23,16 +21,17 @@ export default function AdminProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadProducts();
-  }, []);
-
   async function loadProducts() {
     setLoading(true);
-    const data = await getProducts();
+    const data = await getProducts(true);
     setProducts(data);
     setLoading(false);
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadProducts();
+  }, []);
 
   const handleDelete = async (id: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذه الخطوة.")) return;

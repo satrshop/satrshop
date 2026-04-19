@@ -5,11 +5,9 @@ import { getMessages, deleteMessage, markMessageAsRead } from "@/lib/db/messages
 import { ContactMessage } from "@/types/models/message";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
-  Mail, 
   Search, 
   Trash2, 
   Clock, 
-  User, 
   Phone, 
   Mail as MailIcon,
   Loader2,
@@ -24,16 +22,17 @@ export default function AdminMessagesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadMessages();
-  }, []);
-
   async function loadMessages() {
     setLoading(true);
     const data = await getMessages();
     setMessages(data);
     setLoading(false);
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadMessages();
+  }, []);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
