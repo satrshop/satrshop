@@ -88,14 +88,14 @@ export default function CartDrawer() {
                           <h4 className="font-bold text-primary-foreground line-clamp-1 text-sm">{item.name}</h4>
                           <div className="flex flex-wrap gap-2 mt-1">
                             {item.selectedColor && (
-                              <div className="flex items-center gap-1 bg-white/5 px-1.5 py-0.5 rounded-md border border-white/10">
+                              <div className="flex items-center gap-1 bg-primary-foreground/5 px-1.5 py-0.5 rounded-md border border-primary-foreground/10">
                                 <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.code }} />
-                                <span className="text-[10px] text-white/60">{item.selectedColor.name}</span>
+                                <span className="text-[10px] font-bold text-primary-foreground/80">{item.selectedColor.name}</span>
                               </div>
                             )}
                             {item.selectedSize && (
-                              <div className="flex items-center bg-white/5 px-1.5 py-0.5 rounded-md border border-white/10">
-                                <span className="text-[10px] text-white/60">{item.selectedSize}</span>
+                              <div className="flex items-center bg-primary-foreground/5 px-1.5 py-0.5 rounded-md border border-primary-foreground/10">
+                                <span className="text-[10px] font-bold text-primary-foreground/80">{item.selectedSize}</span>
                               </div>
                             )}
                           </div>
@@ -148,7 +148,7 @@ export default function CartDrawer() {
                 <Link 
                   href="/checkout" 
                   onClick={() => setIsOpen(false)}
-                  className="w-full bg-secondary text-primary-foreground py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2"
+                  className="w-full bg-secondary text-white py-4 rounded-xl font-bold text-lg hover:bg-[#a87d2b] transition-colors shadow-lg shadow-secondary/20 flex items-center justify-center gap-2"
                 >
                   إتمام الطلب
                 </Link>
