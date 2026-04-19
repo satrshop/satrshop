@@ -4,7 +4,7 @@ import { useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { CheckCircle2, Package, ShoppingBag, ArrowLeft, Home } from "lucide-react";
+import { CheckCircle2, ShoppingBag, Home } from "lucide-react";
 import Header from "@/components/layout/Header";
 
 import { useCartStore } from "@/store/useCartStore";
@@ -24,7 +24,7 @@ function SuccessContent() {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5, type: "spring" }}
-        className="bg-primary rounded-[3rem] p-8 sm:p-12 md:p-16 shadow-2xl border border-white/10 text-center relative overflow-hidden text-white"
+        className="bg-primary rounded-[3rem] p-8 sm:p-12 md:p-16 shadow-2xl border border-white/10 text-center relative overflow-hidden text-primary-foreground"
       >
         {/* Background decorative element */}
         <div className="absolute -top-24 -left-24 w-64 h-64 bg-secondary/5 rounded-full blur-3xl -z-10" />
@@ -43,7 +43,7 @@ function SuccessContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6"
+          className="text-3xl sm:text-4xl md:text-5xl font-black text-primary-foreground mb-6"
         >
           شكراً لثقتك بنا!
         </motion.h1>
@@ -52,7 +52,7 @@ function SuccessContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="text-lg sm:text-xl text-white/80 font-medium mb-10 max-w-lg mx-auto"
+          className="text-lg sm:text-xl text-primary-foreground/80 font-medium mb-10 max-w-lg mx-auto"
         >
           تم استلام طلبك بنجاح وسنقوم بالتواصل معك لتأكيد التوصيل في أقرب وقت ممكن.
         </motion.p>
@@ -62,10 +62,10 @@ function SuccessContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="bg-white/10 border border-white/20 rounded-2xl p-4 sm:p-6 mb-12 inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-4"
+            className="bg-primary-foreground/10 border border-primary-foreground/20 rounded-2xl p-4 sm:p-6 mb-12 inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-4"
           >
-            <span className="text-white/60 font-bold">رقم الطلب:</span>
-            <span className="text-secondary font-black text-lg select-all bg-white/10 px-4 py-1.5 rounded-lg border border-white/20">
+            <span className="text-primary-foreground/60 font-bold">رقم الطلب:</span>
+            <span className="text-secondary font-black text-lg select-all bg-primary-foreground/10 px-4 py-1.5 rounded-lg border border-primary-foreground/20">
               #{orderId}
             </span>
           </motion.div>
@@ -84,7 +84,7 @@ function SuccessContent() {
             </button>
           </Link>
           <Link href="/shop" className="w-full sm:w-auto">
-            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white/10 text-white border-2 border-white/20 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-white/20 transition-all">
+            <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-primary-foreground/10 text-primary-foreground border-2 border-primary-foreground/20 px-8 py-4 rounded-2xl font-bold text-lg hover:bg-primary-foreground/20 transition-all">
               العودة للمتجر
               <ShoppingBag size={20} />
             </button>
@@ -97,7 +97,7 @@ function SuccessContent() {
 
 export default function OrderSuccessPage() {
   return (
-    <div className="min-h-screen bg-[#FDF4E3]">
+    <div className="min-h-screen bg-background">
       <Header />
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-screen">

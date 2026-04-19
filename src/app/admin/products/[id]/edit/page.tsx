@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProductById, updateProduct } from "@/lib/db/products";
+import { getProductById, updateProduct, getCategories } from "@/lib/db/products";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
@@ -14,8 +14,11 @@ import {
   AlignLeft,
   Loader2,
   CheckCircle2,
-  AlertCircle,
-  PackageCheck
+  PackageCheck,
+  Palette,
+  Ruler,
+  Plus,
+  X
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -37,13 +40,29 @@ export default function EditProductPage() {
     rating: 5.0,
     isNew: false,
     stock: "10",
-    costPrice: ""
+    costPrice: "",
+    hasColors: false,
+    colors: [{ name: "", code: "#000000" }],
+    hasSizes: false,
+    sizes: ["S", "M", "L", "XL"]
   });
+
+  const [categories, setCategories] = useState<string[]>([]);
+  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [newCategory, setNewCategory] = useState("");
+
+  useEffect(() => {
+    async function fetchCats() {
+      const cats = await getCategories();
+      setCategories(cats);
+    }
+    fetchCats();
+  }, []);
 
   useEffect(() => {
     async function loadProduct() {
       if (typeof id !== 'string') return;
-      const data = await getProductById(id);
+      const data = await getProductById(id, true);
       if (data) {
         setFormData({
           name: data.name,
@@ -54,7 +73,11 @@ export default function EditProductPage() {
           rating: data.rating,
           isNew: data.isNew || false,
           stock: data.stock.toString(),
-          costPrice: (data.costPrice ?? 0).toString()
+          costPrice: (data.costPrice ?? 0).toString(),
+          hasColors: data.hasColors || false,
+          colors: data.colors || [{ name: "", code: "#000000" }],
+          hasSizes: data.hasSizes || false,
+          sizes: data.sizes || ["S", "M", "L", "XL"]
         });
       }
       setLoading(false);
@@ -68,10 +91,15 @@ export default function EditProductPage() {
 
     const productData = {
       ...formData,
+      category: isAddingNew ? newCategory : formData.category,
       price: parseFloat(formData.price),
       rating: parseFloat(formData.rating.toString()),
       stock: parseInt(formData.stock) || 10,
-      costPrice: parseFloat(formData.costPrice || "0")
+      costPrice: parseFloat(formData.costPrice || "0"),
+      hasColors: formData.hasColors,
+      colors: formData.hasColors ? formData.colors : [],
+      hasSizes: formData.hasSizes,
+      sizes: formData.hasSizes ? formData.sizes : []
     };
 
     const updated = await updateProduct(id as string, productData);
@@ -87,10 +115,41 @@ export default function EditProductPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target as any;
+    const target = e.target as HTMLInputElement;
+    const { name, value, type } = target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === "checkbox" ? (e.target as any).checked : value
+      [name]: type === "checkbox" ? target.checked : value
+    }));
+  };
+
+  const addColor = () => {
+    setFormData(prev => ({
+      ...prev,
+      colors: [...prev.colors, { name: "", code: "#000000" }]
+    }));
+  };
+
+  const removeColor = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleColorChange = (index: number, field: "name" | "code", value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      colors: prev.colors.map((c, i) => i === index ? { ...c, [field]: value } : c)
+    }));
+  };
+
+  const handleSizeToggle = (size: string) => {
+    setFormData(prev => ({
+      ...prev,
+      sizes: prev.sizes.includes(size) 
+        ? prev.sizes.filter(s => s !== size)
+        : [...prev.sizes, size]
     }));
   };
 
@@ -159,22 +218,43 @@ export default function EditProductPage() {
                 </div>
                 {/* Category */}
                 <div className="space-y-2">
-                  <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
-                    <Tag size={16} className="text-secondary" />
-                    التصنيف
-                  </label>
-                  <select 
-                    name="category"
-                    value={formData.category}
-                    onChange={handleChange}
-                    className="w-full bg-[#1e293b] border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all appearance-none"
-                  >
-                    <option value="هوديز">هوديز</option>
-                    <option value="تيشرتات">تيشرتات</option>
-                    <option value="جواكيت">جواكيت</option>
-                    <option value="حقائب">حقائب</option>
-                    <option value="إكسسوارات">إكسسوارات</option>
-                  </select>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
+                      <Tag size={16} className="text-secondary" />
+                      التصنيف
+                    </label>
+                    <button 
+                      type="button"
+                      onClick={() => setIsAddingNew(!isAddingNew)}
+                      className="text-[10px] font-black uppercase tracking-widest text-secondary hover:text-white transition-colors"
+                    >
+                      {isAddingNew ? "إلغاء المخصص" : "إضافة تصنيف جديد"}
+                    </button>
+                  </div>
+                  
+                  {isAddingNew ? (
+                    <motion.input 
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      required
+                      type="text"
+                      placeholder="اسم التصنيف الجديد..."
+                      value={newCategory}
+                      onChange={(e) => setNewCategory(e.target.value)}
+                      className="w-full bg-white/5 border border-secondary/50 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
+                    />
+                  ) : (
+                    <select 
+                      name="category"
+                      value={formData.category}
+                      onChange={handleChange}
+                      className="w-full bg-[#1e293b] border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all appearance-none"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>{cat}</option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
 
@@ -214,6 +294,113 @@ export default function EditProductPage() {
                   className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
                 />
               </div>
+
+              {/* Variants Toggles */}
+              <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/5">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox"
+                      name="hasColors"
+                      checked={formData.hasColors}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.hasColors ? 'bg-secondary' : 'bg-white/10'}`} />
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${formData.hasColors ? 'translate-x-6' : ''}`} />
+                  </div>
+                  <span className="text-white/80 font-bold text-sm">تفعيل الألوان</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox"
+                      name="hasSizes"
+                      checked={formData.hasSizes}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.hasSizes ? 'bg-secondary' : 'bg-white/10'}`} />
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${formData.hasSizes ? 'translate-x-6' : ''}`} />
+                  </div>
+                  <span className="text-white/80 font-bold text-sm">تفعيل المقاسات</span>
+                </label>
+              </div>
+
+              {/* Colors Management */}
+              {formData.hasColors && (
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                  <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
+                    <Palette size={16} className="text-secondary" />
+                    إدارة الألوان
+                  </label>
+                  <div className="space-y-3">
+                    {formData.colors.map((color, index) => (
+                      <div key={index} className="flex gap-3 items-center">
+                        <input 
+                          type="text"
+                          placeholder="اسم اللون (مثلاً: أحمر)"
+                          value={color.name}
+                          onChange={(e) => handleColorChange(index, "name", e.target.value)}
+                          className="flex-1 bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white text-sm focus:outline-none focus:border-secondary transition-all"
+                        />
+                        <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/10">
+                          <input 
+                            type="color"
+                            value={color.code}
+                            onChange={(e) => handleColorChange(index, "code", e.target.value)}
+                            className="absolute inset-0 w-[200%] h-[200%] -translate-x-1/4 -translate-y-1/4 cursor-pointer"
+                          />
+                        </div>
+                        {formData.colors.length > 1 && (
+                          <button 
+                            type="button"
+                            onClick={() => removeColor(index)}
+                            className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
+                          >
+                            <X size={18} />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                    <button 
+                      type="button"
+                      onClick={addColor}
+                      className="w-full py-3 bg-white/5 border border-dashed border-white/20 rounded-xl text-white/60 text-sm font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+                    >
+                      <Plus size={16} />
+                      إضافة لون آخر
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Sizes Management */}
+              {formData.hasSizes && (
+                <div className="space-y-4 pt-4 border-t border-white/5">
+                  <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
+                    <Ruler size={16} className="text-secondary" />
+                    إدارة المقاسات
+                  </label>
+                  <div className="flex flex-wrap gap-3">
+                    {["XS", "S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"].map((size) => (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => handleSizeToggle(size)}
+                        className={`px-6 py-2.5 rounded-xl font-bold text-sm transition-all border-2 ${
+                          formData.sizes.includes(size)
+                            ? "bg-secondary/20 border-secondary text-secondary"
+                            : "bg-white/5 border-white/5 text-white/40 hover:bg-white/10 hover:border-white/10"
+                        }`}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Image Upload */}
               <div className="space-y-4">
@@ -278,7 +465,7 @@ export default function EditProductPage() {
               )}
             </div>
             <div className="space-y-4 text-right">
-              <p className="text-secondary font-black text-sm">{formData.category}</p>
+              <p className="text-secondary font-black text-sm">{isAddingNew ? (newCategory || "تصنيف جديد") : formData.category}</p>
               <h4 className="text-2xl font-black">{formData.name}</h4>
               <p className="text-3xl font-black text-white/90">{parseFloat(formData.price || "0").toFixed(2)} د.ا</p>
             </div>

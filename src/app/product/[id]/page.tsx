@@ -50,7 +50,7 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#FDF4E3]">
+      <div className="min-h-screen bg-background">
         <Header />
         <div className="text-center py-40 px-4">
           <h1 className="text-3xl font-black text-primary mb-4">المنتج غير موجود</h1>
@@ -68,7 +68,7 @@ export default async function ProductPage({ params }: Props) {
     .slice(0, 4);
 
   return (
-    <div className="min-h-screen bg-[#FDF4E3]">
+    <div className="min-h-screen bg-background">
       <Header />
       <Suspense fallback={
         <div className="flex items-center justify-center min-h-[60vh]">

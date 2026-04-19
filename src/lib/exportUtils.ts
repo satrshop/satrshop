@@ -10,6 +10,7 @@ export function exportToCSV<T extends object>(data: T[], filename: string, heade
   // Create the data rows
   const rows = data.map(item => {
     return headers.map(h => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const value = h.key.split('.').reduce((obj: any, key) => obj?.[key], item) ?? '';
       
       // Handle values that might contain commas or newlines

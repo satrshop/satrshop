@@ -6,6 +6,7 @@ import { auth } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { subscribeToUnreadCount } from "@/lib/db/messages";
 import { 
   LayoutDashboard, 
   Package, 
@@ -23,10 +24,18 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
+
+  useEffect(() => {
+    const unsubscribe = subscribeToUnreadCount((count) => {
+      setUnreadCount(count);
+    });
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -41,7 +50,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           return;
         }
 
-        setUser(user);
+
       } else if (pathname !== "/admin/login") {
         router.push("/admin/login");
       }
@@ -77,9 +86,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex">
+    <div className="min-h-screen bg-[#0f172a] text-white flex print:bg-white print:text-black print:block">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex w-72 flex-col bg-[#1e293b] border-l border-white/5 sticky top-0 h-screen">
+      <aside className="hidden lg:flex w-72 flex-col bg-[#1e293b] border-l border-white/5 sticky top-0 h-screen print:hidden">
         <div className="p-8 border-b border-white/5 flex flex-col items-center">
           <Link href="/">
             <Image src="/images/whitelogo.png" alt="Satr Shop" width={100} height={32} className="w-auto h-auto mb-2" />
@@ -114,8 +123,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                     />
                   )}
                   <item.icon size={22} className={isActive ? "scale-110" : "opacity-30 group-hover:opacity-100"} />
-                  <span className="tracking-wide text-[15px]">{item.name}</span>
-                  {isActive && <ChevronLeft size={18} className="mr-auto rotate-180 opacity-50" />}
+                  <span className="tracking-wide text-[15px] flex-1">{item.name}</span>
+                  {item.href === "/admin/messages" && unreadCount > 0 && (
+                    <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse shadow-lg shadow-rose-500/20">
+                      {unreadCount}
+                    </span>
+                  )}
+                  {isActive && <ChevronLeft size={18} className="mr-0 rotate-180 opacity-50" />}
                 </motion.div>
               </Link>
             );
@@ -136,7 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar - Mobile */}
-        <header className="lg:hidden h-20 bg-[#1e293b] border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-40">
+        <header className="lg:hidden h-20 bg-[#1e293b] border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-40 print:hidden">
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white/80">
             <Menu size={24} />
           </button>
@@ -145,7 +159,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-6 sm:p-10 lg:p-12">
+        <main className="flex-1 p-6 sm:p-10 lg:p-12 print:p-0">
           {children}
         </main>
       </div>
@@ -182,7 +196,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <div className={`flex items-center justify-end gap-4 px-6 py-4 rounded-2xl font-black transition-all ${
                         isActive ? "bg-secondary text-primary shadow-lg" : "text-white/40"
                       }`}>
-                        <span className="text-lg">{item.name}</span>
+                        {item.href === "/admin/messages" && unreadCount > 0 && (
+                          <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black shadow-lg shadow-rose-500/20">
+                            {unreadCount}
+                          </span>
+                        )}
+                        <span className="text-lg flex-1">{item.name}</span>
                         <item.icon size={24} className={isActive ? "" : "opacity-30"} />
                       </div>
                     </Link>

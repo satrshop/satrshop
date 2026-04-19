@@ -4,28 +4,43 @@
 
 :root {
   --background: #ffe9c5;
-  --foreground: #2C6A87; /* Satr Teal for all text */
-  --primary: #2C6A87; /* Satr Teal */
+  --foreground: #2C6A87;
+  /* Satr Teal for all text */
+  --primary: #2C6A87;
+  /* Satr Teal */
   --primary-foreground: #ffffff;
-  --secondary: #CA9837; /* Satr Gold */
+  --secondary: #CA9837;
+  /* Satr Gold */
   --secondary-foreground: #ffffff;
   --card: #ffffff;
-  --border: #4d8299; /* Light Teal borders */
-  --muted: rgba(44, 106, 135, 0.08); /* Faint teal background for tags */
-  --muted-foreground: #5a8ba1; /* Lighter Teal for secondary text */
+  --border: #4d8299;
+  /* Light Teal borders */
+  --muted: rgba(44, 106, 135, 0.08);
+  /* Faint teal background for tags */
+  --muted-foreground: #5a8ba1;
+  /* Lighter Teal for secondary text */
 }
 
 .dark {
-  --background: #2C6A87; /* Satr Teal as Background */
-  --foreground: #ffe9c5; /* Beige text */
-  --primary: #ffe9c5; /* Beige is primary */
-  --primary-foreground: #2C6A87; /* Inverse text */
-  --secondary: #CA9837; /* Satr Gold stays the same */
+  --background: #2C6A87;
+  /* Satr Teal as Background */
+  --foreground: #ffe9c5;
+  /* Beige text */
+  --primary: #ffe9c5;
+  /* Beige is primary */
+  --primary-foreground: #2C6A87;
+  /* Inverse text */
+  --secondary: #CA9837;
+  /* Satr Gold stays the same */
   --secondary-foreground: #ffffff;
-  --card: #1f5066; /* Deep teal for cards */
-  --border: rgba(255, 233, 197, 0.2); /* Translucent beige borders */
-  --muted: rgba(255, 233, 197, 0.1); /* Faint beige background for tags */
-  --muted-foreground: #e6d2b1; /* Lighter beige for secondary text */
+  --card: #1f5066;
+  /* Deep teal for cards */
+  --border: rgba(255, 233, 197, 0.2);
+  /* Translucent beige borders */
+  --muted: rgba(255, 233, 197, 0.1);
+  /* Faint beige background for tags */
+  --muted-foreground: #e6d2b1;
+  /* Lighter beige for secondary text */
 }
 
 @theme inline {
@@ -39,7 +54,7 @@
   --color-border: var(--border);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
-  
+
   --font-sans: var(--font-mada), system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), monospace;
 }
@@ -60,13 +75,43 @@ body {
 
 /* Improve touch targets on mobile */
 @media (max-width: 640px) {
-  button, a, [role="button"] {
+
+  button,
+  a,
+  [role="button"] {
     min-height: 44px;
     min-width: 44px;
   }
-  
+
   /* Prevent zoom on double-tap for interactive elements */
-  input, select, textarea {
+  input,
+  select,
+  textarea {
     font-size: 16px;
   }
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--secondary);
+  border-radius: 10px;
+  opacity: 0.5;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--secondary) transparent;
 }

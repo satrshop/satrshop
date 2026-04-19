@@ -89,7 +89,11 @@ export async function createOrder(orderData: Omit<Order, "id" | "createdAt" | "s
       status: "pending",
       createdAt: serverTimestamp(),
     };
-    const docRef = await addDoc(ordersRef, newOrder);
+    
+    // Sanitize data to remove undefined values which Firebase doesn't support
+    const sanitizedOrder = sanitizeFirestoreData(newOrder);
+    
+    const docRef = await addDoc(ordersRef, sanitizedOrder);
 
     // 3. Decrement stock for all items
     await decrementStockForItems(
@@ -116,4 +120,28 @@ export async function getOrderById(id: string): Promise<Order | null> {
     console.error("Error fetching order:", error);
     return null;
   }
+}
+
+/**
+ * Recursively removes undefined values from an object to make it safe for Firestore.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function sanitizeFirestoreData(data: any): any {
+  if (Array.isArray(data)) {
+    return data.map(v => sanitizeFirestoreData(v));
+  }
+  
+  if (data !== null && typeof data === 'object' && !(data instanceof Date) && !(data.constructor?.name === 'Timestamp') && !(data.constructor?.name === 'FieldValue')) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const newObj: any = {};
+    Object.keys(data).forEach(key => {
+      const val = sanitizeFirestoreData(data[key]);
+      if (val !== undefined) {
+        newObj[key] = val;
+      }
+    });
+    return newObj;
+  }
+  
+  return data;
 }

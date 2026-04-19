@@ -37,7 +37,7 @@ export default function ShippingPage() {
 
           <h3 className="text-2xl font-bold text-[#2C6A87] mb-4 flex items-center gap-3"><Package className="text-secondary" /> تكلفة الشحن</h3>
           <p className="text-[#2C6A87]/80 font-medium mb-8">
-            تكلفة الشحن الثابتة لجميع محافظات الأردن هي 3.00 د.ا ونوفر <strong>شحناً مجانياً</strong> للطلبات التي تزيد قيمتها عن 35.00 د.ا تلقائياً عند الدفع.
+            تكلفة الشحن الثابتة لجميع محافظات الأردن هي 2.50 د.ا ونوفر <strong>شحناً مجانياً</strong> للطلبات التي تزيد قيمتها عن 35.00 د.ا تلقائياً عند الدفع.
           </p>
 
           <h3 className="text-2xl font-bold text-[#2C6A87] mb-4 flex items-center gap-3"><Truck className="text-secondary" /> شركات الشحن المعتمدة</h3>

@@ -44,7 +44,7 @@ export default function AdminLoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       localStorage.setItem("adminSessionStart", Date.now().toString());
       router.push("/admin");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Login failed:", err);
       setError("فشل تسجيل الدخول. يرجى التأكد من البريد الإلكتروني وكلمة المرور.");
     } finally {

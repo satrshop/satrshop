@@ -5,7 +5,6 @@ import { getProducts, updateStock } from "@/lib/db/products";
 import { Product } from "@/types/models/product";
 import { motion } from "framer-motion";
 import { 
-  Warehouse, 
   Search, 
   Loader2, 
   Save, 
@@ -25,6 +24,8 @@ export default function InventoryPage() {
   const [editedStocks, setEditedStocks] = useState<Record<string, number>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [isSavingAll, setIsSavingAll] = useState(false);
+  const [allSaved, setAllSaved] = useState(false);
 
   useEffect(() => {
     loadProducts();
@@ -32,7 +33,7 @@ export default function InventoryPage() {
 
   async function loadProducts() {
     setLoading(true);
-    const data = await getProducts();
+    const data = await getProducts(true);
     setProducts(data);
     setLoading(false);
   }
@@ -62,6 +63,29 @@ export default function InventoryPage() {
     setSavingId(null);
   };
 
+  const handleSaveAll = async () => {
+    const editIds = Object.keys(editedStocks);
+    if (editIds.length === 0) return;
+
+    setIsSavingAll(true);
+    try {
+      const promises = editIds.map(id => updateStock(id, editedStocks[id]));
+      await Promise.all(promises);
+      
+      setProducts(prev => prev.map(p => 
+        editedStocks[p.id] !== undefined ? { ...p, stock: editedStocks[p.id] } : p
+      ));
+      setEditedStocks({});
+      setAllSaved(true);
+      setTimeout(() => setAllSaved(false), 3000);
+    } catch (error) {
+      console.error("Bulk save error:", error);
+      alert("حدث خطأ أثناء حفظ التعديلات.");
+    } finally {
+      setIsSavingAll(false);
+    }
+  };
+
   const filteredProducts = products.filter(p =>
     p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.category.toLowerCase().includes(searchQuery.toLowerCase())
@@ -86,9 +110,35 @@ export default function InventoryPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-3xl font-black mb-2">إدارة المخزون</h1>
-        <p className="text-white/60 font-bold">تتبع وتحديث الكميات المتاحة لكل منتج.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black mb-2">إدارة المخزون</h1>
+          <p className="text-white/60 font-bold">تتبع وتحديث الكميات المتاحة لكل منتج.</p>
+        </div>
+
+        {Object.keys(editedStocks).length > 0 && (
+          <motion.button
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            onClick={handleSaveAll}
+            disabled={isSavingAll}
+            className="bg-secondary text-primary px-8 py-4 rounded-2xl font-black flex items-center gap-3 hover:bg-white transition-all shadow-xl shadow-secondary/20 disabled:opacity-50"
+          >
+            {isSavingAll ? (
+              <Loader2 size={24} className="animate-spin" />
+            ) : allSaved ? (
+              <>
+                <CheckCircle2 size={24} />
+                تم حفظ الكل بنجاح!
+              </>
+            ) : (
+              <>
+                <Save size={24} />
+                حفظ تعديلات الكل ({Object.keys(editedStocks).length})
+              </>
+            )}
+          </motion.button>
+        )}
       </div>
 
       {/* Stats Cards */}

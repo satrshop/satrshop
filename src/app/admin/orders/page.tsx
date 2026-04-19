@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { getOrders, updateOrderStatus } from "@/lib/db/orders";
 import { Order } from "@/types/models/order";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,7 +8,6 @@ import {
   ShoppingBag, 
   Search, 
   Filter, 
-  ExternalLink,
   Loader2,
   CheckCircle2,
   Clock,
@@ -18,10 +17,12 @@ import {
   MessageCircle,
   FileSpreadsheet,
   XCircle,
-  CheckCircle,
-  ThumbsUp
+  ThumbsUp,
+  Printer,
+  Calendar
 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { exportToCSV } from "@/lib/exportUtils";
 
 export default function AdminOrdersPage() {
@@ -29,15 +30,23 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedMonth, setSelectedMonth] = useState("");
+  const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
+  const [isExportingSheets, setIsExportingSheets] = useState(false);
+  const [pickerYear, setPickerYear] = useState(new Date().getFullYear());
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeUpdateId, setActiveUpdateId] = useState<string | null>(null);
   const filterRef = useRef<HTMLDivElement>(null);
+  const monthPickerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (filterRef.current && !filterRef.current.contains(event.target as Node)) {
         setIsFilterOpen(false);
+      }
+      if (monthPickerRef.current && !monthPickerRef.current.contains(event.target as Node)) {
+        setIsMonthPickerOpen(false);
       }
       if (activeUpdateId) {
         setActiveUpdateId(null);
@@ -47,16 +56,25 @@ export default function AdminOrdersPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [activeUpdateId]);
 
-  useEffect(() => {
-    loadOrders();
-  }, []);
-
   async function loadOrders() {
     setLoading(true);
     const data = await getOrders();
     setOrders(data);
     setLoading(false);
   }
+
+  useEffect(() => {
+     
+    loadOrders();
+  }, []);
+
+  const statusCounts = useMemo(() => {
+    return orders.reduce((acc, order) => {
+      acc[order.status] = (acc[order.status] || 0) + 1;
+      acc['all'] = (acc['all'] || 0) + 1;
+      return acc;
+    }, { all: 0, pending: 0, confirmed: 0, shipping: 0, completed: 0, cancelled: 0 } as Record<string, number>);
+  }, [orders]);
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -111,6 +129,102 @@ export default function AdminOrdersPage() {
     exportToCSV(filteredOrders, "orders", headers);
   };
 
+  const handleMonthlyExport = () => {
+    if (!selectedMonth) {
+      alert("الرجاء اختيار الشهر أولاً");
+      return;
+    }
+    
+    const [year, month] = selectedMonth.split("-").map(Number);
+    
+    const monthlyOrders = orders.filter(o => {
+      if (!o.createdAt) return false;
+      const orderDate = new Date(o.createdAt.seconds * 1000);
+      return orderDate.getFullYear() === year && (orderDate.getMonth() + 1) === month;
+    });
+
+    if (monthlyOrders.length === 0) {
+      alert("لا توجد طلبات في هذا الشهر.");
+      return;
+    }
+
+    const exportData = monthlyOrders.map(order => ({
+      id: order.id,
+      total: order.total,
+      date: order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"
+    }));
+
+    const headers = [
+      { key: "id", label: "رقم الطلب" },
+      { key: "total", label: "قيمة الطلب" },
+      { key: "date", label: "تاريخ الطلب" }
+    ];
+
+    exportToCSV(exportData, `تقرير_طلبات_${selectedMonth}`, headers);
+  };
+
+  const handleGoogleSheetsExport = async () => {
+    if (!selectedMonth) {
+      alert("الرجاء اختيار الشهر أولاً");
+      return;
+    }
+    
+    setIsExportingSheets(true);
+
+    try {
+      const [year, month] = selectedMonth.split("-").map(Number);
+      
+      const monthlyOrders = orders.filter(o => {
+        if (!o.createdAt) return false;
+        const orderDate = new Date(o.createdAt.seconds * 1000);
+        return orderDate.getFullYear() === year && (orderDate.getMonth() + 1) === month;
+      });
+
+      if (monthlyOrders.length === 0) {
+        alert("لا توجد طلبات في هذا الشهر.");
+        setIsExportingSheets(false);
+        return;
+      }
+
+      const exportData = monthlyOrders.map(order => ({
+        id: order.id,
+        total: order.total,
+        date: order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"
+      }));
+
+      const headers = [
+        { key: "id", label: "رقم الطلب" },
+        { key: "total", label: "قيمة الطلب" },
+        { key: "date", label: "تاريخ الطلب" }
+      ];
+
+      const response = await fetch("/api/export/sheets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title: `تقرير طلبات - ${selectedMonth}`,
+          headers,
+          data: exportData
+        })
+      });
+
+      const resData = await response.json();
+
+      if (response.ok && resData.url) {
+        window.open(resData.url, "_blank");
+      } else {
+        alert("فشل في إنشاء الجداول: " + (resData.error || "مجهول"));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("حدث خطأ في النظام أثناء التصدير.");
+    } finally {
+      setIsExportingSheets(false);
+    }
+  };
+
   const getWhatsAppLink = (phone: string) => {
     // Remove any non-numeric characters
     let cleanPhone = phone.replace(/\D/g, '');
@@ -129,18 +243,59 @@ export default function AdminOrdersPage() {
         <p className="text-white/60 font-bold text-lg">متابعة طلبات الزبائن وتحديث حالات الشحن والتحصيل.</p>
       </div>
 
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        {[
+          { id: 'all', label: 'إجمالي الطلبات', icon: ShoppingBag, color: 'text-white', bgColor: 'bg-white/5', count: statusCounts.all },
+          { id: 'pending', label: 'قيد الانتظار', icon: Clock, color: 'text-amber-500', bgColor: 'bg-amber-500/10', count: statusCounts.pending },
+          { id: 'confirmed', label: 'تم التأكيد', icon: ThumbsUp, color: 'text-indigo-400', bgColor: 'bg-indigo-500/10', count: statusCounts.confirmed },
+          { id: 'shipping', label: 'جاري الشحن', icon: Truck, color: 'text-blue-500', bgColor: 'bg-blue-500/10', count: statusCounts.shipping },
+          { id: 'completed', label: 'تم التوصيل', icon: CheckCircle2, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', count: statusCounts.completed },
+          { id: 'cancelled', label: 'ملغي', icon: XCircle, color: 'text-red-500', bgColor: 'bg-red-500/10', count: statusCounts.cancelled },
+        ].map((stat) => (
+          <motion.button
+            key={stat.id}
+            whileHover={{ y: -4, scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => setStatusFilter(stat.id)}
+            className={`p-5 rounded-3xl border transition-all text-right relative overflow-hidden group ${
+              statusFilter === stat.id 
+                ? 'bg-secondary/20 border-secondary shadow-lg shadow-secondary/10' 
+                : `${stat.bgColor} border-white/5 hover:border-white/20`
+            }`}
+          >
+            <div className={`absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity ${stat.color}`}>
+              <stat.icon size={80} />
+            </div>
+            <div className="relative z-10 flex flex-col gap-1">
+              <div className="flex items-center gap-2">
+                <stat.icon size={16} className={stat.color} />
+                <span className="text-[10px] font-black uppercase tracking-widest text-white/40 group-hover:text-white/60 transition-colors">
+                  {stat.label}
+                </span>
+              </div>
+              <span className={`text-3xl font-black ${statusFilter === stat.id ? 'text-secondary' : 'text-white'}`}>
+                {stat.count}
+              </span>
+            </div>
+          </motion.button>
+        ))}
+      </div>
+
       {/* Filters */}
-      <div className="flex flex-col md:flex-row md:items-center gap-4">
-        <div className="flex-1 bg-[#1e293b] p-4 rounded-2xl border border-white/5 flex items-center gap-4">
-          <Search className="text-white/20 mr-2" size={20} />
-          <input 
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="البحث برقم الطلب، اسم العميل، أو رقم الهاتف..."
-            className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder:text-white/20 font-bold"
-          />
-        </div>
+      <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+        {/* Search & Status */}
+        <div className="flex flex-col md:flex-row md:items-center gap-4">
+          <div className="md:w-80 bg-[#1e293b] p-4 rounded-2xl border border-white/5 flex items-center gap-4 focus-within:border-secondary/50 transition-all shadow-sm">
+            <Search className="text-white/20 mr-2" size={20} />
+            <input 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="البحث برقم الطلب، العميل، الهاتف..."
+              className="flex-1 bg-transparent border-none text-white focus:outline-none placeholder:text-white/20 font-bold"
+            />
+          </div>
         <div className="md:w-48 relative" ref={filterRef}>
           <button 
             onClick={() => setIsFilterOpen(!isFilterOpen)}
@@ -191,13 +346,113 @@ export default function AdminOrdersPage() {
             )}
           </AnimatePresence>
         </div>
-        <button 
-          onClick={handleExport}
-          className="bg-secondary/10 hover:bg-secondary text-secondary hover:text-primary transition-all p-4 rounded-2xl border border-secondary/20 font-black flex items-center justify-center gap-2 group"
-        >
-          <FileSpreadsheet size={20} className="group-hover:scale-110 transition-transform" />
-          <span>تصدير لإكسل</span>
-        </button>
+        </div>
+        
+        {/* Exports */}
+        <div className="flex flex-col xl:flex-row items-center gap-4 border-t xl:border-t-0 border-white/5 pt-4 xl:pt-0 mt-2 xl:mt-0 w-full xl:w-auto">
+          {/* Monthly Export Container */}
+          <div className="flex flex-col sm:flex-row items-center bg-[#1e293b] p-1.5 rounded-2xl border border-white/10 hover:border-secondary/40 transition-all shadow-lg shadow-black/20 w-full xl:w-auto relative" ref={monthPickerRef}>
+            <div 
+              onClick={() => setIsMonthPickerOpen(!isMonthPickerOpen)}
+              className="relative flex items-center justify-between gap-3 px-4 w-full sm:w-44 sm:border-l border-white/10 group cursor-pointer h-11 mb-2 sm:mb-0"
+            >
+              <Calendar size={18} className={`transition-transform group-hover:scale-110 ${isMonthPickerOpen || selectedMonth ? 'text-secondary' : 'text-white/40'}`} />
+              <div className="flex-1 text-center mr-2">
+                <span className={`font-black text-sm uppercase tracking-wider ${selectedMonth ? 'text-white' : 'text-white/40'}`}>
+                  {selectedMonth 
+                    ? new Date(selectedMonth + "-01").toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' })
+                    : 'اختر الشهر'}
+                </span>
+              </div>
+            </div>
+            
+            <AnimatePresence>
+              {isMonthPickerOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  className="absolute top-full mt-3 right-0 w-72 bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl z-[100] overflow-hidden backdrop-blur-xl p-4"
+                >
+                  <div className="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+                    <button 
+                      onClick={() => setPickerYear(prev => prev - 1)}
+                      className="p-2 hover:bg-white/5 rounded-lg text-white/60 hover:text-white transition-colors"
+                    >
+                      <ChevronDown size={18} className="transform rotate-90" />
+                    </button>
+                    <span className="font-black text-secondary text-lg">{pickerYear}</span>
+                    <button 
+                      onClick={() => setPickerYear(prev => prev + 1)}
+                      className="p-2 hover:bg-white/5 rounded-lg text-white/60 hover:text-white transition-colors"
+                      disabled={pickerYear >= new Date().getFullYear()}
+                    >
+                      <ChevronDown size={18} className={`transform -rotate-90 ${pickerYear >= new Date().getFullYear() ? 'opacity-30' : ''}`} />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map(month => {
+                      const monthStr = month.toString().padStart(2, '0');
+                      const val = `${pickerYear}-${monthStr}`;
+                      const isSelected = selectedMonth === val;
+                      const monthName = new Date(`${val}-01`).toLocaleDateString('ar-EG', { month: 'short' });
+                      
+                      return (
+                        <button
+                          key={month}
+                          onClick={() => {
+                            setSelectedMonth(val);
+                            setIsMonthPickerOpen(false);
+                          }}
+                          className={`py-3 rounded-xl font-black text-sm transition-all ${
+                            isSelected 
+                              ? 'bg-secondary text-primary shadow-lg shadow-secondary/20' 
+                              : 'bg-white/5 text-white/70 hover:bg-white/10 hover:text-white'
+                          }`}
+                        >
+                          {monthName}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button 
+                onClick={handleMonthlyExport}
+                disabled={!selectedMonth}
+                title="تصدير الشهر بصيغة إكسل CSV"
+                className="bg-secondary text-primary hover:bg-white transition-all px-4 h-11 w-full sm:w-auto rounded-xl font-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-secondary disabled:cursor-not-allowed flex-1"
+              >
+                <FileSpreadsheet size={18} />
+                <span className="whitespace-nowrap">إكسل</span>
+              </button>
+              <button 
+                onClick={handleGoogleSheetsExport}
+                disabled={!selectedMonth || isExportingSheets}
+                title="تصدير الشهر إلى Google Sheets"
+                className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all px-4 h-11 w-full sm:w-auto rounded-xl font-black flex items-center justify-center gap-2 disabled:opacity-50 disabled:hover:bg-emerald-500/10 disabled:hover:text-emerald-500 disabled:cursor-not-allowed border border-emerald-500/20 flex-1"
+              >
+                {isExportingSheets ? <Loader2 size={18} className="animate-spin" /> : <FileSpreadsheet size={18} />}
+                <span className="whitespace-nowrap">جوجل شيت</span>
+              </button>
+            </div>
+          </div>
+          
+          {/* Current Search Export */}
+          <button 
+            onClick={handleExport}
+            className="bg-[#1e293b] hover:bg-white/10 text-white/70 hover:text-white transition-all px-5 h-14 rounded-2xl border border-white/10 hover:border-white/20 font-bold flex items-center justify-center gap-3 w-full xl:w-auto shadow-lg"
+          >
+            <FileSpreadsheet size={20} className="text-white/50" />
+            <div className="flex flex-col items-start gap-0.5">
+              <span className="text-sm">تصدير القائمة</span>
+              <span className="text-[10px] text-white/40 font-normal">حسب الفلترة والبحث</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Orders Table */}
@@ -369,10 +624,23 @@ export default function AdminOrdersPage() {
                                           <div key={idx} className="bg-white/5 p-4 rounded-3xl flex items-center justify-between border border-white/5 hover:border-white/10 transition-colors">
                                             <div className="flex items-center gap-4">
                                               <div className="relative w-16 h-16 rounded-2xl overflow-hidden bg-white/5 border border-white/10 ring-4 ring-black/20">
-                                                <img src={item.image} alt={item.name} className="object-cover w-full h-full" />
+                                                <Image src={item.image} alt={item.name} fill sizes="64px" className="object-cover" />
                                               </div>
                                               <div>
                                                 <p className="font-bold text-white text-lg">{item.name}</p>
+                                                <div className="flex flex-wrap gap-2 mt-1">
+                                                  {(item as { selectedColor?: { code: string, name: string } }).selectedColor && (
+                                                    <div className="flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded-md border border-white/10">
+                                                      <div className="w-2 h-2 rounded-full" style={{ backgroundColor: (item as { selectedColor?: { code: string, name: string } }).selectedColor?.code }} />
+                                                      <span className="text-[10px] text-white/60">{(item as { selectedColor?: { code: string, name: string } }).selectedColor?.name}</span>
+                                                    </div>
+                                                  )}
+                                                  {(item as { selectedSize?: string }).selectedSize && (
+                                                    <div className="flex items-center bg-white/10 px-2 py-0.5 rounded-md border border-white/10">
+                                                      <span className="text-[10px] text-white/60">{(item as { selectedSize?: string }).selectedSize}</span>
+                                                    </div>
+                                                  )}
+                                                </div>
                                                 <div className="flex items-center gap-2 mt-0.5">
                                                   <span className="text-xs text-secondary font-black">الكمية: {item.quantity}</span>
                                                   <span className="w-1 h-1 rounded-full bg-white/10" />
@@ -409,6 +677,15 @@ export default function AdminOrdersPage() {
                                             </div>
                                           )}
                                           <div className="pt-6 border-t border-white/5 space-y-3">
+                                            <Link 
+                                              href={`/admin/orders/${order.id}/invoice`}
+                                              target="_blank"
+                                              className="w-full flex items-center justify-center gap-2 bg-secondary text-primary py-4 rounded-2xl font-black hover:bg-white transition-all shadow-xl shadow-secondary/10 mb-2"
+                                            >
+                                              <Printer size={20} />
+                                              طباعة الفاتورة
+                                            </Link>
+                                            
                                             {order.customer.isZaytoonah && (
                                               <div className="flex items-center justify-between bg-secondary/10 p-4 rounded-2xl border border-secondary/20 mb-2">
                                                 <span className="text-secondary font-bold text-xs">نوع التوصيل</span>

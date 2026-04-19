@@ -5,11 +5,10 @@ import {
   Upload, 
   X, 
   CheckCircle2, 
-  Loader2, 
   RefreshCw,
   AlertCircle
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import Image from "next/image";
 
 interface ImageUploadProps {
@@ -18,7 +17,7 @@ interface ImageUploadProps {
 }
 
 export default function ImageUpload({ onUploadComplete, initialValue }: ImageUploadProps) {
-  const [file, setFile] = useState<File | null>(null);
+  const [, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(initialValue || null);
   const [progress, setProgress] = useState(0);
   const [uploading, setUploading] = useState(false);
