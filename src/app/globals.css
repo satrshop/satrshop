@@ -110,8 +110,33 @@ body {
   background: var(--primary);
 }
 
+/* Force light mode variables even if dark mode is active on html tag */
+.light {
+  --background: #ffe9c5;
+  --foreground: #2C6A87;
+  --primary: #2C6A87;
+  --primary-foreground: #ffffff;
+  --secondary: #CA9837;
+  --secondary-foreground: #ffffff;
+  --card: #ffffff;
+  --border: #4d8299;
+  --muted: rgba(44, 106, 135, 0.08);
+  --muted-foreground: #5a8ba1;
+}
+
 /* For Firefox */
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: var(--secondary) transparent;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

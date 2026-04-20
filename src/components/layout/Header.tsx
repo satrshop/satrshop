@@ -124,7 +124,7 @@ export default function Header() {
   const navLinks = [
     { name: "الرئيسية", href: "/" },
     { name: "المتجر", href: "/shop" },
-    { name: "مجموعاتنا", href: "/collections" },
+    { name: "الأقسام", href: "/collections" },
     { name: "الأسئلة الشائعة", href: "/faq" },
     { name: "تواصل معنا", href: "/contact" },
   ];

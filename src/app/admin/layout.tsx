@@ -21,6 +21,7 @@ import {
   Warehouse
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import AdminHelp from "@/components/admin/AdminHelp";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
@@ -86,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-[#0f172a] text-white flex print:bg-white print:text-black print:block">
+    <div className="light min-h-screen bg-[#0f172a] text-white flex print:bg-white print:text-black print:block selection:bg-secondary selection:text-primary">
       {/* Sidebar - Desktop */}
       <aside className="hidden lg:flex w-72 flex-col bg-[#1e293b] border-l border-white/5 sticky top-0 h-screen print:hidden">
         <div className="p-8 border-b border-white/5 flex flex-col items-center">
@@ -163,6 +164,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {children}
         </main>
       </div>
+
+      <AdminHelp />
 
       {/* Sidebar - Mobile Drawer */}
       <AnimatePresence>
