@@ -70,7 +70,7 @@ export default function HeroSection() {
                   className="h-12 sm:h-14 w-full sm:w-auto px-6 sm:px-8 rounded-2xl font-bold text-lg sm:text-xl text-primary dark:text-white border-2 border-primary/30 dark:border-white/30 flex items-center justify-center gap-3 transition-all hover:bg-primary hover:text-white dark:hover:bg-white/10 backdrop-blur-md shadow-sm"
                 >
                   استكشف
-                  <span className="text-2xl leading-none">&larr;</span>
+                  <span className="text-2xl leading-none dark:text-white">&larr;</span>
                 </motion.button>
               </Link>
             </motion.div>
