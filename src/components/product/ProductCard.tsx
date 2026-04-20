@@ -74,9 +74,9 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         }}
         className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-8 h-8 sm:w-10 sm:h-10 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center border border-white/20 text-white hover:bg-white/20 transition-all"
       >
-        <Heart 
-          size={18} 
-          className={isFavorited ? "fill-secondary text-secondary" : "text-white"} 
+        <Heart
+          size={18}
+          className={isFavorited ? "fill-secondary text-secondary" : "text-white"}
         />
       </button>
 
@@ -91,7 +91,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
             className={`object-cover group-hover:scale-105 transition-transform duration-700 ${isOutOfStock ? 'opacity-50 grayscale' : ''}`}
           />
         </Link>
-        
+
         {/* Quick Add Button Overlay (Desktop Only) */}
         {!isOutOfStock && (
           <div className="hidden sm:flex absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 items-end justify-center pb-6 backdrop-blur-[2px] pointer-events-none">
@@ -100,7 +100,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
                 {product.hasSizes ? "اختر مقاسك" : "اختر اللون"}
               </Link>
             ) : (
-              <motion.button 
+              <motion.button
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
@@ -139,14 +139,14 @@ export default function ProductCard({ product, index }: ProductCardProps) {
               نفذت الكمية
             </div>
           ) : product.hasColors || product.hasSizes ? (
-            <Link 
+            <Link
               href={`/product/${product.id}`}
               className="w-full bg-transparent border-2 border-secondary text-secondary py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all text-sm"
             >
               {product.hasSizes ? "اختر مقاسك" : "اختر اللون"}
             </Link>
           ) : (
-            <button 
+            <button
               onClick={() => addItem(product)}
               className="w-full bg-secondary text-white py-2.5 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-all text-sm"
             >

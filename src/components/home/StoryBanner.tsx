@@ -47,11 +47,18 @@ export default function StoryBanner() {
           className="relative w-full md:w-1/2 aspect-video lg:aspect-[16/10] rounded-2xl sm:rounded-[2rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-4 border-white/10"
         >
           <Image
-            src="/images/img.png"
+            src="/images/123.webp"
             alt="عينات من ملابس متجر سطر التقنية - هوديز وتيشرتات للمبرمجين"
             fill
             sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover"
+            className="object-cover dark:hidden block"
+          />
+          <Image
+            src="/images/321.webp"
+            alt="عينات من ملابس متجر سطر التقنية - هوديز وتيشرتات للمبرمجين"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover hidden dark:block"
           />
         </motion.div>
       </div>
