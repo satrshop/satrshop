@@ -26,7 +26,7 @@ export default function Footer() {
             <Image src="/images/whitelogo.png" alt="شعار متجر سطر الرسمي - الوضع الداكن" width={90} height={30} className="object-contain hidden dark:block" />
           </div>
           <p className="text-primary-foreground/90 text-sm leading-relaxed mb-6 font-medium">
-            متجر سطر، وجهتك الأولى للأزياء التقنية. صُنع لطلبة تكنولوجيا المعلومات والمبرمجين الذين يقدرون الجودة وفخامة الكود.
+            سَـطْـر فِكْـرة تُكتـبُ وأثَـر يَبْـقَى.
           </p>
           <div className="flex gap-4">
             <a href="https://www.instagram.com/satr.shopp/" target="_blank" rel="noopener noreferrer" className="p-3 bg-primary-foreground/10 text-primary-foreground rounded-full hover:bg-secondary transition-colors shadow-sm"><IconInstagram /></a>

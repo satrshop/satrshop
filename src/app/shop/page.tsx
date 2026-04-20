@@ -12,13 +12,23 @@ import { Product } from "@/types/models/product";
 function ShopContent() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get("q") || "";
-  
+  const categoryParam = searchParams.get("category") || "all";
+
+  const categories = [
+    { id: "all", name: "الكل" },
+    { id: "stickers", name: "الستيكرز" },
+    { id: "accessories", name: "الإكسسوارات" },
+    { id: "agenda", name: "الأجندة" },
+  ];
+
+  const [activeCategory, setActiveCategory] = useState(categoryParam);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [selectedSort, setSelectedSort] = useState("ترتيب حسب: الأحدث");
-  
-  const sortOptions = ["ترتيب حسب: الأحدث", "السعر: من الأقل للأعلى", "السعر: من الأعلى للأقل", "الأعلى تقييماً"];
+  const [selectedSort, setSelectedSort] = useState(categories.find(c => c.id === activeCategory)?.name || "كل المنتجات");
+
+  const sortOptions = categories.map(c => c.name);
 
   // Fetch products from Firestore
   useEffect(() => {
@@ -31,16 +41,42 @@ function ShopContent() {
     loadProducts();
   }, []);
 
-  // Filter by search query
+  // Sync active category with URL param
+  useEffect(() => {
+    if (categoryParam) {
+      setActiveCategory(categoryParam);
+    }
+  }, [categoryParam]);
+
+  // Filter by search query and category
   const filteredProducts = useMemo(() => {
-    if (!queryParam.trim()) return products;
-    const q = queryParam.trim().toLowerCase();
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q)
-    );
-  }, [queryParam, products]);
+    let filtered = products;
+
+    // Filter by Category
+    if (activeCategory !== "all") {
+      filtered = filtered.filter(p => {
+        const cat = p.category?.toLowerCase() || "";
+        const target = activeCategory.toLowerCase();
+        // Match by internal ID or the specific names
+        if (target === "stickers") return cat.includes("stickers") || cat.includes("ستيكر") || cat.includes("ستكر");
+        if (target === "accessories") return cat.includes("accessories") || cat.includes("إكسسوار") || cat.includes("اكسسوار");
+        if (target === "agenda") return cat.includes("agenda") || cat.includes("أجندة") || cat.includes("اجنده");
+        return cat.includes(target);
+      });
+    }
+
+    // Filter by Search Query
+    if (queryParam.trim()) {
+      const q = queryParam.trim().toLowerCase();
+      filtered = filtered.filter(
+        (p) =>
+          p.name.toLowerCase().includes(q) ||
+          (p.category?.toLowerCase() || "").includes(q)
+      );
+    }
+
+    return filtered;
+  }, [queryParam, activeCategory, products]);
 
   // Sort the filtered products
   const sortedProducts = useMemo(() => {
@@ -74,7 +110,7 @@ function ShopContent() {
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -82,7 +118,7 @@ function ShopContent() {
       >
         <div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-3 sm:mb-4">
-            {queryParam ? `نتائج البحث` : "المتجر التقني"}
+            {queryParam ? `نتائج البحث` : activeCategory !== "all" ? categories.find(c => c.id === activeCategory)?.name : "المتجر التقني"}
           </h1>
           {queryParam ? (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -95,29 +131,29 @@ function ShopContent() {
             </div>
           ) : (
             <p className="text-base sm:text-lg text-muted-foreground font-medium max-w-2xl">
-              تصفح التشكيلة الكاملة من أزياء متجر سطر. مصممة بدقة للمبرمجين وطلبة تكنولوجيا المعلومات.
-            </p>
+              تصفّح أفضل المنتجات التقنية             </p>
           )}
         </div>
-        
-        <div className="flex items-center gap-4 relative z-30">
-          <div className="relative w-full">
+
+        <div className="flex flex-col lg:flex-row items-center gap-6 w-full lg:w-auto">
+          <div className="relative w-full sm:w-[240px] z-30">
             <motion.button 
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center justify-between gap-2 sm:gap-3 w-full sm:w-[280px] bg-white/40 backdrop-blur-xl border border-primary/10 rounded-xl sm:rounded-[1.25rem] px-4 sm:px-5 py-3 sm:py-4 text-sm font-bold text-primary shadow-sm hover:bg-white/60 hover:shadow-md transition-all"
+              className="flex items-center justify-between gap-3 w-full bg-white/40 backdrop-blur-xl border border-primary/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-primary shadow-sm hover:bg-white/60 hover:shadow-md transition-all"
             >
-              <div className="flex items-center gap-2">
-                <SlidersHorizontal size={18} />
-                <span>{selectedSort}</span>
-              </div>
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal size={18} />
+                  <span>تصفية: {selectedSort}</span>
+                </div>
               <motion.div animate={{ rotate: isSortOpen ? 180 : 0 }}>
                 <ChevronDown size={18} />
               </motion.div>
             </motion.button>
+            {/* ... rest of sort menu ... */}
 
             <AnimatePresence>
               {isSortOpen && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, y: 15, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
@@ -127,12 +163,16 @@ function ShopContent() {
                   {sortOptions.map((opt, i) => (
                     <button 
                       key={i}
-                      onClick={() => { setSelectedSort(opt); setIsSortOpen(false); }}
-                      className={`w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${
-                        selectedSort === opt 
-                          ? 'bg-primary text-primary-foreground shadow-md translate-x-[-4px]' 
+                      onClick={() => { 
+                        setSelectedSort(opt); 
+                        const catId = categories.find(c => c.name === opt)?.id || "all";
+                        setActiveCategory(catId);
+                        setIsSortOpen(false); 
+                      }}
+                      className={`w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedSort === opt
+                          ? 'bg-primary text-primary-foreground shadow-md translate-x-[-4px]'
                           : 'text-primary hover:bg-primary/5 hover:translate-x-[-4px]'
-                      } mb-1 last:mb-0`}
+                        } mb-1 last:mb-0`}
                     >
                       {opt}
                     </button>
@@ -176,7 +216,7 @@ export default function ShopPage() {
   return (
     <div className="min-h-screen bg-background selection:bg-secondary selection:text-white relative">
       <Header />
-      
+
       {/* Background decorative element */}
       <div className="absolute top-20 right-0 w-[400px] h-[400px] bg-secondary/5 rounded-full filter blur-[100px] -z-10" />
 
@@ -186,7 +226,7 @@ export default function ShopPage() {
             <div className="h-12 bg-primary/5 rounded-2xl w-48" />
             <div className="h-6 bg-primary/5 rounded-xl w-96" />
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[1,2,3,4].map(i => (
+              {[1, 2, 3, 4].map(i => (
                 <div key={i} className="aspect-[4/5] bg-primary/5 rounded-2xl" />
               ))}
             </div>

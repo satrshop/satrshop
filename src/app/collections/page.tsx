@@ -7,9 +7,27 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 const COLLECTIONS = [
-  { id: "winter", title: "مجموعة الخريف التقنية", subtitle: "إصدار محدود", desc: "هوديز قطنية ثقيلة وجواكيت توفر الدفء والأناقة في أطول جلسات البرمجة.", image: "/images/background.png" },
-  { id: "darkmode", title: "مجموعة Dark Mode", subtitle: "الطابع الرسمي", desc: "تصاميم تعكس الجانب المظلم من الشاشة، لمحبي الألوان الداكنة والراحة المستمرة.", image: "/images/img.png" },
-  { id: "basics", title: "الأساسيات (Basics)", subtitle: "للاستخدام اليومي", desc: "تيشرتات مصممة بصيغة مينيمالستيك، مريحة ويومية لترافقك إلى مكتبك.", image: "/images/background.png" },
+  { 
+    id: "stickers", 
+    title: "ستكرز سطر", 
+    subtitle: "أضف لمستك الخاصة", 
+    desc: "تشكيلة من الستكرز التقنية المقاومة للماء، مصممة بدقة لتزين لابتوبك ومعداتك البرمجية.", 
+    image: "/images/herosection.JPG" 
+  },
+  { 
+    id: "accessories", 
+    title: "إكسسوارات تقنية", 
+    subtitle: "تكمل تفاصيلك", 
+    desc: "قطع فريدة مصممة لتناسب أسلوب حياتك البرمجي، من علاقات مفاتيح إلى ملحقات مكتبية مميزة.", 
+    image: "/images/bgblue.png" 
+  },
+  { 
+    id: "agenda", 
+    title: "أجندة سطر", 
+    subtitle: "خطط لمستقبلك", 
+    desc: "أجندة يومية مصممة لتساعدك على تنظيم مهامك، تدوين أفكارك البرمجية، ورفع إنتاجيتك بأسلوب سطر.", 
+    image: "/images/bg2.png" 
+  },
 ];
 
 export default function CollectionsPage() {
@@ -27,7 +45,7 @@ export default function CollectionsPage() {
           transition={{ duration: 0.6 }}
           className="text-center max-w-3xl mx-auto mb-12 sm:mb-20"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground mb-4 sm:mb-6">مجموعاتنا التقنية</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-foreground mb-4 sm:mb-6">الأقسام</h1>
           <p className="text-base sm:text-xl text-muted-foreground font-medium leading-relaxed">
             استكشف تصنيفاتنا المصممة خصيصاً لتناسب أسلوب حياتك البرمجي والتقني. كل مجموعة لها طابع، وكل طابع يعكس سطر كود مختلف.
           </p>
@@ -63,7 +81,7 @@ export default function CollectionsPage() {
                   {col.desc}
                 </p>
                 
-                <Link href="/shop" passHref>
+                <Link href={`/shop?category=${col.id}`} passHref>
                   <motion.button 
                     whileHover={{ x: -10 }} 
                     className="inline-flex items-center gap-3 bg-primary text-primary-foreground h-14 px-8 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:bg-[#22556d] transition-all"

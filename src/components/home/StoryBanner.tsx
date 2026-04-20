@@ -36,8 +36,8 @@ export default function StoryBanner() {
           >
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 text-secondary drop-shadow-sm leading-tight">تصميم يروي الكود</h2>
             <p className="text-base sm:text-lg md:text-xl text-primary dark:text-white/90 leading-relaxed font-medium">
-              تفاصيل دقيقة، جودة قماش عالية، ولمسات مستوحاة من أعظم التقنيات. نحن في متجر سطر نؤمن بأن ملابسك يجب أن تعكس هويتك البرمجية بحداثة ورقي.
-            </p>
+              التفاصيل تصنع الفرق .. <br />
+              عيننا على كل تفصيلة لنقدم لك تصاميم<br />تجمع بين البساطة والجودة في قطعة واحدة            </p>
           </motion.div>
         </div>
 

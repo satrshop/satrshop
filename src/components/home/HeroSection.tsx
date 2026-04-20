@@ -27,33 +27,34 @@ export default function HeroSection() {
         <Image src="/images/bg2.png" alt="خلفية متجر سطر الرسمية - سطوع عالي" fill sizes="100vw" className="object-cover z-0 pointer-events-none dark:hidden block" priority />
         <Image src="/images/bgblue.png" alt="خلفية متجر سطر الرسمية - الوضع الداكن" fill sizes="100vw" className="object-cover z-0 pointer-events-none hidden dark:block" priority />
 
-        <main className="w-full px-4 sm:px-6 py-12 sm:py-16 md:py-20 lg:py-28 flex flex-col lg:flex-row items-center gap-8 sm:gap-12 lg:gap-16 relative z-10">
+        <main className="w-full px-4 sm:px-6 pt-4 sm:pt-6 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-28 flex flex-col lg:flex-row items-center lg:items-start gap-8 sm:gap-12 lg:gap-16 relative z-10">
           {/* Background decorative blur - hidden on mobile for performance */}
           <div className="hidden sm:block absolute top-0 right-0 w-[400px] h-[400px] bg-secondary/15 rounded-full filter blur-[100px] -z-10" />
 
           {/* Content Side */}
           <motion.div
-            className="flex-1 flex flex-col justify-center space-y-6 sm:space-y-8 lg:space-y-10 z-10 w-full text-right"
+            className="flex-1 flex flex-col justify-start space-y-6 sm:space-y-8 lg:space-y-10 z-10 w-full text-right pt-2"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
-            <motion.h1 
-              variants={fadeInUp} 
+            <motion.h1
+              variants={fadeInUp}
               className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-extrabold leading-[1.2] text-primary dark:text-white tracking-tight"
             >
               مرحباً بك في <span className="dark:text-secondary">متجر سطر</span> <br />
-              <span className="text-primary dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-l dark:from-white dark:to-secondary block mt-2 pb-2">الجودة تليق بك.</span>
+              <span className="text-secondary dark:text-secondary block mt-2 pb-2 text-lg sm:text-xl md:text-2xl lg:text-3xl font-medium">سَـطْـر فِكْـرة تُكتـبُ وأثَـر يَبْـقَى.</span>
             </motion.h1>
 
-            <motion.p 
-              variants={fadeInUp} 
+            <motion.p
+              variants={fadeInUp}
               className="text-base sm:text-lg md:text-xl text-primary/80 dark:text-white/90 font-medium max-w-lg leading-relaxed border-r-4 border-secondary pr-4 drop-shadow-md"
             >
-              نوفر لك طابعاً فريداً يجمع بين الفخامة وإلهام التشفير. ارتقِ بمظهرك مع مجموعتنا التقنية الحديثة المصممة خصيصاً للمبرمجين.
+              حيث تبدأ تفاصيل الحكاية
+              تصاميم عصرية بلمسة فريدة .. مصنوعة بدقة لتمنحك حضورا مميزا
             </motion.p>
 
-            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-end sm:justify-start gap-3 sm:gap-4 pt-2 sm:pt-4">
+            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-end sm:justify-start gap-3 sm:gap-4 pt-6 sm:pt-8 md:pt-10">
               <Link href="/shop" className="w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
