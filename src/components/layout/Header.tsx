@@ -407,7 +407,7 @@ export default function Header() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
               onClick={closeMobileMenu}
-              className="fixed inset-0 bg-primary/70 z-[50] lg:hidden"
+              className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[50] lg:hidden"
               style={{ willChange: "opacity" }}
             />
             <motion.div
@@ -415,15 +415,15 @@ export default function Header() {
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
               transition={{ type: "tween", duration: 0.3, ease: "easeOut" }}
-              className="fixed top-0 right-0 h-full w-[85%] max-w-sm bg-background z-[60] shadow-2xl flex flex-col overflow-y-auto lg:hidden"
+              className="fixed top-0 right-0 h-full w-[85%] max-w-sm bg-white/80 dark:bg-black/60 backdrop-blur-[25px] z-[60] shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col overflow-y-auto lg:hidden border-l border-white/20"
               style={{ willChange: "transform" }}
             >
-              <div className="flex items-center justify-between p-5 sm:p-6 border-b border-border sticky top-0 bg-background z-10">
+              <div className="flex items-center justify-between p-5 sm:p-6 border-b border-primary/10 sticky top-0 bg-transparent z-10">
                 <Image src="/images/SatrLogo.png" alt="Satr Shop" width={70} height={22} className="w-auto h-auto dark:hidden block" />
                 <Image src="/images/whitelogo.png" alt="Satr Shop" width={70} height={22} className="w-auto h-auto hidden dark:block" />
                 <button
                   onClick={closeMobileMenu}
-                  className="p-2 bg-muted text-muted-foreground rounded-full hover:bg-red-50 hover:text-red-500 active:scale-90 transition-all touch-manipulation"
+                  className="p-2 bg-primary/10 text-primary rounded-full hover:bg-secondary/20 hover:text-secondary active:scale-90 transition-all touch-manipulation"
                 >
                   <X size={20} />
                 </button>
@@ -435,15 +435,15 @@ export default function Header() {
                     key={i}
                     href={item.href}
                     onClick={closeMobileMenu}
-                    className="text-xl sm:text-2xl font-bold text-foreground border-b border-border py-4 hover:text-primary active:text-secondary transition-colors touch-manipulation"
+                    className="text-xl sm:text-2xl font-black text-primary dark:text-white border-b border-primary/10 py-4 hover:text-secondary active:text-secondary transition-colors touch-manipulation"
                   >
                     {item.name}
                   </Link>
                 ))}
               </nav>
 
-              <div className="p-5 sm:p-6 border-t border-border">
-
+              <div className="p-5 sm:p-6 border-t border-primary/10">
+                {/* Additional footer items if needed */}
               </div>
             </motion.div>
           </>
