@@ -79,7 +79,7 @@ export default function AdminHelp() {
   };
 
   return (
-    <div className="fixed bottom-10 left-10 z-[100] print:hidden">
+    <div className="light fixed bottom-10 left-10 z-[100] print:hidden">
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -91,10 +91,10 @@ export default function AdminHelp() {
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/5 rounded-2xl flex items-center justify-center text-primary">
+                <div className="w-10 h-10 bg-[#2C6A87]/5 rounded-2xl flex items-center justify-center text-[#2C6A87]">
                   <Info size={22} />
                 </div>
-                <h3 className="font-black text-xl text-primary">{content.title}</h3>
+                <h3 className="font-black text-xl text-[#2C6A87]">{content.title}</h3>
               </div>
               <button 
                 onClick={() => setIsOpen(false)}
