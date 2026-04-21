@@ -38,17 +38,18 @@ export default function Footer() {
           <ul className="space-y-4 text-sm text-primary-foreground/80 font-medium">
             <li><Link href="/" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الرئيسية</Link></li>
             <li><Link href="/shop" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">المتجر</Link></li>
-            <li><Link href="/contact" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">تواصل معنا</Link></li>
+            <li><Link href="/collections" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الأقسام</Link></li>
+            <li><Link href="/size-guide" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">دليل المقاسات</Link></li>
           </ul>
         </div>
 
         <div className="md:text-left">
           <h4 className="font-bold text-primary-foreground mb-6 text-lg">الدعم والمساعدة</h4>
           <ul className="space-y-4 text-sm text-primary-foreground/80 font-medium">
+            <li><Link href="/returns" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">سياسة الاسترجاع والاستبدال</Link></li>
             <li><Link href="/faq" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الأسئلة الشائعة</Link></li>
             <li><Link href="/shipping" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">الشحن والتوصيل</Link></li>
-            <li><Link href="/returns" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">سياسة الاسترجاع</Link></li>
-            <li><Link href="/size-guide" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">دليل المقاسات</Link></li>
+            <li><Link href="/contact" className="hover:text-secondary hover:translate-x-[-5px] inline-block transition-transform">تواصل معنا</Link></li>
           </ul>
         </div>
       </div>

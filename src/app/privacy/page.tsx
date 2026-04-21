@@ -29,7 +29,7 @@ export default function PrivacyPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="bg-white p-5 sm:p-8 md:p-12 rounded-2xl sm:rounded-[2rem] shadow-sm border border-border"
         >
-          <p className="text-muted-foreground font-medium leading-relaxed">
+          <p className="text-muted-foreground dark:text-primary-foreground font-medium leading-relaxed">
             في متجر سطر، تعتبر الخصوصية والأمن من أهم أولوياتنا لأننا، كأشخاص تقنيين، ندرك تماماً أهمية حماية البيانات والمعلومات.
             يتم تشفير كافة معلوماتك ولا تتم مشاركتها مع أي أطراف ثالثة لأغراض تجارية إطلاقاً.
           </p>

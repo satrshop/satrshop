@@ -29,7 +29,7 @@ export default function TermsPage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="bg-white p-5 sm:p-8 md:p-12 rounded-2xl sm:rounded-[2rem] shadow-sm border border-border"
         >
-          <p className="text-muted-foreground font-medium leading-relaxed">
+          <p className="text-muted-foreground dark:text-primary-foreground font-medium leading-relaxed">
             نسعى دائماً لتقديم أفضل تجربة تسوق ممكنة. استخدامك لهذا المتجر يعني موافقتك الصريحة على جميع الشروط والأحكام المطبقة حسب قوانين التجارة الإلكترونية بالمملكة الأردنية الهاشمية.
           </p>
         </motion.div>

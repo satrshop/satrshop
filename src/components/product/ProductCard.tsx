@@ -123,10 +123,6 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         <Link href={`/product/${product.id}`} className="block flex-1 cursor-pointer">
           <div className="flex items-center justify-between mb-1.5 sm:mb-2">
             <p className="text-secondary font-mono text-[10px] sm:text-xs tracking-widest uppercase truncate">{product.category}</p>
-            <div className="flex items-center gap-0.5 sm:gap-1 text-secondary flex-shrink-0">
-              <Star size={12} className="sm:w-[14px] sm:h-[14px]" fill="currentColor" />
-              <span className="text-xs sm:text-sm font-bold text-primary-foreground/90">{product.rating}</span>
-            </div>
           </div>
           <h3 className="text-sm sm:text-lg font-bold text-primary-foreground mb-1.5 sm:mb-3 line-clamp-2 h-10 sm:h-14 group-hover:text-secondary transition-colors leading-tight">{product.name}</h3>
           <p className="text-base sm:text-xl font-extrabold text-primary-foreground/90 mb-3">{product.price.toFixed(2)} د.ا</p>

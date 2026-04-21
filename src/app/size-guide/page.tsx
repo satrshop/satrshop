@@ -29,7 +29,7 @@ export default function SizeGuidePage() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="bg-white p-5 sm:p-8 md:p-12 rounded-2xl sm:rounded-[2rem] shadow-sm border border-border"
         >
-          <p className="text-muted-foreground font-medium leading-relaxed text-center">
+          <p className="text-muted-foreground dark:text-primary-foreground font-medium leading-relaxed text-center">
             سيتم إضافة جدول المقاسات قريباً. جميع منتجاتنا تأتي بتصميم Oversize مريح ليناسب فترات العمل والبرمجة الطويلة. 
             ننصح دائماً باختيار مقاسك المعتاد للحصول على هذا المظهر المريح.
           </p>

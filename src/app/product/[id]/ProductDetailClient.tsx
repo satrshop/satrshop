@@ -100,16 +100,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
           
           <div className="relative z-10 space-y-8 sm:space-y-10">
             <div className="space-y-4 sm:space-y-6">
-              <div className="flex items-center gap-4">
-                <span className="bg-white/10 text-white dark:text-secondary text-xs sm:text-sm font-black px-4 py-1.5 rounded-full tracking-widest uppercase backdrop-blur-md">
-                  {product.category}
-                </span>
-                <div className="flex items-center gap-1.5 text-secondary">
-                  <Star size={18} fill="currentColor" />
-                  <span className="font-black text-lg text-primary-foreground">{product.rating}</span>
-                  <span className="text-primary-foreground/60 text-sm font-bold mr-1">(12+ تقييم)</span>
+                <div className="flex items-center gap-4">
+                  <span className="bg-white/10 text-white dark:text-secondary text-xs sm:text-sm font-black px-4 py-1.5 rounded-full tracking-widest uppercase backdrop-blur-md">
+                    {product.category}
+                  </span>
                 </div>
-              </div>
 
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white dark:text-primary-foreground leading-tight">
                 {product.name}

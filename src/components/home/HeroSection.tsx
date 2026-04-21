@@ -62,7 +62,7 @@ export default function HeroSection() {
                   className="bg-gradient-to-r from-secondary to-[#c79122] text-secondary-foreground h-12 sm:h-14 w-full sm:w-auto px-8 sm:px-10 rounded-2xl font-bold text-lg sm:text-xl transition-all shadow-lg hover:shadow-xl border border-white/10 relative overflow-hidden group"
                 >
                   <div className="absolute inset-0 bg-white/20 w-[200%] translate-x-[-150%] skew-x-[-30deg] group-hover:translate-x-[150%] transition-transform duration-700 ease-in-out" />
-                  <span className="relative z-10">تصفح التشكيلة</span>
+                  <span className="relative z-10">تسوّق الآن</span>
                 </motion.button>
               </Link>
               <Link href="/collections" className="w-full sm:w-auto">
