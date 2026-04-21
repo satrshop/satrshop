@@ -139,7 +139,7 @@ function ShopContent() {
           <div className="relative w-full sm:w-[240px] z-30">
             <motion.button 
               onClick={() => setIsSortOpen(!isSortOpen)}
-              className="flex items-center justify-between gap-3 w-full bg-white/40 backdrop-blur-xl border border-primary/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-primary shadow-sm hover:bg-white/60 hover:shadow-md transition-all"
+              className="flex items-center justify-between gap-3 w-full bg-white/40 dark:bg-white/80 backdrop-blur-xl border border-primary/10 rounded-2xl px-5 py-3.5 text-sm font-bold text-primary dark:text-primary-foreground shadow-sm hover:bg-white/60 hover:shadow-md transition-all"
             >
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal size={18} />
@@ -149,7 +149,6 @@ function ShopContent() {
                 <ChevronDown size={18} />
               </motion.div>
             </motion.button>
-            {/* ... rest of sort menu ... */}
 
             <AnimatePresence>
               {isSortOpen && (
@@ -158,7 +157,7 @@ function ShopContent() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 15, scale: 0.95 }}
                   transition={{ duration: 0.2, type: "spring", stiffness: 300, damping: 25 }}
-                  className="absolute top-full mt-3 w-full bg-white/70 backdrop-blur-2xl border border-primary/5 rounded-[1.25rem] p-2 shadow-[0_15px_40px_-5px_rgba(22,54,68,0.15)] overflow-hidden"
+                  className="absolute top-full mt-3 w-full bg-white/70 dark:bg-white/90 backdrop-blur-2xl border border-primary/5 rounded-[1.25rem] p-2 shadow-[0_15px_40px_-5px_rgba(22,54,68,0.15)] overflow-hidden"
                 >
                   {sortOptions.map((opt, i) => (
                     <button 
@@ -171,7 +170,7 @@ function ShopContent() {
                       }}
                       className={`w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedSort === opt
                           ? 'bg-primary text-primary-foreground shadow-md translate-x-[-4px]'
-                          : 'text-primary hover:bg-primary/5 hover:translate-x-[-4px]'
+                          : 'text-primary dark:text-primary-foreground hover:bg-primary/5 hover:translate-x-[-4px]'
                         } mb-1 last:mb-0`}
                     >
                       {opt}
