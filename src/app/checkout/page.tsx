@@ -214,7 +214,7 @@ export default function CheckoutPage() {
                         onChange={handleInputChange}
                         required
                         className="w-full bg-white/10 border border-primary-foreground/20 rounded-xl px-4 py-3.5 text-right text-primary-foreground placeholder:text-primary-foreground/30 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all"
-                        placeholder="07XXXXXXXX"
+                        placeholder="07X XXX XXXX"
                       />
                       <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-foreground/40" size={18} />
                     </div>

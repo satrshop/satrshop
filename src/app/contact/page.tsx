@@ -89,7 +89,7 @@ export default function ContactPage() {
                           onChange={handleChange}
                           type="tel" 
                           className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 text-right focus:outline-none focus:border-secondary transition-colors" 
-                          placeholder="05x xxx xxxx" 
+                          placeholder="07x xxx xxxx" 
                           dir="ltr" 
                         />
                       </div>

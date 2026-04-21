@@ -7,7 +7,7 @@ export const metadata: Metadata = {
     canonical: "/returns",
   },
   openGraph: {
-    title: "سياسة الاسترجاع | متجر سطر",
+    title: "سياسة الاسترجاع والاستبدال | متجر سطر",
     description: "استرجاع خلال 7 أيام واستبدال خلال 14 يوماً. تسوق بثقة تامة.",
     url: "/returns",
     type: "website",

@@ -30,18 +30,18 @@ export default function ShippingPage() {
           className="bg-white p-5 sm:p-8 md:p-12 rounded-2xl sm:rounded-[2rem] shadow-sm border border-border prose prose-lg prose-slate max-w-none rtl"
           dir="rtl"
         >
-          <h3 className="text-2xl font-bold text-[#2C6A87] mb-4 flex items-center gap-3"><Clock className="text-secondary" /> المدة المستغرقة</h3>
-          <p className="text-[#2C6A87]/80 font-medium mb-8">
+          <h3 className="text-2xl font-bold text-primary dark:text-primary-foreground mb-4 flex items-center gap-3"><Clock className="text-secondary" /> المدة المستغرقة</h3>
+          <p className="text-primary/80 dark:text-primary-foreground/80 font-medium mb-8">
             نقوم بمعالجة الطلبات خلال 24 ساعة من تأكيد الشراء. التوصيل لعَمّان يستغرق (1 - 3 أيام عمل). التوصيل لباقي المحافظات يستغرق (3 - 5 أيام عمل).
           </p>
 
-          <h3 className="text-2xl font-bold text-[#2C6A87] mb-4 flex items-center gap-3"><Package className="text-secondary" /> تكلفة الشحن</h3>
-          <p className="text-[#2C6A87]/80 font-medium mb-8">
+          <h3 className="text-2xl font-bold text-primary dark:text-primary-foreground mb-4 flex items-center gap-3"><Package className="text-secondary" /> تكلفة الشحن</h3>
+          <p className="text-primary/80 dark:text-primary-foreground/80 font-medium mb-8">
             تكلفة الشحن الثابتة لجميع محافظات الأردن هي 2.50 د.ا ونوفر <strong>شحناً مجانياً</strong> للطلبات التي تزيد قيمتها عن 35.00 د.ا تلقائياً عند الدفع.
           </p>
 
-          <h3 className="text-2xl font-bold text-[#2C6A87] mb-4 flex items-center gap-3"><Truck className="text-secondary" /> شركات الشحن المعتمدة</h3>
-          <p className="text-[#2C6A87]/80 font-medium">
+          <h3 className="text-2xl font-bold text-primary dark:text-primary-foreground mb-4 flex items-center gap-3"><Truck className="text-secondary" /> شركات الشحن المعتمدة</h3>
+          <p className="text-primary/80 dark:text-primary-foreground/80 font-medium">
             نتعامل مع أفضل مزودي الخدمات اللوجستية مثل أرامكس (Aramex) لضمان وصول ملابسك التقنية بحالة ممتازة وبأسرع وقت ممكن لباب منزلك.
           </p>
         </motion.div>
