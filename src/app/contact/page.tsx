@@ -197,7 +197,7 @@ export default function ContactPage() {
             </div>
 
             <div className="flex items-start gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center text-secondary flex-shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
                 <MapPin size={28} />
               </div>
               <div>
