@@ -1,8 +1,10 @@
 import { MetadataRoute } from 'next'
 import { getProducts } from '@/lib/db/products'
 
+export const revalidate = 3600; // revalidate every hour
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://satrshop.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://satrshop.com'
   
   // Static pages with appropriate priorities and change frequencies
   const staticRoutes: MetadataRoute.Sitemap = [
