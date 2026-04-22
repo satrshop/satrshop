@@ -65,7 +65,7 @@ export default function AdminOrdersPage() {
     try {
       const [data, roleData] = await Promise.all([
         adminFetch<{ orders: Order[] }>("/api/admin/orders"),
-        adminFetch<any>("/api/admin/auth/login", { method: "POST" }).catch(() => ({ admin: { role: "" } }))
+        adminFetch<any>("/api/admin/auth/me").catch(() => ({ admin: { role: "" } }))
       ]);
       setOrders(data.orders);
       setIsAdminRole(roleData?.admin?.role || "");
