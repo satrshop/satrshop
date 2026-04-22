@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { Loader2, Lock, Mail, AlertCircle } from "lucide-react";
+import { Loader2, Lock, Mail, AlertCircle, ArrowRight } from "lucide-react";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -128,7 +128,14 @@ export default function AdminLoginPage() {
       >
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center">
-            <Image src="/images/whitelogo.png" alt="Satr Logo" width={100} height={30} className="w-auto h-auto brightness-0 invert opacity-80" />
+            <Image 
+              src="/images/whitelogo.png" 
+              alt="Satr Logo" 
+              width={100} 
+              height={30} 
+              priority
+              className="w-auto h-auto brightness-0 invert opacity-80" 
+            />
           </div>
           <h1 className="text-2xl font-black text-white mb-2">لوحة التحكم</h1>
           <p className="text-white/40 font-bold">يرجى تسجيل الدخول للمتابعة</p>
@@ -213,7 +220,17 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        <p className="mt-6 text-center text-white/10 text-[10px] font-black uppercase tracking-widest">
+        <div className="mt-8 pt-6 border-t border-white/5 flex justify-center">
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 text-white/40 hover:text-secondary transition-all font-bold group"
+          >
+            <ArrowRight className="group-hover:translate-x-1 transition-transform" size={20} />
+            <span>العودة للمتجر</span>
+          </Link>
+        </div>
+
+        <p className="mt-8 text-center text-white/10 text-[10px] font-black uppercase tracking-widest">
           Satr Shop Administrative Console
         </p>
       </motion.div>
