@@ -150,7 +150,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside className="hidden lg:flex w-72 flex-col bg-[#1e293b] border-l border-white/5 sticky top-0 h-screen print:hidden">
         <div className="p-8 border-b border-white/5 flex flex-col items-center">
           <Link href="/">
-            <Image src="/images/whitelogo.png" alt="Satr Shop" width={100} height={32} className="w-auto h-auto mb-2" />
+            <Image src="/images/whitelogo.png" alt="Satr Shop" width={100} height={32} priority className="w-auto h-auto mb-2" />
           </Link>
           <span className="text-[10px] bg-secondary text-primary px-3 py-0.5 rounded-full font-black uppercase tracking-widest">
             إدارة المتجر
@@ -213,7 +213,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white/80">
             <Menu size={22} />
           </button>
-          <Image src="/images/whitelogo.png" alt="Logo" width={60} height={16} className="w-auto h-auto max-h-[28px]" />
+          <Image src="/images/whitelogo.png" alt="Logo" width={60} height={16} priority className="w-auto h-auto max-h-[28px]" />
           <div className="w-8" /> {/* Spacer */}
         </header>
 
@@ -244,7 +244,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               className="fixed top-0 right-0 h-full w-[80%] max-w-sm bg-[#1e293b] z-[60] shadow-2xl flex flex-col"
             >
               <div className="p-5 flex items-center justify-between border-b border-white/5">
-                <Image src="/images/whitelogo.png" alt="Logo" width={65} height={18} className="w-auto h-auto max-h-[28px]" />
+                <Image src="/images/whitelogo.png" alt="Logo" width={65} height={18} priority className="w-auto h-auto max-h-[28px]" />
                 <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-white/60">
                   <X size={24} />
                 </button>
