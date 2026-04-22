@@ -38,7 +38,7 @@ export async function DELETE(
       await batch.commit();
       await logAdminActivity(
         adminUser,
-        "delete_customer",
+        "حذف زبون",
         `تم حذف زبون (رقم: ${phone}) بجميع طلباته (${deletedCount} طلب)`
       );
       return NextResponse.json({ success: true, deletedCount });
