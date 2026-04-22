@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, usePathname } from "next/navigation";
@@ -31,6 +31,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const unsubscribeMessagesRef = useRef<(() => void) | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -79,14 +80,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           setUnreadCount(count);
         });
 
-        // Store it so we can clean it up (optional, but good practice)
-        (window as any)._unsubscribeMessages = unsubscribeSnapshot;
+        // Store the unsubscribe handler in a ref for cleanup
+        unsubscribeMessagesRef.current = unsubscribeSnapshot;
 
       } else {
         // Unsubscribe if user logs out or session expires
-        if ((window as any)._unsubscribeMessages) {
-          (window as any)._unsubscribeMessages();
-          delete (window as any)._unsubscribeMessages;
+        if (unsubscribeMessagesRef.current) {
+          unsubscribeMessagesRef.current();
+          unsubscribeMessagesRef.current = null;
         }
         if (pathname !== "/admin/login" && pathname !== "/admin/register") {
           router.push("/admin/login");
@@ -96,16 +97,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     });
     return () => {
       unsubscribe();
-      if ((window as any)._unsubscribeMessages) {
-        (window as any)._unsubscribeMessages();
+      if (unsubscribeMessagesRef.current) {
+        unsubscribeMessagesRef.current();
+        unsubscribeMessagesRef.current = null;
       }
     };
   }, [router, pathname]);
 
   const handleLogout = async () => {
-    if ((window as any)._unsubscribeMessages) {
-      (window as any)._unsubscribeMessages();
-      delete (window as any)._unsubscribeMessages;
+    if (unsubscribeMessagesRef.current) {
+      unsubscribeMessagesRef.current();
+      unsubscribeMessagesRef.current = null;
     }
     await signOut(auth);
     router.push("/admin/login");
@@ -161,10 +163,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             return (
               <Link key={item.name} href={item.href}>
                 <motion.div
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 20, backgroundColor: "rgba(0, 0, 0, 0)" }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  whileHover={{ x: -8, backgroundColor: isActive ? "" : "rgba(255, 255, 255, 0.03)" }}
+                  whileHover={{ x: -8, backgroundColor: isActive ? "rgba(0, 0, 0, 0)" : "rgba(255, 255, 255, 0.03)" }}
                   whileTap={{ scale: 0.98 }}
                   className={`relative flex items-center gap-4 px-6 py-4 rounded-2xl font-black transition-all ${
                     isActive 
@@ -207,12 +209,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top bar - Mobile */}
-        <header className="lg:hidden h-20 bg-[#1e293b] border-b border-white/10 flex items-center justify-between px-6 sticky top-0 z-40 print:hidden">
+        <header className="lg:hidden h-14 bg-[#1e293b] border-b border-white/10 flex items-center justify-between px-4 sticky top-0 z-40 print:hidden">
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-white/80">
-            <Menu size={24} />
+            <Menu size={22} />
           </button>
-          <Image src="/images/whitelogo.png" alt="Logo" width={80} height={20} className="w-auto h-auto" />
-          <div className="w-10" /> {/* Spacer */}
+          <Image src="/images/whitelogo.png" alt="Logo" width={60} height={16} className="w-auto h-auto max-h-[28px]" />
+          <div className="w-8" /> {/* Spacer */}
         </header>
 
         {/* Page Content */}
@@ -241,8 +243,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               transition={{ type: "tween", duration: 0.3 }}
               className="fixed top-0 right-0 h-full w-[80%] max-w-sm bg-[#1e293b] z-[60] shadow-2xl flex flex-col"
             >
-              <div className="p-6 flex items-center justify-between border-b border-white/5">
-                <Image src="/images/whitelogo.png" alt="Logo" width={80} height={20} className="w-auto h-auto" />
+              <div className="p-5 flex items-center justify-between border-b border-white/5">
+                <Image src="/images/whitelogo.png" alt="Logo" width={65} height={18} className="w-auto h-auto max-h-[28px]" />
                 <button onClick={() => setIsSidebarOpen(false)} className="p-2 text-white/60">
                   <X size={24} />
                 </button>

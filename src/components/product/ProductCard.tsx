@@ -82,7 +82,7 @@ export default function ProductCard({ product, index }: ProductCardProps) {
 
       {/* Image Area - Container */}
       <div className="relative aspect-[4/5] overflow-hidden bg-white/5 border-b border-white/10">
-        <Link href={`/product/${product.id}`} className="block w-full h-full cursor-pointer">
+        <Link href={`/product/${product.id}`} className="relative block w-full h-full cursor-pointer">
           <Image
             src={product.image}
             alt={product.name}

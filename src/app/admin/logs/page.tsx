@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Activity, Clock, User, Info } from "lucide-react";
+import { Loader2, Activity, Clock, User, Info, Trash2 } from "lucide-react";
 import { adminFetch } from "@/lib/api/admin-client";
 
 interface ActivityLog {
@@ -16,6 +16,7 @@ interface ActivityLog {
 export default function LogsPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clearing, setClearing] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -30,6 +31,19 @@ export default function LogsPage() {
       console.error("Failed to load logs:", err);
     }
     setLoading(false);
+  };
+
+  const handleClearLogs = async () => {
+    if (!confirm("هل أنت متأكد من حذف جميع سجلات النشاط؟ لا يمكن التراجع عن هذا الإجراء.")) return;
+    
+    setClearing(true);
+    try {
+      await adminFetch("/api/admin/logs", { method: "DELETE" });
+      await fetchLogs();
+    } catch (err) {
+      console.error("Failed to clear logs:", err);
+    }
+    setClearing(false);
   };
 
   const formatDate = (timestamp: ActivityLog["createdAt"]) => {
@@ -59,9 +73,19 @@ export default function LogsPage() {
           <Activity className="text-secondary" />
           سجل النشاطات (Audit Logs)
         </h1>
-        <button onClick={fetchLogs} className="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg text-white transition-colors">
-          تحديث السجل
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleClearLogs} 
+            disabled={clearing || logs.length === 0}
+            className="text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-4 py-2 rounded-lg text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {clearing ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+            تنظيف السجل
+          </button>
+          <button onClick={fetchLogs} className="text-sm bg-white/5 hover:bg-white/10 px-4 py-2 rounded-lg text-white transition-colors">
+            تحديث السجل
+          </button>
+        </div>
       </div>
 
       <div className="bg-[#1e293b] rounded-2xl border border-white/5 overflow-hidden">

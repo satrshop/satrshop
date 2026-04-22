@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { Loader2, Lock, Mail, AlertCircle } from "lucide-react";
@@ -61,6 +62,7 @@ export default function AdminLoginPage() {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${idToken}`,
         },
+        body: JSON.stringify({ isLogin: true }),
       });
 
       if (!response.ok) {
@@ -203,7 +205,16 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <p className="mt-10 text-center text-primary/30 text-[10px] font-black uppercase tracking-widest">
+        <div className="mt-6 text-center">
+          <p className="text-primary/50 text-sm font-bold">
+            ليس لديك حساب؟{" "}
+            <Link href="/admin/register" className="text-secondary hover:text-secondary/80 transition-colors font-black">
+              تسجيل حساب جديد
+            </Link>
+          </p>
+        </div>
+
+        <p className="mt-6 text-center text-primary/30 text-[10px] font-black uppercase tracking-widest">
           Satr Shop Administrative Console
         </p>
       </motion.div>

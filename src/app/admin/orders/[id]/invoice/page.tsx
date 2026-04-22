@@ -67,7 +67,7 @@ export default function InvoicePage() {
       </div>
 
       {/* Invoice Content */}
-      <div className="max-w-[210mm] mx-auto bg-white shadow-2xl print:shadow-none p-[10mm] sm:p-[15mm] flex flex-col text-right font-sans" dir="rtl">
+      <div className="invoice-container max-w-[210mm] mx-auto bg-white shadow-2xl print:shadow-none p-[10mm] sm:p-[15mm] flex flex-col text-right font-sans" dir="rtl">
         {/* Header */}
         <div className="flex justify-between items-start border-b-2 border-secondary pb-10 mb-10">
           <div>
@@ -187,13 +187,42 @@ export default function InvoicePage() {
           body {
             background: white !important;
             padding: 0 !important;
+            margin: 0 !important;
           }
           @page {
-            margin: 0;
-            size: auto;
+            margin: 5mm;
+            size: A4;
           }
           .print-hidden {
             display: none !important;
+          }
+          /* Reduce vertical spacing for single page fit */
+          .mb-10, .mb-12 {
+            margin-bottom: 1.5rem !important;
+          }
+          .pb-10 {
+            padding-bottom: 1rem !important;
+          }
+          .py-10 {
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+          }
+          /* Ensure footer doesn't jump to next page unless necessary */
+          .mt-auto {
+            margin-top: 2rem !important;
+          }
+          table th, table td {
+            padding: 8px !important;
+          }
+          .max-w-[210mm] {
+            box-shadow: none !important;
+            width: 100% !important;
+            padding: 0 !important;
+          }
+          /* Scale down slightly if needed */
+          .invoice-container {
+            transform: scale(0.98);
+            transform-origin: top center;
           }
         }
       `}</style>

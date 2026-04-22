@@ -52,7 +52,7 @@ export default function AdminOrdersPage() {
       if (monthPickerRef.current && !monthPickerRef.current.contains(event.target as Node)) {
         setIsMonthPickerOpen(false);
       }
-      if (activeUpdateId) {
+      if (activeUpdateId && !(event.target as HTMLElement).closest('.update-dropdown-container')) {
         setActiveUpdateId(null);
       }
     }
@@ -498,10 +498,10 @@ export default function AdminOrdersPage() {
           <p className="text-white/60 font-bold text-lg">جاري تحميل الطلبات...</p>
         </div>
       ) : (
-        <div className="bg-[#1e293b]/50 backdrop-blur-md rounded-[2.5rem] border border-white/5 overflow-hidden shadow-2xl relative">
+        <div className="bg-[#1e293b]/50 backdrop-blur-md rounded-[2.5rem] border border-white/5 shadow-2xl relative">
           <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
-          <div className="overflow-x-auto relative z-10">
-            <table className="w-full text-right">
+          <div className="overflow-x-auto relative z-10 pb-40">
+            <table className="w-full text-right pb-20">
               <thead>
                 <tr className="bg-white/5 text-white/40 text-sm font-bold uppercase tracking-widest">
                   <th className="px-8 py-6">رقم الطلب</th>
@@ -525,7 +525,7 @@ export default function AdminOrdersPage() {
                         onClick={() => toggleExpand(order.id)}
                         className={`hover:bg-white/5 transition-colors group cursor-pointer ${
                           expandedId === order.id ? "bg-white/5" : ""
-                        }`}
+                        } ${activeUpdateId === order.id ? "relative z-[100]" : "relative z-0"}`}
                       >
                         <td className="px-8 py-6 font-mono text-xs text-white/40">
                           <div className="flex items-center gap-3">
@@ -588,7 +588,7 @@ export default function AdminOrdersPage() {
                         </td>
                         <td className="px-8 py-6" onClick={(e) => e.stopPropagation()}>
                           <div className="flex items-center gap-2">
-                            <div className="relative">
+                            <div className="relative update-dropdown-container">
                               <button
                                 onClick={() => setActiveUpdateId(activeUpdateId === order.id ? null : order.id)}
                                 className="bg-[#1e293b] border border-white/10 text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-3 hover:border-secondary transition-all text-white group"
@@ -603,7 +603,7 @@ export default function AdminOrdersPage() {
                                   initial={{ opacity: 0, scale: 0.9, x: 10 }}
                                   animate={{ opacity: 1, scale: 1, x: 0 }}
                                   exit={{ opacity: 0, scale: 0.9, x: 10 }}
-                                  className="absolute left-full top-0 mr-2 min-w-[140px] bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl z-[110] overflow-hidden backdrop-blur-2xl"
+                                  className="absolute right-0 top-full mt-2 min-w-[150px] bg-[#1e293b] border border-white/10 rounded-2xl shadow-2xl z-[150] overflow-hidden backdrop-blur-2xl"
                                 >
                                   {(
                                     [
@@ -691,7 +691,7 @@ export default function AdminOrdersPage() {
                                                   )}
                                                 </div>
                                                 <div className="flex items-center gap-2 mt-0.5">
-                                                  <span className="text-xs text-secondary font-black">الكمية: {item.quantity}</span>
+                                                  <span className="text-lg text-secondary font-black bg-secondary/10 px-3 py-1 rounded-xl border border-secondary/20">الكمية: {item.quantity}</span>
                                                   <span className="w-1 h-1 rounded-full bg-white/10" />
                                                   <span className="text-xs text-white/40 font-bold">#{item.id.slice(0, 6)}</span>
                                                 </div>

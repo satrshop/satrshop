@@ -2,12 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2 } from "lucide-react";
+import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import Header from "@/components/layout/Header";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -18,6 +19,7 @@ export default function ContactPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
       const response = await fetch("/api/contact", {
@@ -33,10 +35,10 @@ export default function ContactPage() {
         setFormData({ name: "", email: "", phone: "", content: "" });
         setTimeout(() => setSuccess(false), 3000);
       } else {
-        alert(data.error || "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
+        setError(data.error || "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
       }
     } catch {
-      alert("فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
+      setError("فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
     }
     setLoading(false);
   };
@@ -77,6 +79,16 @@ export default function ContactPage() {
                 >
                   <h2 className="text-2xl font-bold text-primary-foreground mb-8">أرسل لنا رسالة</h2>
                   <form onSubmit={handleSubmit} className="space-y-6">
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-red-500/10 border border-red-500/20 text-red-200 p-4 rounded-xl flex items-center gap-3 text-sm font-bold"
+                      >
+                        <AlertCircle size={18} className="flex-shrink-0" />
+                        {error}
+                      </motion.div>
+                    )}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-bold text-primary-foreground/90 mb-2">الاسم الكامل</label>

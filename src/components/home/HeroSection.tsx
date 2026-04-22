@@ -24,8 +24,8 @@ export default function HeroSection() {
     <div className="px-3 sm:px-4 md:px-8 pt-24 sm:pt-28 md:pt-32 pb-10 sm:pb-16">
       <div className="w-full max-w-[1500px] mx-auto relative rounded-2xl sm:rounded-[2rem] md:rounded-[3rem] overflow-hidden shadow-2xl">
         {/* Full-width Background Images */}
-        <Image src="/images/bg2.png" alt="خلفية متجر سطر الرسمية - سطوع عالي" fill sizes="100vw" className="object-cover z-0 pointer-events-none dark:hidden block" priority />
-        <Image src="/images/bgblue.png" alt="خلفية متجر سطر الرسمية - الوضع الداكن" fill sizes="100vw" className="object-cover z-0 pointer-events-none hidden dark:block" priority />
+        <Image src="/images/bg2.png" alt="خلفية متجر سطر الرسمية - سطوع عالي" fill sizes="(max-width: 1500px) 100vw, 1500px" className="object-cover z-0 pointer-events-none dark:hidden block" priority />
+        <Image src="/images/bgblue.png" alt="خلفية متجر سطر الرسمية - الوضع الداكن" fill sizes="(max-width: 1500px) 100vw, 1500px" className="object-cover z-0 pointer-events-none hidden dark:block" priority />
 
         <main className="w-full px-4 sm:px-6 pt-4 sm:pt-6 md:pt-10 lg:pt-12 pb-12 sm:pb-16 md:pb-20 lg:pb-28 flex flex-col lg:flex-row items-center lg:items-start gap-8 sm:gap-12 lg:gap-16 relative z-10">
           {/* Background decorative blur - hidden on mobile for performance */}
@@ -67,11 +67,11 @@ export default function HeroSection() {
               </Link>
               <Link href="/collections" className="w-full sm:w-auto">
                 <motion.button
-                  whileHover={{ x: -5, backgroundColor: "var(--primary)", color: "white", transition: { duration: 0.2 } }}
+                  whileHover={{ x: -5, backgroundColor: "rgba(255, 255, 255, 0.1)", transition: { duration: 0.2 } }}
                   className="h-12 sm:h-14 w-full sm:w-auto px-6 sm:px-8 rounded-2xl font-bold text-lg sm:text-xl text-primary dark:text-white border-2 border-primary/30 dark:border-white/30 flex items-center justify-center gap-3 transition-all hover:bg-primary hover:text-white dark:hover:bg-white/10 backdrop-blur-md shadow-sm"
                 >
                   استكشف
-                  <span className="text-2xl leading-none dark:text-white">&larr;</span>
+                  <span className="text-2xl leading-none">&larr;</span>
                 </motion.button>
               </Link>
             </motion.div>
@@ -91,6 +91,7 @@ export default function HeroSection() {
               sizes="(max-width: 1024px) 100vw, 500px"
               className="object-cover transition-transform duration-[2s] ease-out group-hover:scale-110"
               priority
+              loading="eager"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-[#163644]/90 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex items-end justify-center pb-6 sm:pb-8 p-4 sm:p-6 backdrop-blur-[2px]">
               <motion.div
