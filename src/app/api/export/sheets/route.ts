@@ -1,8 +1,33 @@
 import { NextResponse } from "next/server";
 import { google } from "googleapis";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
 
 export async function POST(req: Request) {
   try {
+    // 1. Authenticate Request
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json({ error: "Unauthorized - No token provided" }, { status: 401 });
+    }
+
+    const token = authHeader.split("Bearer ")[1];
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    
+    if (!decodedToken.email) {
+      return NextResponse.json({ error: "Unauthorized - Invalid token" }, { status: 401 });
+    }
+
+    // 2. Authorize Request (Check if admin is active)
+    const adminDocs = await adminDb.collection("admins").where("email", "==", decodedToken.email).get();
+    if (adminDocs.empty) {
+      return NextResponse.json({ error: "Forbidden - Not an admin" }, { status: 403 });
+    }
+    
+    const adminData = adminDocs.docs[0].data();
+    if (adminData.status !== "active") {
+      return NextResponse.json({ error: "Forbidden - Admin account is inactive" }, { status: 403 });
+    }
+
     const { title, headers, data } = await req.json();
 
     const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;

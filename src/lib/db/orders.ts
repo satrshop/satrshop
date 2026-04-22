@@ -2,6 +2,7 @@ import { db } from "../firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc, getDocs, query, orderBy, updateDoc } from "firebase/firestore";
 import { Order } from "@/types/models/order";
 import { decrementStockForItems, incrementStockForItems, validateStock } from "./products";
+import { logCurrentAdminActivity } from "./logs";
 
 const ORDERS_COLLECTION = "orders";
 
@@ -48,6 +49,17 @@ export async function updateOrderStatus(id: string, status: Order["status"]): Pr
     }
 
     await updateDoc(docRef, { status });
+    
+    // Log the activity
+    const statusArabic: Record<string, string> = {
+      pending: "قيد الانتظار",
+      confirmed: "تم التأكيد",
+      shipping: "جاري الشحن",
+      completed: "تم التوصيل",
+      cancelled: "ملغي"
+    };
+    await logCurrentAdminActivity("تحديث حالة طلب", `تم تحديث حالة الطلب ${id} إلى: ${statusArabic[status] || status}`);
+
     return true;
   } catch (error) {
     console.error("Error updating order status:", error);

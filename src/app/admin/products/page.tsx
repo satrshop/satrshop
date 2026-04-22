@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProducts, deleteProduct } from "@/lib/db/products";
 import { Product } from "@/types/models/product";
+import { adminFetch } from "@/lib/api/admin-client";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Plus, 
@@ -23,8 +23,12 @@ export default function AdminProductsPage() {
 
   async function loadProducts() {
     setLoading(true);
-    const data = await getProducts(true);
-    setProducts(data);
+    try {
+      const data = await adminFetch<{ products: Product[] }>("/api/admin/products");
+      setProducts(data.products);
+    } catch (err) {
+      console.error("Failed to load products:", err);
+    }
     setLoading(false);
   }
 
@@ -37,10 +41,10 @@ export default function AdminProductsPage() {
     if (!confirm("هل أنت متأكد من حذف هذا المنتج؟ لا يمكن التراجع عن هذه الخطوة.")) return;
     
     setIsDeleting(id);
-    const success = await deleteProduct(id);
-    if (success) {
+    try {
+      await adminFetch(`/api/admin/products/${id}`, { method: "DELETE" });
       setProducts(prev => prev.filter(p => p.id !== id));
-    } else {
+    } catch {
       alert("فشل حذف المنتج. حاول مرة أخرى.");
     }
     setIsDeleting(null);

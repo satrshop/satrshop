@@ -18,25 +18,21 @@ import {
   ChevronLeft,
   Mail,
   Users,
-  Warehouse
+  Warehouse,
+  Shield,
+  Activity
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminHelp from "@/components/admin/AdminHelp";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
+  const [adminRole, setAdminRole] = useState<"superadmin" | "admin" | null>(null);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
-
-  useEffect(() => {
-    const unsubscribe = subscribeToUnreadCount((count) => {
-      setUnreadCount(count);
-    });
-    return () => unsubscribe();
-  }, []);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -51,16 +47,66 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           return;
         }
 
+        // Verify admin role via server-side API
+        try {
+          const idToken = await user.getIdToken();
+          const response = await fetch("/api/admin/auth/login", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${idToken}`,
+            },
+          });
 
-      } else if (pathname !== "/admin/login") {
-        router.push("/admin/login");
+          if (!response.ok) {
+            await signOut(auth);
+            router.push("/admin/login?error=unauthorized");
+            setLoading(false);
+            return;
+          }
+
+          const data = await response.json();
+          setAdminRole(data.admin?.role || null);
+        } catch {
+          await signOut(auth);
+          router.push("/admin/login?error=unauthorized");
+          setLoading(false);
+          return;
+        }
+
+        // Setup messages listener for the authenticated user
+        const unsubscribeSnapshot = subscribeToUnreadCount((count) => {
+          setUnreadCount(count);
+        });
+
+        // Store it so we can clean it up (optional, but good practice)
+        (window as any)._unsubscribeMessages = unsubscribeSnapshot;
+
+      } else {
+        // Unsubscribe if user logs out or session expires
+        if ((window as any)._unsubscribeMessages) {
+          (window as any)._unsubscribeMessages();
+          delete (window as any)._unsubscribeMessages;
+        }
+        if (pathname !== "/admin/login" && pathname !== "/admin/register") {
+          router.push("/admin/login");
+        }
       }
       setLoading(false);
     });
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      if ((window as any)._unsubscribeMessages) {
+        (window as any)._unsubscribeMessages();
+      }
+    };
   }, [router, pathname]);
 
   const handleLogout = async () => {
+    if ((window as any)._unsubscribeMessages) {
+      (window as any)._unsubscribeMessages();
+      delete (window as any)._unsubscribeMessages;
+    }
     await signOut(auth);
     router.push("/admin/login");
   };
@@ -73,9 +119,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  // Don't show layout on login page
-  if (pathname === "/admin/login") {
+  // Don't show layout on login or register page
+  if (pathname === "/admin/login" || pathname === "/admin/register") {
     return <>{children}</>;
+  }
+
+  // Prevent rendering protected content if not fully authenticated yet (during redirect)
+  if (!auth.currentUser || !adminRole) {
+    return null;
   }
   const navItems = [
     { name: "الإحصائيات", href: "/admin", icon: LayoutDashboard },
@@ -85,6 +136,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "الزبائن", href: "/admin/customers", icon: Users },
     { name: "الرسائل", href: "/admin/messages", icon: Mail },
   ];
+
+  if (adminRole === "superadmin") {
+    navItems.push({ name: "إدارة الفريق", href: "/admin/team", icon: Shield });
+    navItems.push({ name: "سجل النشاطات", href: "/admin/logs", icon: Activity });
+  }
 
   return (
     <div className="light min-h-screen bg-[#0f172a] text-white flex print:bg-white print:text-black print:block selection:bg-secondary selection:text-primary">

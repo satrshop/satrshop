@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getMessages, deleteMessage, markMessageAsRead } from "@/lib/db/messages";
 import { ContactMessage } from "@/types/models/message";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
@@ -15,6 +14,7 @@ import {
   XCircle,
   ChevronDown
 } from "lucide-react";
+import { adminFetch } from "@/lib/api/admin-client";
 
 export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
@@ -24,13 +24,16 @@ export default function AdminMessagesPage() {
 
   async function loadMessages() {
     setLoading(true);
-    const data = await getMessages();
-    setMessages(data);
+    try {
+      const data = await adminFetch<{ messages: ContactMessage[] }>("/api/admin/messages");
+      setMessages(data.messages);
+    } catch (err) {
+      console.error("Failed to load messages:", err);
+    }
     setLoading(false);
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadMessages();
   }, []);
 
@@ -38,18 +41,25 @@ export default function AdminMessagesPage() {
     e.stopPropagation();
     if (!confirm("هل أنت متأكد من حذف هذه الرسالة؟")) return;
     
-    const success = await deleteMessage(id);
-    if (success) {
+    try {
+      await adminFetch(`/api/admin/messages/${id}`, { method: "DELETE" });
       setMessages(prev => prev.filter(m => m.id !== id));
+    } catch (err) {
+      console.error("Failed to delete message:", err);
     }
   };
 
   const toggleReadStatus = async (id: string, currentStatus: boolean, e: React.MouseEvent) => {
     e.stopPropagation();
     const newStatus = !currentStatus;
-    const success = await markMessageAsRead(id, newStatus);
-    if (success) {
+    try {
+      await adminFetch(`/api/admin/messages/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ isRead: newStatus }),
+      });
       setMessages(prev => prev.map(m => m.id === id ? { ...m, isRead: newStatus } : m));
+    } catch (err) {
+      console.error("Failed to update message:", err);
     }
   };
 
@@ -97,9 +107,14 @@ export default function AdminMessagesPage() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 onClick={() => {
                   setExpandedId(expandedId === msg.id ? null : msg.id);
-                  if (!msg.isRead) markMessageAsRead(msg.id, true).then(() => {
-                     setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
-                  });
+                  if (!msg.isRead) {
+                    adminFetch(`/api/admin/messages/${msg.id}`, {
+                      method: "PUT",
+                      body: JSON.stringify({ isRead: true }),
+                    }).then(() => {
+                      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
+                    }).catch(() => {});
+                  }
                 }}
                 className={`bg-[#1e293b] rounded-[2rem] border border-white/5 overflow-hidden cursor-pointer transition-all hover:border-secondary/30 ${
                   !msg.isRead ? "ring-1 ring-secondary/50 bg-secondary/5" : ""

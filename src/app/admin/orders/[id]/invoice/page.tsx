@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { getOrderById } from "@/lib/db/orders";
 import { Order } from "@/types/models/order";
+import { adminFetch } from "@/lib/api/admin-client";
 import { Loader2, Printer, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -16,10 +16,14 @@ export default function InvoicePage() {
   useEffect(() => {
     async function loadOrder() {
       if (typeof id !== "string") return;
-      const data = await getOrderById(id);
-      setOrder(data);
-      if (data) {
-        document.title = `Invoice-${data.id.slice(0, 8).toUpperCase()}`;
+      try {
+        const data = await adminFetch<{ order: Order }>(`/api/admin/orders/${id}`);
+        setOrder(data.order);
+        if (data.order) {
+          document.title = `Invoice-${data.order.id.slice(0, 8).toUpperCase()}`;
+        }
+      } catch (err) {
+        console.error("Failed to load order:", err);
       }
       setLoading(false);
     }

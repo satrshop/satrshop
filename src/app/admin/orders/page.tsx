@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { getOrders, updateOrderStatus } from "@/lib/db/orders";
 import { Order } from "@/types/models/order";
+import { adminFetch } from "@/lib/api/admin-client";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   ShoppingBag, 
@@ -24,6 +24,7 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import { exportToCSV } from "@/lib/exportUtils";
+import { auth } from "@/lib/firebase";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -58,8 +59,12 @@ export default function AdminOrdersPage() {
 
   async function loadOrders() {
     setLoading(true);
-    const data = await getOrders();
-    setOrders(data);
+    try {
+      const data = await adminFetch<{ orders: Order[] }>("/api/admin/orders");
+      setOrders(data.orders);
+    } catch (err) {
+      console.error("Failed to load orders:", err);
+    }
     setLoading(false);
   }
 
@@ -81,10 +86,13 @@ export default function AdminOrdersPage() {
   };
 
   const handleStatusUpdate = async (id: string, newStatus: Order["status"]) => {
-    const success = await updateOrderStatus(id, newStatus);
-    if (success) {
+    try {
+      await adminFetch(`/api/admin/orders/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ status: newStatus }),
+      });
       setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
-    } else {
+    } catch {
       alert("فشل تحديث حالة الطلب.");
     }
   };
@@ -109,8 +117,9 @@ export default function AdminOrdersPage() {
       if (!isAFinished && isBFinished) return -1;
 
       // 2. Chronological within groups (newest first)
-      const dateA = a.createdAt?.toMillis?.() || 0;
-      const dateB = b.createdAt?.toMillis?.() || 0;
+      const getSeconds = (ts: any) => ts?.seconds || ts?._seconds || 0;
+      const dateA = getSeconds(a.createdAt) * 1000;
+      const dateB = getSeconds(b.createdAt) * 1000;
       return dateB - dateA;
     });
 
@@ -138,8 +147,9 @@ export default function AdminOrdersPage() {
     const [year, month] = selectedMonth.split("-").map(Number);
     
     const monthlyOrders = orders.filter(o => {
-      if (!o.createdAt) return false;
-      const orderDate = new Date(o.createdAt.seconds * 1000);
+      if (!o.createdAt || o.status !== "completed") return false;
+      const seconds = o.createdAt.seconds || (o.createdAt as any)._seconds || 0;
+      const orderDate = new Date(seconds * 1000);
       return orderDate.getFullYear() === year && (orderDate.getMonth() + 1) === month;
     });
 
@@ -151,7 +161,7 @@ export default function AdminOrdersPage() {
     const exportData = monthlyOrders.map(order => ({
       id: order.id,
       total: order.total,
-      date: order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"
+      date: order.createdAt ? new Date((order.createdAt.seconds || (order.createdAt as any)._seconds || 0) * 1000).toLocaleDateString("ar-EG") : "---"
     }));
 
     const headers = [
@@ -175,8 +185,9 @@ export default function AdminOrdersPage() {
       const [year, month] = selectedMonth.split("-").map(Number);
       
       const monthlyOrders = orders.filter(o => {
-        if (!o.createdAt) return false;
-        const orderDate = new Date(o.createdAt.seconds * 1000);
+        if (!o.createdAt || o.status !== "completed") return false;
+        const seconds = o.createdAt.seconds || (o.createdAt as any)._seconds || 0;
+        const orderDate = new Date(seconds * 1000);
         return orderDate.getFullYear() === year && (orderDate.getMonth() + 1) === month;
       });
 
@@ -189,7 +200,7 @@ export default function AdminOrdersPage() {
       const exportData = monthlyOrders.map(order => ({
         id: order.id,
         total: order.total,
-        date: order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"
+        date: order.createdAt ? new Date((order.createdAt.seconds || (order.createdAt as any)._seconds || 0) * 1000).toLocaleDateString("ar-EG") : "---"
       }));
 
       const headers = [
@@ -198,10 +209,13 @@ export default function AdminOrdersPage() {
         { key: "date", label: "تاريخ الطلب" }
       ];
 
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : "";
+
       const response = await fetch("/api/export/sheets", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
         },
         body: JSON.stringify({
           title: `تقرير طلبات - ${selectedMonth}`,
@@ -525,7 +539,7 @@ export default function AdminOrdersPage() {
                         </td>
                         <td className="px-8 py-6 font-black text-xl text-secondary">{order.total.toFixed(2)} د.ا</td>
                         <td className="px-8 py-6 text-white/60 font-bold text-sm">
-                          {order.createdAt ? new Date(order.createdAt.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
+                          {order.createdAt ? new Date((order.createdAt.seconds || (order.createdAt as any)._seconds || 0) * 1000).toLocaleDateString("ar-EG") : "---"}
                         </td>
                         <td className="px-8 py-6">
                           <div className="flex items-center gap-3">

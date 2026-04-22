@@ -21,9 +21,17 @@ const COLLECTION_NAME = "messages";
  */
 export function subscribeToUnreadCount(callback: (count: number) => void) {
   const q = query(collection(db, COLLECTION_NAME), where("isRead", "==", false));
-  return onSnapshot(q, (snapshot) => {
-    callback(snapshot.size);
-  });
+  return onSnapshot(q, 
+    (snapshot) => {
+      callback(snapshot.size);
+    }, 
+    (error) => {
+      // Ignore permission-denied errors that happen during logout/auth transitions
+      if (error.code !== "permission-denied") {
+        console.error("Messages listener error:", error);
+      }
+    }
+  );
 }
 
 export async function sendMessage(message: Omit<ContactMessage, "id" | "createdAt" | "isRead">) {

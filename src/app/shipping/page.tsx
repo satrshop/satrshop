@@ -10,7 +10,7 @@ export default function ShippingPage() {
       <Header />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -23,7 +23,7 @@ export default function ShippingPage() {
           <p className="text-base sm:text-lg text-muted-foreground font-medium">سريعين في الشحن كما نحن سريعين في كتابة الكود!</p>
         </motion.div>
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
@@ -42,7 +42,7 @@ export default function ShippingPage() {
 
           <h3 className="text-2xl font-bold text-primary dark:text-primary-foreground mb-4 flex items-center gap-3"><Truck className="text-secondary" /> شركات الشحن المعتمدة</h3>
           <p className="text-primary/80 dark:text-primary-foreground/80 font-medium">
-            نتعامل مع أفضل مزودي الخدمات اللوجستية مثل أرامكس (Aramex) لضمان وصول ملابسك التقنية بحالة ممتازة وبأسرع وقت ممكن لباب منزلك.
+            نتعامل مع أفضل مزودي الخدمات اللوجستية لضمان وصول ملابسك التقنية بحالة ممتازة وبأسرع وقت ممكن لباب منزلك.
           </p>
         </motion.div>
       </main>

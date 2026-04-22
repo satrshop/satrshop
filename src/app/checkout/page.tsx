@@ -18,7 +18,6 @@ import {
   ChevronDown
 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
-import { createOrder } from "@/lib/db/orders";
 import Header from "@/components/layout/Header";
 
 const JORDAN_CITIES = [
@@ -103,32 +102,34 @@ export default function CheckoutPage() {
     }
 
     try {
-      const orderId = await createOrder({
-        items: items.map(item => ({
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          quantity: item.quantity,
-          costPrice: 0, // Will be injected server-side for security
-          selectedColor: item.selectedColor,
-          selectedSize: item.selectedSize
-        })),
-        total: total,
-        customer: {
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          city: formData.city,
-          address: formData.address,
-          isZaytoonah: !!isZaytoonah,
-          gender: gender || null
-        },
-        paymentMethod: 'cod',
-        shippingFee: currentShippingFee || 0
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: items.map(item => ({
+            id: item.id,
+            image: item.image,
+            quantity: item.quantity,
+            selectedColor: item.selectedColor,
+            selectedSize: item.selectedSize
+          })),
+          customer: {
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            city: formData.city,
+            address: formData.address,
+            isZaytoonah: !!isZaytoonah,
+            gender: gender || null
+          },
+          paymentMethod: 'cod',
+          shippingFee: currentShippingFee || 0
+        })
       });
 
-      if (orderId) {
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         // Save customer data to localStorage for next time
         localStorage.setItem("satr_customer_info", JSON.stringify({
           formData,
@@ -136,19 +137,19 @@ export default function CheckoutPage() {
           gender
         }));
         
-        router.push(`/checkout/success?id=${orderId}`);
+        router.push(`/checkout/success?id=${data.orderId}`);
       } else {
-        throw new Error("Failed to create order");
+        throw new Error(data.error || "Failed to create order");
       }
-    } catch (err: unknown) {
-      const error = err as Error;
-      if (error.message?.startsWith("INSUFFICIENT_STOCK:")) {
-        const details = error.message.replace("INSUFFICIENT_STOCK:", "");
+    } catch (err: any) {
+      const errorMessage = err.message || "";
+      if (errorMessage.startsWith("INSUFFICIENT_STOCK:")) {
+        const details = errorMessage.replace("INSUFFICIENT_STOCK:", "");
         setError(`عذراً، بعض المنتجات لم تعد متوفرة بالكمية المطلوبة: ${details}`);
       } else {
         setError("حدث خطأ أثناء إتمام الطلب. يرجى المحاولة مرة أخرى.");
       }
-      console.error(error);
+      console.error(err);
     } finally {
       setIsSubmitting(false);
     }

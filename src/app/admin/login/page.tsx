@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, onAuthStateChanged, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
@@ -13,12 +13,14 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [resetSent, setResetSent] = useState(false);
   const router = useRouter();
 
   const searchParams = useSearchParams();
   const unauthorizedError = searchParams.get("error") === "unauthorized";
 
   useEffect(() => {
+
     if (unauthorizedError) {
       setError("ليس لديك صلاحيات للوصول إلى لوحة التحكم.");
     } else if (searchParams.get("error") === "expired") {
@@ -41,12 +43,71 @@ export default function AdminLoginPage() {
     setError("");
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      // FIX-10: Email verification is bypassed for now to allow old admin accounts to login.
+      // if (!userCredential.user.emailVerified) {
+      //   await auth.signOut();
+      //   setError("يرجى تفعيل بريدك الإلكتروني أولاً. تحقق من صندوق الوارد.");
+      //   setLoading(false);
+      //   return;
+      // }
+
+      // Verify admin status server-side and log login
+      const idToken = await userCredential.user.getIdToken();
+      const response = await fetch("/api/admin/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`,
+        },
+      });
+
+      if (!response.ok) {
+        await auth.signOut();
+        setError("حسابك غير مسجل كمدير، أو أنه قيد الانتظار بانتظار تفعيل المدير الرئيسي.");
+        setLoading(false);
+        return;
+      }
+
       localStorage.setItem("adminSessionStart", Date.now().toString());
       router.push("/admin");
     } catch (err: unknown) {
       console.error("Login failed:", err);
       setError("فشل تسجيل الدخول. يرجى التأكد من البريد الإلكتروني وكلمة المرور.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!email) {
+      setError("الرجاء إدخال البريد الإلكتروني أولاً في الحقل المخصص لإرسال رابط استعادة كلمة المرور.");
+      return;
+    }
+    
+    setLoading(true);
+    setError("");
+    setResetSent(false);
+    
+    try {
+      await sendPasswordResetEmail(auth, email);
+      
+      // Log the activity securely on the server
+      await fetch("/api/admin/auth/log-reset", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      setResetSent(true);
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === "auth/user-not-found") {
+        setError("لا يوجد حساب مسجل بهذا البريد الإلكتروني.");
+      } else {
+        setError("فشل إرسال رابط استعادة كلمة المرور. يرجى المحاولة لاحقاً.");
+      }
     } finally {
       setLoading(false);
     }
@@ -100,7 +161,27 @@ export default function AdminLoginPage() {
                 className="w-full bg-white/50 border border-primary/10 rounded-2xl py-4 pr-12 pl-4 text-primary placeholder:text-primary/20 focus:outline-none focus:border-secondary focus:ring-4 focus:ring-secondary/5 transition-all"
               />
             </div>
+            <div className="flex justify-end mt-2">
+              <button
+                type="button"
+                onClick={handleResetPassword}
+                className="text-sm text-secondary hover:text-secondary/80 transition-colors font-bold"
+              >
+                نسيت كلمة المرور؟
+              </button>
+            </div>
           </div>
+
+          {resetSent && (
+            <motion.div 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="bg-green-500/10 border border-green-500/20 text-green-600 p-4 rounded-xl flex items-center gap-3 text-sm font-bold leading-relaxed"
+            >
+              تم إرسال رابط استعادة كلمة المرور إلى بريدك الإلكتروني بنجاح.<br/>
+              (يرجى تفقد مجلد البريد غير المرغوب فيه أو Spam / Junk في حال لم تجد الرسالة)
+            </motion.div>
+          )}
 
           {error && (
             <motion.div 
