@@ -1,14 +1,9 @@
 import { db } from "../firebase";
-import { collection, getDocs, doc, getDoc, query, addDoc, updateDoc, deleteDoc, increment, DocumentSnapshot } from "firebase/firestore";
+import { collection, getDocs, doc, getDoc, query, DocumentSnapshot } from "firebase/firestore";
 import { Product, DEFAULT_STOCK } from "@/types/models/product";
-import { logCurrentAdminActivity } from "./logs";
 
 const PRODUCTS_COLLECTION = "products";
 
-/**
- * Normalizes a Firestore document into a Product, ensuring `stock` has a value.
- * Products that predate the stock field get DEFAULT_STOCK.
- */
 /**
  * Normalizes a Firestore document into a Product, ensuring `stock` has a value.
  * Products that predate the stock field get DEFAULT_STOCK.
@@ -31,48 +26,10 @@ function docToProduct(docSnap: DocumentSnapshot, includeSensitive: boolean = fal
   return product;
 }
 
-export async function createProduct(productData: Omit<Product, "id">): Promise<string | null> {
-  try {
-    const productsRef = collection(db, PRODUCTS_COLLECTION);
-    const docRef = await addDoc(productsRef, {
-      ...productData,
-      stock: productData.stock ?? DEFAULT_STOCK,
-    });
-    await logCurrentAdminActivity("إضافة منتج", `تمت إضافة منتج جديد: ${productData.name}`);
-    return docRef.id;
-  } catch (error) {
-    console.error("Error creating product:", error);
-    return null;
-  }
-}
-
-export async function updateProduct(id: string, productData: Partial<Product>): Promise<boolean> {
-  try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, id);
-    await updateDoc(docRef, productData);
-    await logCurrentAdminActivity("تعديل منتج", `تم تعديل منتج: ${productData.name || id}`);
-    return true;
-  } catch (error) {
-    console.error("Error updating product:", error);
-    return false;
-  }
-}
-
-export async function deleteProduct(id: string): Promise<boolean> {
-  try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, id);
-    const docSnap = await getDoc(docRef);
-    const productName = docSnap.exists() ? docSnap.data().name : id;
-
-    await deleteDoc(docRef);
-    await logCurrentAdminActivity("حذف منتج", `تم حذف المنتج: ${productName}`);
-    return true;
-  } catch (error) {
-    console.error("Error deleting product:", error);
-    return false;
-  }
-}
-
+/**
+ * Fetches all products from Firestore (read-only via Client SDK).
+ * Write operations are handled exclusively via Admin SDK in API routes.
+ */
 export async function getProducts(includeSensitive: boolean = false): Promise<Product[]> {
   try {
     const productsRef = collection(db, PRODUCTS_COLLECTION);
@@ -108,78 +65,6 @@ export async function getProductById(id: string, includeSensitive: boolean = fal
 }
 
 /**
- * Update the stock quantity for a single product.
- */
-export async function updateStock(productId: string, newStock: number): Promise<boolean> {
-  try {
-    const docRef = doc(db, PRODUCTS_COLLECTION, productId);
-    await updateDoc(docRef, { stock: Math.max(0, newStock) });
-    return true;
-  } catch (error) {
-    console.error("Error updating stock:", error);
-    return false;
-  }
-}
-
-/**
- * Decrement stock for multiple products at once (used after placing an order).
- * Uses Firestore `increment()` for atomic operations.
- * Returns true if all updates succeed.
- */
-export async function decrementStockForItems(items: { id: string; quantity: number }[]): Promise<boolean> {
-  try {
-    const updatePromises = items.map((item) => {
-      const docRef = doc(db, PRODUCTS_COLLECTION, item.id);
-      return updateDoc(docRef, { stock: increment(-item.quantity) });
-    });
-    await Promise.all(updatePromises);
-    return true;
-  } catch (error) {
-    console.error("Error decrementing stock:", error);
-    return false;
-  }
-}
-
-/**
- * Add stock back for multiple products (used when an order is cancelled).
- */
-export async function incrementStockForItems(items: { id: string; quantity: number }[]): Promise<boolean> {
-  try {
-    const updatePromises = items.map((item) => {
-      const docRef = doc(db, PRODUCTS_COLLECTION, item.id);
-      return updateDoc(docRef, { stock: increment(item.quantity) });
-    });
-    await Promise.all(updatePromises);
-    return true;
-  } catch (error) {
-    console.error("Error incrementing stock:", error);
-    return false;
-  }
-}
-
-/**
- * Check if all items in the cart have sufficient stock.
- * Returns an array of items that are out of stock or have insufficient quantity.
- */
-export async function validateStock(items: { id: string; quantity: number; name: string }[]): Promise<{ id: string; name: string; requested: number; available: number }[]> {
-  const insufficientItems: { id: string; name: string; requested: number; available: number }[] = [];
-
-  for (const item of items) {
-    const product = await getProductById(item.id);
-    if (!product || product.stock < item.quantity) {
-      insufficientItems.push({
-        id: item.id,
-        name: item.name,
-        requested: item.quantity,
-        available: product?.stock ?? 0,
-      });
-    }
-  }
-
-  return insufficientItems;
-}
-
-/**
  * Perform a search on products.
  * For small catalogs, we fetch all and filter client-side.
  * For large catalogs, we should use a proper search index or Firestore filters.
@@ -203,11 +88,16 @@ export async function getCategories(): Promise<string[]> {
   try {
     const products = await getProducts();
     const categories = Array.from(new Set(products.map(p => p.category)));
-    // Default categories if list is empty
-    const defaults = ["هوديز", "تيشرتات", "جواكيت", "حقائب", "إكسسوارات"];
-    return Array.from(new Set([...defaults, ...categories])).filter(Boolean);
+    // Default categories that should always show
+    const defaults = ["أجندة", "ستيكر", "بروش", "إكسسوارات"];
+    
+    // Combine defaults with existing categories, but explicitly filter out the ones user wants removed
+    const unwanted = ["هوديز", "تيشرتات", "جواكيت", "حقائب", "هوديز تقنية"];
+    
+    const combined = Array.from(new Set([...defaults, ...categories]));
+    return combined.filter(cat => cat && !unwanted.includes(cat));
   } catch (error) {
     console.error("Error fetching categories:", error);
-    return ["هوديز", "تيشرتات", "جواكيت", "حقائب", "إكسسوارات"];
+    return ["أجندة", "ستيكر", "بروش", "إكسسوارات"];
   }
 }

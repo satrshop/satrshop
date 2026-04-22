@@ -58,10 +58,19 @@ export default function CartDrawer() {
             {/* Cart Items */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {items.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center space-y-4 opacity-50">
-                  <ShoppingBag size={64} className="text-muted-foreground" />
-                  <p className="text-lg font-bold text-foreground">الحقيبة فارغة حالياً</p>
-                  <p className="text-sm text-muted-foreground">تصفح تشكيلة سطر وأضف ما يعجبك!</p>
+                <div className="flex flex-col items-center justify-center h-full text-center space-y-6">
+                  <div className="opacity-50 flex flex-col items-center space-y-4">
+                    <ShoppingBag size={64} className="text-muted-foreground" />
+                    <p className="text-lg font-bold text-foreground">الحقيبة فارغة حالياً</p>
+                    <p className="text-sm text-muted-foreground">تصفح تشكيلة سطر وأضف ما يعجبك!</p>
+                  </div>
+                  <Link 
+                    href="/shop"
+                    onClick={() => setIsOpen(false)}
+                    className="bg-secondary text-white px-8 py-3 rounded-xl font-bold hover:bg-[#a87d2b] transition-all shadow-lg shadow-secondary/20 transform hover:scale-105 active:scale-95"
+                  >
+                    تسوّق الآن
+                  </Link>
                 </div>
               ) : (
                 items.map((item) => (

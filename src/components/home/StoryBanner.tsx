@@ -34,7 +34,7 @@ export default function StoryBanner() {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 text-secondary drop-shadow-sm leading-tight">تصميم يروي الكود</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 sm:mb-6 text-secondary leading-tight">تصميم يروي الحكاية</h2>
             <p className="text-base sm:text-lg md:text-xl text-primary dark:text-white/90 leading-relaxed font-medium">
               التفاصيل تصنع الفرق .. <br />
               عيننا على كل تفصيلة لنقدم لك تصاميم<br />تجمع بين البساطة والجودة في قطعة واحدة            </p>

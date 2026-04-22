@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import CartDrawer from "@/components/cart/CartDrawer";
 import Footer from "@/components/layout/Footer";
-import Script from "next/script";
 
 const madaFont = localFont({
   src: "../../public/fonts/SFMADA.ttf",
@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://satrshop.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://satrshop.com"),
   title: {
     default: "متجر سطر | Satr Shop - متجر المبرمجين الأول في الأردن",
     template: "%s | متجر سطر"
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "متجر سطر | Satr Shop - أزياء المبرمجين",
     description: "المتجر الأول لطلبة تكنولوجيا المعلومات والمبرمجين في الأردن والعالم العربي. هوديز، تيشرتات، وإكسسوارات تقنية بجودة عالية.",
-    url: "https://satrshop.vercel.app",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://satrshop.com",
     siteName: "متجر سطر",
     locale: "ar_JO",
     type: "website",
@@ -81,13 +81,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://satrshop.com";
+
   const jsonLd = [
     {
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "متجر سطر | Satr Shop",
-      "url": "https://satrshop.vercel.app",
-      "logo": "https://satrshop.vercel.app/images/SatrLogo.png",
+      "url": siteUrl,
+      "logo": `${siteUrl}/images/SatrLogo.png`,
       "description": "المتجر العربي الأول لطلبة تكنولوجيا المعلومات والمبرمجين. هوديز، تيشرتات، وإكسسوارات مصممة خصيصاً لمجتمع البرمجة.",
       "contactPoint": {
         "@type": "ContactPoint",
@@ -110,20 +112,21 @@ export default function RootLayout({
       "@type": "WebSite",
       "name": "متجر سطر",
       "alternateName": "Satr Shop",
-      "url": "https://satrshop.vercel.app",
+      "url": siteUrl,
       "potentialAction": {
         "@type": "SearchAction",
         "target": {
           "@type": "EntryPoint",
-          "urlTemplate": "https://satrshop.vercel.app/shop?q={search_term_string}"
+          "urlTemplate": `${siteUrl}/shop?q={search_term_string}`
         },
         "query-input": "required name=search_term_string"
-      }
+      },
+      "inLanguage": "ar-JO"
     }
   ];
 
   return (
-    <html lang="ar" dir="rtl" className={`${madaFont.variable} ${geistMono.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className={`${madaFont.variable} ${geistMono.variable} h-full antialiased`} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head>
         {process.env.NEXT_PUBLIC_GA_ID && (
           <>

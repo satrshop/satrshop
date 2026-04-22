@@ -65,6 +65,8 @@ export default function AdminCustomersPage() {
     // Group orders by phone number to extract unique customers
     const customerMap = new Map<string, Customer>();
     
+    const getSeconds = (ts: any) => ts?.seconds ?? ts?._seconds ?? 0;
+    
     orders.forEach(order => {
       // Clean phone number for grouping
       const phone = (order.customer?.phone || '').replace(/\D/g, '');
@@ -76,8 +78,8 @@ export default function AdminCustomersPage() {
         existing.orderCount += 1;
         existing.totalSpent += order.total;
         // Keep the most recent data (Firestore Timestamp comparison)
-        const orderSeconds = order.createdAt?.seconds || 0;
-        const existingSeconds = existing.lastOrderDate?.seconds || 0;
+        const orderSeconds = getSeconds(order.createdAt);
+        const existingSeconds = getSeconds(existing.lastOrderDate);
         
         if (orderSeconds > existingSeconds) {
           existing.name = order.customer.name;
@@ -339,7 +341,9 @@ export default function AdminCustomersPage() {
                       <td className="px-8 py-6">
                         <div className="flex items-center gap-2 text-white/60 font-bold text-sm">
                           <Calendar size={14} className="text-white/20" />
-                          {customer.lastOrderDate?.seconds ? new Date(customer.lastOrderDate.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
+                          {(customer.lastOrderDate as any)?.seconds || (customer.lastOrderDate as any)?._seconds 
+                            ? new Date(((customer.lastOrderDate as any).seconds || (customer.lastOrderDate as any)._seconds) * 1000).toLocaleDateString("ar-EG") 
+                            : "---"}
                         </div>
                       </td>
 

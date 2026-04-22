@@ -8,6 +8,15 @@ import { verifyAdmin, logAdminActivity, AdminAuthError } from "@/lib/api/admin-a
  */
 export async function POST(req: Request) {
   try {
+    // Parse body to check if this is an actual login (vs session verification)
+    let isLogin = false;
+    try {
+      const body = await req.json();
+      isLogin = body?.isLogin === true;
+    } catch {
+      // No body or invalid JSON — this is a session verification call
+    }
+
     const admin = await verifyAdmin(req);
 
     // Initialize superadmin if admins collection is empty
@@ -24,8 +33,10 @@ export async function POST(req: Request) {
       }
     }
 
-    // Log login activity
-    await logAdminActivity(admin, "تسجيل دخول", "تم تسجيل الدخول للوحة التحكم بنجاح");
+    // Log login activity only for actual logins (not session verifications)
+    if (isLogin) {
+      await logAdminActivity(admin, "تسجيل دخول", "تم تسجيل الدخول للوحة التحكم بنجاح");
+    }
 
     return NextResponse.json({
       success: true,

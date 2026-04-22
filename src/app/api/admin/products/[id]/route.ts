@@ -54,8 +54,22 @@ export async function PUT(
       return NextResponse.json({ error: "Product not found" }, { status: 404 });
     }
 
-    await docRef.update(body);
-    await logAdminActivity(admin, "تعديل منتج", `تم تعديل منتج: ${body.name || id}`);
+    // Whitelist allowed fields to prevent arbitrary field injection
+    const ALLOWED_FIELDS = [
+      'name', 'price', 'image', 'category', 'description',
+      'stock', 'costPrice', 'hasColors', 'colors', 'hasSizes', 'sizes',
+      'rating', 'isNew',
+    ];
+    const sanitizedBody = Object.fromEntries(
+      Object.entries(body).filter(([key]) => ALLOWED_FIELDS.includes(key))
+    );
+
+    if (Object.keys(sanitizedBody).length === 0) {
+      return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
+    }
+
+    await docRef.update(sanitizedBody);
+    await logAdminActivity(admin, "تعديل منتج", `تم تعديل منتج: ${sanitizedBody.name || id}`);
 
     return NextResponse.json({ success: true });
   } catch (error) {

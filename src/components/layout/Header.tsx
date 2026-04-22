@@ -9,7 +9,7 @@ import { ShoppingBag, Search, Menu, X, ArrowLeft, Loader2, Heart } from "lucide-
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { useCartStore } from "@/store/useCartStore";
 import { useWishlistStore } from "@/store/useWishlistStore";
-import { searchProductsRemote } from "@/lib/db/products";
+import { searchProductsRemote, getCategories } from "@/lib/db/products";
 import { Product } from "@/types/models/product";
 
 export default function Header() {
@@ -18,6 +18,7 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -33,8 +34,17 @@ export default function Header() {
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalWishlistItems = wishlistItems.length;
 
+  // Fetch categories for search suggestions
   useEffect(() => {
-    return scrollY.onChange((latest) => {
+    async function loadCategories() {
+      const cats = await getCategories();
+      setCategories(cats);
+    }
+    loadCategories();
+  }, []);
+
+  useEffect(() => {
+    return scrollY.on("change", (latest) => {
       setIsScrolled(latest > 50);
     });
   }, [scrollY]);
@@ -149,7 +159,8 @@ export default function Header() {
                   alt="شعار متجر سطر"
                   width={isScrolled ? 48 : 56}
                   height={isScrolled ? 16 : 20}
-                  className="object-contain transition-all duration-300 w-auto h-auto dark:hidden block"
+                  className="object-contain transition-all duration-300 dark:hidden block"
+                  style={{ width: "auto", height: "auto" }}
                   priority
                 />
                 <Image
@@ -157,7 +168,8 @@ export default function Header() {
                   alt="شعار متجر سطر"
                   width={isScrolled ? 48 : 56}
                   height={isScrolled ? 16 : 20}
-                  className="object-contain transition-all duration-300 w-auto h-auto hidden dark:block"
+                  className="object-contain transition-all duration-300 hidden dark:block"
+                  style={{ width: "auto", height: "auto" }}
                   priority
                 />
               </motion.div>
@@ -305,11 +317,11 @@ export default function Header() {
                       <Search size={36} className="text-muted-foreground/50" />
                     </div>
                     <p className="text-lg font-bold text-foreground">ابحث في متجر سطر</p>
-                    <p className="text-muted-foreground text-sm">ابحث عن هوديز، تيشرتات، جواكيت، إكسسوارات وغيرها...</p>
+                    <p className="text-muted-foreground text-sm">ابحث عن أجندة، ستيكر، بروش، إكسسوارات وغيرها...</p>
 
                     {/* Quick category suggestions */}
                     <div className="flex flex-wrap justify-center gap-2 pt-4">
-                      {["هوديز تقنية", "تيشرتات", "جواكيت", "إكسسوارات", "حقائب"].map((cat) => (
+                      {categories.map((cat) => (
                         <button
                           key={cat}
                           onClick={() => setSearchQuery(cat)}

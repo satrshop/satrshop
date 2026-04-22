@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "تواصل معنا - خدمة العملاء",
@@ -19,5 +20,41 @@ export default function ContactLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return children;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://satrshop.com";
+
+  const contactJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "تواصل معنا - متجر سطر",
+    "url": `${siteUrl}/contact`,
+    "mainEntity": {
+      "@type": "Organization",
+      "name": "متجر سطر",
+      "url": siteUrl,
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+962798419463",
+        "contactType": "customer service",
+        "email": "satrshopp@gmail.com",
+        "availableLanguage": ["Arabic", "English"],
+        "areaServed": "JO"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "عمّان",
+        "addressCountry": "JO"
+      }
+    }
+  };
+
+  return (
+    <>
+      <Script
+        id="contact-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactJsonLd) }}
+      />
+      {children}
+    </>
+  );
 }
