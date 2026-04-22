@@ -4,12 +4,12 @@ import { verifyAdmin, logAdminActivity, AdminAuthError } from "@/lib/api/admin-a
 
 export async function DELETE(
   req: Request,
-  { params }: { params: { phone: string } }
+  { params }: { params: Promise<{ phone: string }> }
 ) {
   try {
     // Only superadmin can delete customers
     const adminUser = await verifyAdmin(req, "superadmin");
-    const { phone } = params;
+    const { phone } = await params;
 
     if (!phone) {
       return NextResponse.json({ error: "رقم الهاتف مطلوب" }, { status: 400 });
