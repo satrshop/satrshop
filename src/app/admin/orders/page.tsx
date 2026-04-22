@@ -19,7 +19,8 @@ import {
   XCircle,
   ThumbsUp,
   Printer,
-  Calendar
+  Calendar,
+  Trash2
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -29,6 +30,8 @@ import { auth } from "@/lib/firebase";
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdminRole, setIsAdminRole] = useState<string>("");
+  const [deletingOrderId, setDeletingOrderId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -60,8 +63,12 @@ export default function AdminOrdersPage() {
   async function loadOrders() {
     setLoading(true);
     try {
-      const data = await adminFetch<{ orders: Order[] }>("/api/admin/orders");
+      const [data, roleData] = await Promise.all([
+        adminFetch<{ orders: Order[] }>("/api/admin/orders"),
+        adminFetch<any>("/api/admin/auth/login", { method: "POST" }).catch(() => ({ admin: { role: "" } }))
+      ]);
       setOrders(data.orders);
+      setIsAdminRole(roleData?.admin?.role || "");
     } catch (err) {
       console.error("Failed to load orders:", err);
     }
@@ -95,6 +102,21 @@ export default function AdminOrdersPage() {
     } catch {
       alert("فشل تحديث حالة الطلب.");
     }
+  };
+
+  const handleDeleteOrder = async (id: string) => {
+    if (!window.confirm("هل أنت متأكد من حذف هذا الطلب الملغي بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.")) {
+      return;
+    }
+    setDeletingOrderId(id);
+    try {
+      await adminFetch(`/api/admin/orders/${id}`, { method: "DELETE" });
+      setOrders(prev => prev.filter(o => o.id !== id));
+      if (expandedId === id) setExpandedId(null);
+    } catch (err: any) {
+      alert("فشل الحذف: " + err.message);
+    }
+    setDeletingOrderId(null);
   };
 
   const filteredOrders = orders
@@ -565,16 +587,17 @@ export default function AdminOrdersPage() {
                           </div>
                         </td>
                         <td className="px-8 py-6" onClick={(e) => e.stopPropagation()}>
-                          <div className="relative">
-                            <button
-                              onClick={() => setActiveUpdateId(activeUpdateId === order.id ? null : order.id)}
-                              className="bg-[#1e293b] border border-white/10 text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-3 hover:border-secondary transition-all text-white group"
-                            >
-                              <span>تحديث</span>
-                              <ChevronDown size={14} className={`text-white/20 transition-transform ${activeUpdateId === order.id ? 'rotate-180' : ''}`} />
-                            </button>
+                          <div className="flex items-center gap-2">
+                            <div className="relative">
+                              <button
+                                onClick={() => setActiveUpdateId(activeUpdateId === order.id ? null : order.id)}
+                                className="bg-[#1e293b] border border-white/10 text-[10px] font-black px-4 py-2 rounded-xl flex items-center gap-3 hover:border-secondary transition-all text-white group"
+                              >
+                                <span>تحديث</span>
+                                <ChevronDown size={14} className={`text-white/20 transition-transform ${activeUpdateId === order.id ? 'rotate-180' : ''}`} />
+                              </button>
 
-                            <AnimatePresence>
+                              <AnimatePresence>
                               {activeUpdateId === order.id && (
                                 <motion.div
                                   initial={{ opacity: 0, scale: 0.9, x: 10 }}
@@ -608,6 +631,18 @@ export default function AdminOrdersPage() {
                                 </motion.div>
                               )}
                             </AnimatePresence>
+                          </div>
+                          
+                          {isAdminRole === "superadmin" && order.status === "cancelled" && (
+                            <button
+                              onClick={() => handleDeleteOrder(order.id)}
+                              disabled={deletingOrderId === order.id}
+                              className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition-all disabled:opacity-50 border border-red-500/20 shadow-lg shadow-red-500/5"
+                              title="حذف الطلب نهائياً"
+                            >
+                              {deletingOrderId === order.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                            </button>
+                          )}
                           </div>
                         </td>
                       </motion.tr>

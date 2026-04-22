@@ -105,3 +105,43 @@ export async function PUT(
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
+
+/**
+ * DELETE /api/admin/orders/[id] — Delete a cancelled order.
+ */
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const verifiedAdmin = await verifyAdmin(req, "superadmin");
+    const { id } = await params;
+
+    const docRef = adminDb.collection(ORDERS_COLLECTION).doc(id);
+    const doc = await docRef.get();
+
+    if (!doc.exists) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const orderData = doc.data()!;
+    if (orderData.status !== "cancelled") {
+      return NextResponse.json({ error: "يمكن حذف الطلبات الملغية فقط" }, { status: 400 });
+    }
+
+    await docRef.delete();
+
+    await logAdminActivity(
+      verifiedAdmin,
+      "حذف طلب",
+      `تم حذف طلب ملغي برقم: ${id}`
+    );
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    if (error instanceof AdminAuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+  }
+}
