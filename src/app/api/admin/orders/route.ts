@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 import { adminDb } from "@/lib/firebase-admin";
 import { verifyAdmin, AdminAuthError } from "@/lib/api/admin-auth";
 

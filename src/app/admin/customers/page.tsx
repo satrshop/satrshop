@@ -18,6 +18,7 @@ import {
   FileSpreadsheet
 } from "lucide-react";
 import { exportToCSV } from "@/lib/exportUtils";
+import { Trash2 } from "lucide-react";
 
 interface Customer {
   id: string; // Using phone number as ID for uniqueness in this view
@@ -35,6 +36,8 @@ export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isAdminRole, setIsAdminRole] = useState<string>("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [genderFilter, setGenderFilter] = useState("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
@@ -52,8 +55,12 @@ export default function AdminCustomersPage() {
   async function loadCustomers() {
     setLoading(true);
     try {
-      const data = await adminFetch<{ orders: Order[] }>("/api/admin/orders");
+      const [data, roleData] = await Promise.all([
+        adminFetch<{ orders: Order[] }>("/api/admin/orders"),
+        adminFetch<any>("/api/admin/auth/login", { method: "POST" }).catch(() => ({ admin: { role: "" } }))
+      ]);
       const orders = data.orders;
+      setIsAdminRole(roleData?.admin?.role || "");
     
     // Group orders by phone number to extract unique customers
     const customerMap = new Map<string, Customer>();
@@ -111,6 +118,22 @@ export default function AdminCustomersPage() {
       cleanPhone = '962' + cleanPhone.substring(1);
     }
     return `https://wa.me/${cleanPhone}`;
+  };
+
+  const handleDeleteCustomer = async (phone: string, name: string) => {
+    if (!window.confirm(`تحذير خطير: هل أنت متأكد من حذف الزبون "${name}"؟\\n\\nهذا الإجراء سيؤدي إلى مسح جميع طلباته من النظام بشكل نهائي ولا يمكن التراجع عنه!`)) {
+      return;
+    }
+    setDeletingId(phone);
+    try {
+      await adminFetch(`/api/admin/customers/${encodeURIComponent(phone)}`, {
+        method: "DELETE"
+      });
+      await loadCustomers();
+    } catch (err: any) {
+      alert("فشل الحذف: " + err.message);
+    }
+    setDeletingId(null);
   };
 
   const filteredCustomers = customers.filter(c => {
@@ -229,6 +252,7 @@ export default function AdminCustomersPage() {
                   <th className="px-8 py-6">الجنس</th>
                   <th className="px-8 py-6">إحصائيات</th>
                   <th className="px-8 py-6">آخر طلب</th>
+                  {isAdminRole === "superadmin" && <th className="px-8 py-6">إجراءات</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
@@ -318,6 +342,20 @@ export default function AdminCustomersPage() {
                           {customer.lastOrderDate?.seconds ? new Date(customer.lastOrderDate.seconds * 1000).toLocaleDateString("ar-EG") : "---"}
                         </div>
                       </td>
+
+                      {/* Actions */}
+                      {isAdminRole === "superadmin" && (
+                        <td className="px-8 py-6">
+                          <button
+                            onClick={() => handleDeleteCustomer(customer.phone, customer.name)}
+                            disabled={deletingId === customer.phone}
+                            className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all disabled:opacity-50"
+                            title="حذف الزبون وجميع طلباته"
+                          >
+                            {deletingId === customer.phone ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
+                          </button>
+                        </td>
+                      )}
                     </motion.tr>
                   ))}
                 </AnimatePresence>
