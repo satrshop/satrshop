@@ -147,7 +147,7 @@ export async function POST(req: Request) {
       shippingFee: finalShippingFee,
       paymentMethod: paymentMethod || "cod",
       status: "pending",
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      createdAt: admin.firestore.Timestamp.now(),
     };
 
     const docRef = await adminDb.collection("orders").add(newOrder);
