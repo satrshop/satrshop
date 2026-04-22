@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProducts } from "@/lib/db/products";
-import { getOrders } from "@/lib/db/orders";
 import { Product } from "@/types/models/product";
 import { Order } from "@/types/models/order";
 import { motion } from "framer-motion";
@@ -14,6 +12,7 @@ import {
   AlertTriangle
 } from "lucide-react";
 import Link from "next/link";
+import { adminFetch } from "@/lib/api/admin-client";
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -23,12 +22,12 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [prodData, orderData] = await Promise.all([
-          getProducts(true),
-          getOrders()
+        const [prodRes, orderRes] = await Promise.all([
+          adminFetch<{ products: Product[] }>("/api/admin/products"),
+          adminFetch<{ orders: Order[] }>("/api/admin/orders")
         ]);
-        setProducts(prodData);
-        setOrders(orderData);
+        setProducts(prodRes.products);
+        setOrders(orderRes.orders);
       } catch (err) {
         console.error("Failed to load dashboard data:", err);
       } finally {
@@ -160,5 +159,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
-

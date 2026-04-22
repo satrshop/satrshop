@@ -1,6 +1,7 @@
 import { db } from "../firebase";
 import { collection, getDocs, doc, getDoc, query, addDoc, updateDoc, deleteDoc, increment, DocumentSnapshot } from "firebase/firestore";
 import { Product, DEFAULT_STOCK } from "@/types/models/product";
+import { logCurrentAdminActivity } from "./logs";
 
 const PRODUCTS_COLLECTION = "products";
 
@@ -37,6 +38,7 @@ export async function createProduct(productData: Omit<Product, "id">): Promise<s
       ...productData,
       stock: productData.stock ?? DEFAULT_STOCK,
     });
+    await logCurrentAdminActivity("إضافة منتج", `تمت إضافة منتج جديد: ${productData.name}`);
     return docRef.id;
   } catch (error) {
     console.error("Error creating product:", error);
@@ -48,6 +50,7 @@ export async function updateProduct(id: string, productData: Partial<Product>): 
   try {
     const docRef = doc(db, PRODUCTS_COLLECTION, id);
     await updateDoc(docRef, productData);
+    await logCurrentAdminActivity("تعديل منتج", `تم تعديل منتج: ${productData.name || id}`);
     return true;
   } catch (error) {
     console.error("Error updating product:", error);
@@ -58,7 +61,11 @@ export async function updateProduct(id: string, productData: Partial<Product>): 
 export async function deleteProduct(id: string): Promise<boolean> {
   try {
     const docRef = doc(db, PRODUCTS_COLLECTION, id);
+    const docSnap = await getDoc(docRef);
+    const productName = docSnap.exists() ? docSnap.data().name : id;
+
     await deleteDoc(docRef);
+    await logCurrentAdminActivity("حذف منتج", `تم حذف المنتج: ${productName}`);
     return true;
   } catch (error) {
     console.error("Error deleting product:", error);

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProductById, updateProduct, getCategories } from "@/lib/db/products";
+import { getCategories } from "@/lib/db/products";
+import { adminFetch } from "@/lib/api/admin-client";
 import { useParams, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
@@ -62,23 +63,28 @@ export default function EditProductPage() {
   useEffect(() => {
     async function loadProduct() {
       if (typeof id !== 'string') return;
-      const data = await getProductById(id, true);
-      if (data) {
-        setFormData({
-          name: data.name,
-          price: data.price.toString(),
-          category: data.category,
-          image: data.image,
-          description: data.description || "",
-          rating: data.rating,
-          isNew: data.isNew || false,
-          stock: data.stock.toString(),
-          costPrice: (data.costPrice ?? 0).toString(),
-          hasColors: data.hasColors || false,
-          colors: data.colors || [{ name: "", code: "#000000" }],
-          hasSizes: data.hasSizes || false,
-          sizes: data.sizes || ["S", "M", "L", "XL"]
-        });
+      try {
+        const res = await adminFetch<{ product: any }>(`/api/admin/products/${id}`);
+        const data = res.product;
+        if (data) {
+          setFormData({
+            name: data.name,
+            price: data.price.toString(),
+            category: data.category,
+            image: data.image,
+            description: data.description || "",
+            rating: data.rating,
+            isNew: data.isNew || false,
+            stock: data.stock.toString(),
+            costPrice: (data.costPrice ?? 0).toString(),
+            hasColors: data.hasColors || false,
+            colors: data.colors || [{ name: "", code: "#000000" }],
+            hasSizes: data.hasSizes || false,
+            sizes: data.sizes || ["S", "M", "L", "XL"]
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load product:", err);
       }
       setLoading(false);
     }
@@ -102,13 +108,16 @@ export default function EditProductPage() {
       sizes: formData.hasSizes ? formData.sizes : []
     };
 
-    const updated = await updateProduct(id as string, productData);
-    if (updated) {
+    try {
+      await adminFetch(`/api/admin/products/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(productData),
+      });
       setSuccess(true);
       setTimeout(() => {
         router.push("/admin/products");
       }, 1500);
-    } else {
+    } catch {
       alert("فشل تحديث المنتج. حاول مرة أخرى.");
       setSaving(false);
     }

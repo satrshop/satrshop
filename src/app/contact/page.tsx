@@ -4,7 +4,6 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone, MapPin, Send, Loader2, CheckCircle2 } from "lucide-react";
 import Header from "@/components/layout/Header";
-import { sendMessage } from "@/lib/db/messages";
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -20,13 +19,23 @@ export default function ContactPage() {
     e.preventDefault();
     setLoading(true);
 
-    const result = await sendMessage(formData);
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-    if (result) {
-      setSuccess(true);
-      setFormData({ name: "", email: "", phone: "", content: "" });
-      setTimeout(() => setSuccess(false), 3000);
-    } else {
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        setFormData({ name: "", email: "", phone: "", content: "" });
+        setTimeout(() => setSuccess(false), 3000);
+      } else {
+        alert(data.error || "فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
+      }
+    } catch {
       alert("فشل إرسال الرسالة. يرجى المحاولة مرة أخرى.");
     }
     setLoading(false);

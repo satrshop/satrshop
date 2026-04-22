@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getProducts, updateStock } from "@/lib/db/products";
 import { Product } from "@/types/models/product";
+import { adminFetch } from "@/lib/api/admin-client";
 import { motion } from "framer-motion";
 import { 
   Search, 
@@ -33,8 +33,12 @@ export default function InventoryPage() {
 
   async function loadProducts() {
     setLoading(true);
-    const data = await getProducts(true);
-    setProducts(data);
+    try {
+      const data = await adminFetch<{ products: Product[] }>("/api/admin/products");
+      setProducts(data.products);
+    } catch (err) {
+      console.error("Failed to load products:", err);
+    }
     setLoading(false);
   }
 
@@ -47,8 +51,11 @@ export default function InventoryPage() {
     if (newStock === undefined) return;
 
     setSavingId(productId);
-    const success = await updateStock(productId, newStock);
-    if (success) {
+    try {
+      await adminFetch(`/api/admin/products/${productId}/stock`, {
+        method: "PUT",
+        body: JSON.stringify({ stock: newStock }),
+      });
       setProducts(prev =>
         prev.map(p => p.id === productId ? { ...p, stock: newStock } : p)
       );
@@ -59,6 +66,8 @@ export default function InventoryPage() {
       });
       setSavedId(productId);
       setTimeout(() => setSavedId(null), 2000);
+    } catch {
+      alert("فشل حفظ التعديل.");
     }
     setSavingId(null);
   };
@@ -69,7 +78,12 @@ export default function InventoryPage() {
 
     setIsSavingAll(true);
     try {
-      const promises = editIds.map(id => updateStock(id, editedStocks[id]));
+      const promises = editIds.map(id =>
+        adminFetch(`/api/admin/products/${id}/stock`, {
+          method: "PUT",
+          body: JSON.stringify({ stock: editedStocks[id] }),
+        })
+      );
       await Promise.all(promises);
       
       setProducts(prev => prev.map(p => 

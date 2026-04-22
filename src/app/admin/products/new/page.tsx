@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createProduct, getCategories } from "@/lib/db/products";
+import { getCategories } from "@/lib/db/products";
+import { adminFetch } from "@/lib/api/admin-client";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { 
@@ -74,13 +75,16 @@ export default function NewProductPage() {
       sizes: formData.hasSizes ? formData.sizes : []
     };
 
-    const id = await createProduct(productData);
-    if (id) {
+    try {
+      await adminFetch("/api/admin/products", {
+        method: "POST",
+        body: JSON.stringify(productData),
+      });
       setSuccess(true);
       setTimeout(() => {
         router.push("/admin/products");
       }, 1500);
-    } else {
+    } catch {
       alert("فشل إضافة المنتج. حاول مرة أخرى.");
       setLoading(false);
     }

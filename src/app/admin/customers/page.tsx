@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { getOrders } from "@/lib/db/orders";
+import { Order } from "@/types/models/order";
+import { adminFetch } from "@/lib/api/admin-client";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Users, 
@@ -50,7 +51,9 @@ export default function AdminCustomersPage() {
 
   async function loadCustomers() {
     setLoading(true);
-    const orders = await getOrders();
+    try {
+      const data = await adminFetch<{ orders: Order[] }>("/api/admin/orders");
+      const orders = data.orders;
     
     // Group orders by phone number to extract unique customers
     const customerMap = new Map<string, Customer>();
@@ -92,11 +95,13 @@ export default function AdminCustomersPage() {
     });
     
     setCustomers(Array.from(customerMap.values()));
+    } catch (err) {
+      console.error("Failed to load customers:", err);
+    }
     setLoading(false);
   }
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadCustomers();
   }, []);
 
