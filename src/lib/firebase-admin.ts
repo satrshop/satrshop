@@ -19,9 +19,13 @@ if (!admin.apps.length) {
     // النسخة النووية للتنظيف
     // 1. فك التشفير من أي أسطر مكسرة أو كوتيشن
     let rawKey = privateKey.replace(/\\n/g, '\n').replace(/['"]/g, '').trim();
+
+    // دعم خاص لفك تشفير الـ Base64 (لحل مشاكل الدوكر نهائياً)
+    if (!rawKey.includes('-----')) {
+      rawKey = Buffer.from(rawKey, 'base64').toString('utf8');
+    }
     
     // 2. استخراج محتوى الـ Base64 فقط (بين BEGIN و END)
-    // بنشيل أي شي بيشبه الهيدر أو الفوتر وبنشيل كل الفراغات
     const body = rawKey
       .replace(/-----BEGIN[^-]*-----/g, '')
       .replace(/-----END[^-]*-----/g, '')
