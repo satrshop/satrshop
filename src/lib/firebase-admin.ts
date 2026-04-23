@@ -4,37 +4,47 @@ import * as admin from 'firebase-admin';
 if (!admin.apps.length) {
   try {
     const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n');
+    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
     if (!clientEmail || !privateKey || !projectId) {
-      console.error("❌ Missing Firebase Admin Credentials:", {
-        hasEmail: !!clientEmail,
-        hasKey: !!privateKey,
-        hasProjectId: !!projectId
+      console.error("❌ Missing Firebase Admin Credentials:", { 
+        hasEmail: !!clientEmail, 
+        hasKey: !!privateKey, 
+        hasProjectId: !!projectId 
       });
       throw new Error("Missing Firebase Admin / Google Cloud Credentials");
     }
 
-    // Super-robust cleaning for the private key
-    const formattedKey = privateKey
-      .replace(/\\n/g, '\n')      // Fix escaped newlines
-      .replace(/"/g, '')         // Remove all double quotes
-      .replace(/'/g, '');        // Remove all single quotes
+    // الحل الجبار: إعادة بناء المفتاح مهما كان شكل المدخلات
+    let cleanedKey = privateKey.replace(/\\n/g, '\n').replace(/['"]/g, '').trim();
+    
+    if (cleanedKey.includes('PRIVATE KEY-----')) {
+      const header = "-----BEGIN PRIVATE KEY-----";
+      const footer = "-----END PRIVATE KEY-----";
+      // استخراج النص اللي بالنص وتنظيفه من أي فراغات أو أسطر قديمة
+      const body = cleanedKey
+        .replace(header, '')
+        .replace(footer, '')
+        .replace(/\s+/g, ''); 
+      
+      // إعادة بناء المفتاح بأسطر حقيقية (كل 64 حرف سطر)
+      cleanedKey = `${header}\n${body.match(/.{1,64}/g)?.join('\n')}\n${footer}`;
+    }
 
-    console.log("🔑 Formatted Key Preview:", formattedKey.substring(0, 30) + "...");
+    console.log("🔑 Key Reconstructed Successfully (First 40 chars):", cleanedKey.substring(0, 40));
 
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        privateKey: formattedKey,
+        privateKey: cleanedKey,
       }),
       databaseURL: `https://${projectId}.firebaseio.com`
     });
   } catch (error) {
     console.error("❌ Firebase Admin initialization error:", error);
-    throw error; // Re-throw to fail the build loudly with the error message
+    throw error;
   }
 }
 
