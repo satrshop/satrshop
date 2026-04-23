@@ -8,21 +8,30 @@ if (!admin.apps.length) {
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
     if (!clientEmail || !privateKey || !projectId) {
-      throw new Error("Missing Firebase Admin / Google Cloud Credentials in .env.local");
+      console.error("❌ Missing Firebase Admin Credentials:", { 
+        hasEmail: !!clientEmail, 
+        hasKey: !!privateKey, 
+        hasProjectId: !!projectId 
+      });
+      throw new Error("Missing Firebase Admin / Google Cloud Credentials");
     }
+
+    // Clean the private key from potential extra quotes and fix newlines
+    const formattedKey = privateKey
+      .replace(/^['"]|['"]$/g, '') // Remove leading/trailing quotes
+      .replace(/\\n/g, '\n');
 
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        privateKey,
+        privateKey: formattedKey,
       }),
       databaseURL: `https://${projectId}.firebaseio.com`
     });
   } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Firebase Admin initialization error", error);
-    }
+    console.error("❌ Firebase Admin initialization error:", error);
+    throw error; // Re-throw to fail the build loudly with the error message
   }
 }
 
