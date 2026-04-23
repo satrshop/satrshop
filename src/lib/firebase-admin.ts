@@ -16,29 +16,27 @@ if (!admin.apps.length) {
       throw new Error("Missing Firebase Admin / Google Cloud Credentials");
     }
 
-    // الحل الجبار: إعادة بناء المفتاح مهما كان شكل المدخلات
-    let cleanedKey = privateKey.replace(/\\n/g, '\n').replace(/['"]/g, '').trim();
+    // النسخة النووية للتنظيف
+    // 1. فك التشفير من أي أسطر مكسرة أو كوتيشن
+    let rawKey = privateKey.replace(/\\n/g, '\n').replace(/['"]/g, '').trim();
     
-    if (cleanedKey.includes('PRIVATE KEY-----')) {
-      const header = "-----BEGIN PRIVATE KEY-----";
-      const footer = "-----END PRIVATE KEY-----";
-      // استخراج النص اللي بالنص وتنظيفه من أي فراغات أو أسطر قديمة
-      const body = cleanedKey
-        .replace(header, '')
-        .replace(footer, '')
-        .replace(/\s+/g, ''); 
-      
-      // إعادة بناء المفتاح بأسطر حقيقية (كل 64 حرف سطر)
-      cleanedKey = `${header}\n${body.match(/.{1,64}/g)?.join('\n')}\n${footer}`;
-    }
+    // 2. استخراج محتوى الـ Base64 فقط (بين BEGIN و END)
+    // بنشيل أي شي بيشبه الهيدر أو الفوتر وبنشيل كل الفراغات
+    const body = rawKey
+      .replace(/-----BEGIN[^-]*-----/g, '')
+      .replace(/-----END[^-]*-----/g, '')
+      .replace(/\s+/g, ''); 
+    
+    // 3. إعادة بناء المفتاح بالصيغة القياسية (5 شرطات بالظبط)
+    const finalKey = `-----BEGIN PRIVATE KEY-----\n${body.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----\n`;
 
-    console.log("🔑 Key Reconstructed Successfully (First 40 chars):", cleanedKey.substring(0, 40));
+    console.log("🔑 Key Reconstructed Successfully. Length:", finalKey.length);
 
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        privateKey: cleanedKey,
+        privateKey: finalKey,
       }),
       databaseURL: `https://${projectId}.firebaseio.com`
     });
