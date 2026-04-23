@@ -16,31 +16,14 @@ if (!admin.apps.length) {
       throw new Error("Missing Firebase Admin / Google Cloud Credentials");
     }
 
-    // النسخة النووية للتنظيف
-    // 1. فك التشفير من أي أسطر مكسرة أو كوتيشن
-    let rawKey = privateKey.replace(/\\n/g, '\n').replace(/['"]/g, '').trim();
-
-    // دعم خاص لفك تشفير الـ Base64 (لحل مشاكل الدوكر نهائياً)
-    if (!rawKey.includes('-----')) {
-      rawKey = Buffer.from(rawKey, 'base64').toString('utf8');
-    }
-    
-    // 2. استخراج محتوى الـ Base64 فقط (بين BEGIN و END)
-    const body = rawKey
-      .replace(/-----BEGIN[^-]*-----/g, '')
-      .replace(/-----END[^-]*-----/g, '')
-      .replace(/\s+/g, ''); 
-    
-    // 3. إعادة بناء المفتاح بالصيغة القياسية (5 شرطات بالظبط)
-    const finalKey = `-----BEGIN PRIVATE KEY-----\n${body.match(/.{1,64}/g)?.join('\n')}\n-----END PRIVATE KEY-----\n`;
-
-    console.log("🔑 Key Reconstructed Successfully. Length:", finalKey.length);
+    // تنسيق المفتاح للتعامل مع الأسطر الجديدة في متغيرات البيئة
+    const formattedPrivateKey = privateKey.replace(/\\n/g, '\n');
 
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        privateKey: finalKey,
+        privateKey: formattedPrivateKey,
       }),
       databaseURL: `https://${projectId}.firebaseio.com`
     });
