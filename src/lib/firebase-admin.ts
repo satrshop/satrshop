@@ -8,18 +8,21 @@ if (!admin.apps.length) {
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
     if (!clientEmail || !privateKey || !projectId) {
-      console.error("❌ Missing Firebase Admin Credentials:", { 
-        hasEmail: !!clientEmail, 
-        hasKey: !!privateKey, 
-        hasProjectId: !!projectId 
+      console.error("❌ Missing Firebase Admin Credentials:", {
+        hasEmail: !!clientEmail,
+        hasKey: !!privateKey,
+        hasProjectId: !!projectId
       });
       throw new Error("Missing Firebase Admin / Google Cloud Credentials");
     }
 
-    // Clean the private key from potential extra quotes and fix newlines
+    // Super-robust cleaning for the private key
     const formattedKey = privateKey
-      .replace(/^['"]|['"]$/g, '') // Remove leading/trailing quotes
-      .replace(/\\n/g, '\n');
+      .replace(/\\n/g, '\n')      // Fix escaped newlines
+      .replace(/"/g, '')         // Remove all double quotes
+      .replace(/'/g, '');        // Remove all single quotes
+
+    console.log("🔑 Formatted Key Preview:", formattedKey.substring(0, 30) + "...");
 
     admin.initializeApp({
       credential: admin.credential.cert({
