@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+.env*
+*.md
+.firebase
+docs
+scripts
+tmp_assets
+check-*.js
+test-*.js
+delete-*.js
+.github
