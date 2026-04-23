@@ -1,3 +1,4 @@
+import React from "react";
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Geist_Mono } from "next/font/google";
@@ -75,6 +76,17 @@ export const metadata: Metadata = {
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+
+declare module "react" {
+  namespace JSX {
+    interface IntrinsicElements {
+      'amp-auto-ads': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
+        type?: string;
+        'data-ad-client'?: string;
+      }, HTMLElement>;
+    }
+  }
+}
 
 export default function RootLayout({
   children,
@@ -154,8 +166,23 @@ export default function RootLayout({
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8780681191196549"
           crossOrigin="anonymous"
         ></script>
+        <Script
+          async
+          src="https://cdn.ampproject.org/v0.js"
+          strategy="afterInteractive"
+        />
+        <Script
+          async
+          src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"
+          {...{ "custom-element": "amp-auto-ads" }}
+          strategy="afterInteractive"
+        />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300">
+        <amp-auto-ads
+          type="adsense"
+          data-ad-client="ca-pub-8780681191196549"
+        ></amp-auto-ads>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
