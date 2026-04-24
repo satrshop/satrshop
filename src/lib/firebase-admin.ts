@@ -1,29 +1,28 @@
 import * as admin from 'firebase-admin';
 
-// Initialize Firebase Admin if it hasn't been initialized already
 if (!admin.apps.length) {
   try {
     const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY;
+    let privateKey = process.env.GOOGLE_PRIVATE_KEY;
     const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
 
     if (!clientEmail || !privateKey || !projectId) {
-      console.error("❌ Missing Firebase Admin Credentials:", { 
-        hasEmail: !!clientEmail, 
-        hasKey: !!privateKey, 
-        hasProjectId: !!projectId 
-      });
       throw new Error("Missing Firebase Admin / Google Cloud Credentials");
     }
 
-    // تنسيق المفتاح للتعامل مع الأسطر الجديدة في متغيرات البيئة
-    const formattedPrivateKey = privateKey.replace(/\\n/g, '\n');
+    // --- هذا هو التعديل السحري ---
+    // هذه الطريقة تعالج كل السيناريوهات: سواء جاء المفتاح بـ \n كنص،
+    // أو جاء محاطاً بعلامات تنصيص إضافية، أو جاء مقطوعاً بمسافات.
+    privateKey = privateKey
+      .replace(/\\n/g, '\n') // تحويل النص \n إلى سطر جديد فعلي
+      .replace(/^"|"$/g, '') // إزالة علامات التنصيص من البداية والنهاية إذا وُجدت
+      .trim(); // إزالة أي مسافات فارغة زائدة
 
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId,
         clientEmail,
-        privateKey: formattedPrivateKey,
+        privateKey,
       }),
       databaseURL: `https://${projectId}.firebaseio.com`
     });
