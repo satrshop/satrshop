@@ -14,8 +14,9 @@ export default function FeaturedProducts() {
     async function fetchFeatured() {
       try {
         const products = await getProducts();
-        // Take the first 4 for the homepage
-        setFeaturedProducts(products.slice(0, 4));
+        const featured = products.filter(p => p.isFeatured);
+        // Take the first 4 featured for the homepage, if none fallback to newest 4
+        setFeaturedProducts(featured.length > 0 ? featured.slice(0, 4) : products.slice(0, 4));
       } catch (error) {
         console.error("Failed to fetch featured products:", error);
       } finally {

@@ -44,7 +44,9 @@ export default function NewProductPage() {
     hasColors: false,
     colors: [{ name: "", code: "#000000" }],
     hasSizes: false,
-    sizes: ["S", "M", "L", "XL"]
+    sizes: ["S", "M", "L", "XL"],
+    isBestSeller: false,
+    isFeatured: false
   });
 
   const [uploadKey, setUploadKey] = useState(Date.now());
@@ -76,7 +78,10 @@ export default function NewProductPage() {
       colors: formData.hasColors ? formData.colors : [],
       hasSizes: formData.hasSizes,
       sizes: formData.hasSizes ? formData.sizes : [],
-      images: formData.images
+      images: formData.images,
+      isBestSeller: formData.isBestSeller,
+      isNew: formData.isNew,
+      isFeatured: formData.isFeatured
     };
 
     try {
@@ -291,7 +296,52 @@ export default function NewProductPage() {
               </div>
 
               {/* Variants Toggles */}
-              <div className="grid grid-cols-2 gap-6 pt-4 border-t border-white/5">
+              <div className="flex flex-wrap gap-8 pt-4 border-t border-white/5">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox"
+                      name="isFeatured"
+                      checked={formData.isFeatured}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.isFeatured ? 'bg-emerald-500' : 'bg-white/10'}`} />
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${formData.isFeatured ? 'translate-x-6' : ''}`} />
+                  </div>
+                  <span className="text-white/80 font-bold text-sm">في الرئيسية</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox"
+                      name="isNew"
+                      checked={formData.isNew}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.isNew ? 'bg-secondary' : 'bg-white/10'}`} />
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${formData.isNew ? 'translate-x-6' : ''}`} />
+                  </div>
+                  <span className="text-white/80 font-bold text-sm">منتج جديد</span>
+                </label>
+
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input 
+                      type="checkbox"
+                      name="isBestSeller"
+                      checked={formData.isBestSeller}
+                      onChange={handleChange}
+                      className="sr-only"
+                    />
+                    <div className={`w-12 h-6 rounded-full transition-colors ${formData.isBestSeller ? 'bg-amber-500' : 'bg-white/10'}`} />
+                    <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform ${formData.isBestSeller ? 'translate-x-6' : ''}`} />
+                  </div>
+                  <span className="text-white/80 font-bold text-sm">الأكثر مبيعاً</span>
+                </label>
+
                 <label className="flex items-center gap-3 cursor-pointer group">
                   <div className="relative">
                     <input 

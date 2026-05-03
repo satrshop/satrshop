@@ -17,6 +17,7 @@ interface ProductCardProps {
     category: string;
     rating: number;
     isNew?: boolean;
+    isBestSeller?: boolean;
     stock: number;
     hasColors?: boolean;
     hasSizes?: boolean;
@@ -61,6 +62,12 @@ export default function ProductCard({ product, index }: ProductCardProps) {
         {product.isNew && !isOutOfStock && (
           <div className="bg-secondary text-secondary-foreground text-[10px] sm:text-xs font-extrabold px-2 sm:px-3 py-1 rounded-full shadow-md">
             جديد
+          </div>
+        )}
+        {product.isBestSeller && !isOutOfStock && (
+          <div className="bg-amber-400 text-amber-950 text-[10px] sm:text-xs font-extrabold px-2 sm:px-3 py-1 rounded-full shadow-md flex items-center gap-1">
+            <Star size={10} className="fill-amber-950" />
+            الأكثر مبيعاً
           </div>
         )}
       </div>

@@ -58,7 +58,7 @@ export async function PUT(
     const ALLOWED_FIELDS = [
       'name', 'price', 'image', 'images', 'category', 'description',
       'stock', 'costPrice', 'hasColors', 'colors', 'hasSizes', 'sizes',
-      'rating', 'isNew',
+      'rating', 'isNew', 'isBestSeller', 'isFeatured',
     ];
     const sanitizedBody = Object.fromEntries(
       Object.entries(body).filter(([key]) => ALLOWED_FIELDS.includes(key))

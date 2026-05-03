@@ -7,6 +7,8 @@ export interface Product {
   category: string;
   rating: number;
   isNew?: boolean;
+  isBestSeller?: boolean;
+  isFeatured?: boolean;
   description?: string;
   stock: number; // Available quantity. 0 = out of stock
   costPrice?: number; // The cost to the shop for this product (admin only)

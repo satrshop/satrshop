@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const admin = await verifyAdmin(req);
     const body = await req.json();
 
-    const { name, price, image, images, category, description, stock, costPrice, hasColors, colors, hasSizes, sizes } = body;
+    const { name, price, image, images, category, description, stock, costPrice, hasColors, colors, hasSizes, sizes, isBestSeller, isNew, isFeatured } = body;
 
     if (!name || typeof price !== "number" || !image || !category) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -62,6 +62,9 @@ export async function POST(req: Request) {
       colors: Array.isArray(colors) ? colors : [],
       hasSizes: !!hasSizes,
       sizes: Array.isArray(sizes) ? sizes : [],
+      isBestSeller: !!isBestSeller,
+      isNew: typeof isNew === "boolean" ? isNew : true,
+      isFeatured: !!isFeatured,
     };
 
     const docRef = await adminDb.collection(PRODUCTS_COLLECTION).add(productData);
