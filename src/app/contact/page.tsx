@@ -92,51 +92,51 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div>
                         <label className="block text-sm font-bold text-primary-foreground/90 mb-2">الاسم الكامل</label>
-                        <input 
+                        <input
                           required
                           name="name"
                           value={formData.name}
                           onChange={handleChange}
-                          type="text" 
-                          className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors" 
-                          placeholder="أحمد محمد" 
+                          type="text"
+                          className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 focus:outline-none focus:border-secondary transition-colors"
+                          placeholder="أحمد محمد"
                         />
                       </div>
                       <div>
                         <label className="block text-sm font-bold text-primary-foreground/90 mb-2">رقم الهاتف (اختياري)</label>
-                        <input 
+                        <input
                           name="phone"
                           value={formData.phone}
                           onChange={handleChange}
-                          type="tel" 
-                          className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 text-right focus:outline-none focus:border-secondary transition-colors" 
-                          placeholder="07x xxx xxxx" 
-                          dir="ltr" 
+                          type="tel"
+                          className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 text-right focus:outline-none focus:border-secondary transition-colors"
+                          placeholder="07x xxx xxxx"
+                          dir="ltr"
                         />
                       </div>
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-primary-foreground/90 mb-2">البريد الإلكتروني</label>
-                      <input 
+                      <input
                         required
                         name="email"
                         value={formData.email}
                         onChange={handleChange}
-                        type="email" 
-                        className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 text-left focus:outline-none focus:border-secondary transition-colors" 
-                        placeholder="email@example.com" 
-                        dir="ltr" 
+                        type="email"
+                        className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 text-left focus:outline-none focus:border-secondary transition-colors"
+                        placeholder="email@example.com"
+                        dir="ltr"
                       />
                     </div>
                     <div>
                       <label className="block text-sm font-bold text-primary-foreground/90 mb-2">محتوى الرسالة</label>
-                      <textarea 
+                      <textarea
                         required
                         name="content"
                         value={formData.content}
                         onChange={handleChange}
-                        className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 h-32 resize-none focus:outline-none focus:border-secondary transition-colors" 
-                        placeholder="كيف يمكننا مساعدتك؟" 
+                        className="w-full bg-primary-foreground/10 text-primary-foreground placeholder:text-primary-foreground/50 border border-primary-foreground/20 rounded-xl px-4 py-3 h-32 resize-none focus:outline-none focus:border-secondary transition-colors"
+                        placeholder="كيف يمكننا مساعدتك؟"
                       />
                     </div>
                     <motion.button
@@ -222,7 +222,7 @@ export default function ContactPage() {
                 <MapPin size={28} />
               </div>
               <div>
-                <h3 className="text-xl font-bold text-foreground mb-2">المقرات الإدارية</h3>
+                <h3 className="text-xl font-bold text-foreground mb-2">المقرات</h3>
                 <p className="text-muted-foreground font-medium leading-relaxed">
                   متجر سطر، عَمّان<br />
                   المملكة الأردنية الهاشمية<br />
