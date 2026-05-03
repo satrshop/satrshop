@@ -15,12 +15,16 @@ import {
   ChevronDown
 } from "lucide-react";
 import { adminFetch } from "@/lib/api/admin-client";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function AdminMessagesPage() {
   const [messages, setMessages] = useState<ContactMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [messageToDelete, setMessageToDelete] = useState<string | null>(null);
+  const { showToast } = useToast();
 
   async function loadMessages() {
     setLoading(true);
@@ -37,14 +41,13 @@ export default function AdminMessagesPage() {
     loadMessages();
   }, []);
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!confirm("هل أنت متأكد من حذف هذه الرسالة؟")) return;
-    
+  const executeDelete = async (id: string) => {
     try {
       await adminFetch(`/api/admin/messages/${id}`, { method: "DELETE" });
       setMessages(prev => prev.filter(m => m.id !== id));
+      showToast("تم حذف الرسالة بنجاح", "success");
     } catch (err) {
+      showToast("فشل في حذف الرسالة", "error");
       console.error("Failed to delete message:", err);
     }
   };
@@ -58,7 +61,9 @@ export default function AdminMessagesPage() {
         body: JSON.stringify({ isRead: newStatus }),
       });
       setMessages(prev => prev.map(m => m.id === id ? { ...m, isRead: newStatus } : m));
+      showToast(newStatus ? "تم تحديد الرسالة كمقروءة" : "تم تحديد الرسالة كغير مقروءة", "success");
     } catch (err) {
+      showToast("فشل في تحديث حالة الرسالة", "error");
       console.error("Failed to update message:", err);
     }
   };
@@ -153,7 +158,10 @@ export default function AdminMessagesPage() {
                       {msg.isRead ? <XCircle size={20} /> : <CheckCircle2 size={20} />}
                     </button>
                     <button 
-                      onClick={(e) => handleDelete(msg.id, e)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setMessageToDelete(msg.id);
+                      }}
                       className="p-3 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500/20 transition-all"
                     >
                       <Trash2 size={20} />
@@ -215,6 +223,16 @@ export default function AdminMessagesPage() {
           )}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={messageToDelete !== null}
+        title="حذف رسالة"
+        message="هل أنت متأكد من حذف هذه الرسالة بشكل نهائي؟"
+        onConfirm={() => {
+          if (messageToDelete) executeDelete(messageToDelete);
+        }}
+        onCancel={() => setMessageToDelete(null)}
+      />
     </div>
   );
 }

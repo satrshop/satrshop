@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { subscribeToUnreadCount } from "@/lib/db/messages";
+import { subscribeToPendingOrdersCount } from "@/lib/db/orders";
 import { 
   LayoutDashboard, 
   Package, 
@@ -20,7 +21,9 @@ import {
   Users,
   Warehouse,
   Shield,
-  Activity
+  Activity,
+  Ticket,
+  BarChart3
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import AdminHelp from "@/components/admin/AdminHelp";
@@ -31,7 +34,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [pendingOrdersCount, setPendingOrdersCount] = useState(0);
   const unsubscribeMessagesRef = useRef<(() => void) | null>(null);
+  const unsubscribeOrdersRef = useRef<(() => void) | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -79,15 +84,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         const unsubscribeSnapshot = subscribeToUnreadCount((count) => {
           setUnreadCount(count);
         });
-
-        // Store the unsubscribe handler in a ref for cleanup
         unsubscribeMessagesRef.current = unsubscribeSnapshot;
+
+        // Setup orders listener for the authenticated user
+        const unsubscribeOrdersSnapshot = subscribeToPendingOrdersCount((count) => {
+          setPendingOrdersCount(count);
+        });
+        unsubscribeOrdersRef.current = unsubscribeOrdersSnapshot;
 
       } else {
         // Unsubscribe if user logs out or session expires
         if (unsubscribeMessagesRef.current) {
           unsubscribeMessagesRef.current();
           unsubscribeMessagesRef.current = null;
+        }
+        if (unsubscribeOrdersRef.current) {
+          unsubscribeOrdersRef.current();
+          unsubscribeOrdersRef.current = null;
         }
         if (pathname !== "/admin/login" && pathname !== "/admin/register") {
           router.push("/admin/login");
@@ -101,6 +114,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         unsubscribeMessagesRef.current();
         unsubscribeMessagesRef.current = null;
       }
+      if (unsubscribeOrdersRef.current) {
+        unsubscribeOrdersRef.current();
+        unsubscribeOrdersRef.current = null;
+      }
     };
   }, [router, pathname]);
 
@@ -108,6 +125,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     if (unsubscribeMessagesRef.current) {
       unsubscribeMessagesRef.current();
       unsubscribeMessagesRef.current = null;
+    }
+    if (unsubscribeOrdersRef.current) {
+      unsubscribeOrdersRef.current();
+      unsubscribeOrdersRef.current = null;
     }
     await signOut(auth);
     router.push("/admin/login");
@@ -137,6 +158,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "الطلبات", href: "/admin/orders", icon: ShoppingBag },
     { name: "الزبائن", href: "/admin/customers", icon: Users },
     { name: "الرسائل", href: "/admin/messages", icon: Mail },
+    { name: "أكواد الخصم", href: "/admin/coupons", icon: Ticket },
+    { name: "تحليلات المنتجات", href: "/admin/analytics", icon: BarChart3 },
   ];
 
   if (adminRole === "superadmin") {
@@ -186,6 +209,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   {item.href === "/admin/messages" && unreadCount > 0 && (
                     <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse shadow-lg shadow-rose-500/20">
                       {unreadCount}
+                    </span>
+                  )}
+                  {item.href === "/admin/orders" && pendingOrdersCount > 0 && (
+                    <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black animate-pulse shadow-lg shadow-amber-500/20">
+                      {pendingOrdersCount} جديد
                     </span>
                   )}
                   {isActive && <ChevronLeft size={18} className="mr-0 rotate-180 opacity-50" />}
@@ -260,6 +288,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                         {item.href === "/admin/messages" && unreadCount > 0 && (
                           <span className="bg-rose-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black shadow-lg shadow-rose-500/20">
                             {unreadCount}
+                          </span>
+                        )}
+                        {item.href === "/admin/orders" && pendingOrdersCount > 0 && (
+                          <span className="bg-amber-500 text-white text-[10px] px-2 py-0.5 rounded-full font-black shadow-lg shadow-amber-500/20">
+                            {pendingOrdersCount} جديد
                           </span>
                         )}
                         <span className="text-lg flex-1">{item.name}</span>

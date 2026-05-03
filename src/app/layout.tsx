@@ -73,20 +73,23 @@ export const metadata: Metadata = {
   verification: {
     google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/images/favicon.png", type: "image/png", sizes: "48x48" },
+      { url: "/images/favicon.png", type: "image/png", sizes: "96x96" },
+      { url: "/images/favicon.png", type: "image/png", sizes: "144x144" },
+      { url: "/images/favicon.png", type: "image/png", sizes: "192x192" },
+    ],
+    apple: [
+      { url: "/images/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
 };
 
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ToastProvider } from "@/components/ui/ToastProvider";
 
-declare module "react" {
-  namespace JSX {
-    interface IntrinsicElements {
-      'amp-auto-ads': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement> & {
-        type?: string;
-        'data-ad-client'?: string;
-      }, HTMLElement>;
-    }
-  }
-}
 
 export default function RootLayout({
   children,
@@ -161,39 +164,27 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
-        <script
+        <Script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8780681191196549"
           crossOrigin="anonymous"
-        ></script>
-        <Script
-          async
-          src="https://cdn.ampproject.org/v0.js"
-          strategy="afterInteractive"
-        />
-        <Script
-          async
-          src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"
-          {...{ "custom-element": "amp-auto-ads" }}
           strategy="afterInteractive"
         />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground transition-colors duration-300">
-        <amp-auto-ads
-          type="adsense"
-          data-ad-client="ca-pub-8780681191196549"
-        ></amp-auto-ads>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
           disableTransitionOnChange
         >
-          <CartDrawer />
-          <div className="flex-1">
-            {children}
-          </div>
-          <Footer />
+          <ToastProvider>
+            <CartDrawer />
+            <div className="flex-1">
+              {children}
+            </div>
+            <Footer />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

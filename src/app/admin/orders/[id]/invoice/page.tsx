@@ -151,8 +151,18 @@ export default function InvoicePage() {
           <div className="w-full max-w-[300px] space-y-4">
             <div className="flex justify-between items-center text-gray-500 font-bold">
               <span>المجموع الفرعي</span>
-              <span>{(order.total - order.shippingFee).toFixed(2)} د.ا</span>
+              <span>{(order.total - order.shippingFee + ((order as any).couponDiscount || 0)).toFixed(2)} د.ا</span>
             </div>
+            {(order as any).couponCode && (
+              <div className="flex justify-between items-center text-emerald-600 font-bold bg-emerald-50 p-3 rounded-xl border border-emerald-100">
+                <span className="flex items-center gap-2 text-sm">
+                  <span>كود خصم</span>
+                  <span className="font-mono font-black text-xs bg-emerald-100 px-2 py-0.5 rounded">{(order as any).couponCode}</span>
+                  <span className="text-emerald-500 text-xs">({(order as any).couponDiscountPercent || 0}%)</span>
+                </span>
+                <span className="font-black">-{((order as any).couponDiscount || 0).toFixed(2)} د.ا</span>
+              </div>
+            )}
             <div className="flex justify-between items-center text-gray-500 font-bold">
               <span>رسوم التوصيل</span>
               <span>{order.shippingFee.toFixed(2)} د.ا</span>

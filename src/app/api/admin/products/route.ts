@@ -42,7 +42,7 @@ export async function POST(req: Request) {
     const admin = await verifyAdmin(req);
     const body = await req.json();
 
-    const { name, price, image, category, description, stock, costPrice, hasColors, colors, hasSizes, sizes } = body;
+    const { name, price, image, images, category, description, stock, costPrice, hasColors, colors, hasSizes, sizes } = body;
 
     if (!name || typeof price !== "number" || !image || !category) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -52,6 +52,7 @@ export async function POST(req: Request) {
       name,
       price,
       image,
+      images: Array.isArray(images) ? images : [],
       category,
       rating: 0,
       description: description || "",

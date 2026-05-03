@@ -43,11 +43,24 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-  }, []);
+
+    // Track product view (once per session per product to avoid spamming)
+    const trackedKey = `tracked_view_${product.id}`;
+    if (!sessionStorage.getItem(trackedKey)) {
+      fetch(`/api/products/${product.id}/view`, { method: "POST" })
+        .then(res => {
+          if (res.ok) sessionStorage.setItem(trackedKey, "true");
+        })
+        .catch(console.error);
+    }
+  }, [product.id]);
+
+  const [activeImage, setActiveImage] = useState(product.image);
 
   const isFavorited = mounted ? isInWishlist(product.id) : false;
   const isOutOfStock = product.stock === 0;
   const isLowStock = product.stock > 0 && product.stock <= 5;
+  const allImages = product.images && product.images.length > 0 ? product.images : [product.image];
 
   return (
     <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-40 pb-20">
@@ -69,11 +82,11 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             className="relative aspect-square sm:aspect-[4/5] rounded-[2rem] sm:rounded-[3rem] overflow-hidden bg-white shadow-xl border border-border/50"
           >
             <Image 
-              src={product.image} 
+              src={activeImage} 
               alt={product.name} 
               fill 
               sizes="(max-width: 1024px) 100vw, 800px"
-              className="object-cover"
+              className="object-cover transition-opacity duration-300"
               priority
             />
             
@@ -86,11 +99,26 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             </button>
 
             {product.isNew && (
-              <div className="absolute top-6 right-6 bg-secondary text-white font-black px-4 py-1.5 rounded-full shadow-lg text-sm">
+              <div className="absolute top-6 right-6 bg-secondary text-white font-black px-4 py-1.5 rounded-full shadow-lg text-sm z-10">
                 جديد
               </div>
             )}
           </motion.div>
+
+          {/* Thumbnails */}
+          {allImages.length > 1 && (
+            <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImage(img)}
+                  className={`relative w-20 h-24 sm:w-24 sm:h-28 rounded-2xl overflow-hidden flex-shrink-0 border-2 sm:border-[3px] transition-all ${activeImage === img ? 'border-secondary shadow-md opacity-100' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                >
+                  <Image src={img} alt={`${product.name} ${idx + 1}`} fill sizes="100px" className="object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Right: Product Info */}

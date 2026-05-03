@@ -3,6 +3,7 @@ export interface Product {
   name: string;
   price: number;
   image: string;
+  images?: string[]; // Array of all images
   category: string;
   rating: number;
   isNew?: boolean;

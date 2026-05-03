@@ -15,9 +15,14 @@ import {
   Loader2,
   CheckCircle2,
   AlertCircle,
-  ChevronDown
+  ChevronDown,
+  Ticket,
+  X,
+  Plus,
+  Minus,
+  Trash2
 } from "lucide-react";
-import { useCartStore } from "@/store/useCartStore";
+import { useCartStore, getCartItemKey } from "@/store/useCartStore";
 import Header from "@/components/layout/Header";
 
 const JORDAN_CITIES = [
@@ -29,7 +34,7 @@ const SHIPPING_FEE = 2.50;
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { items } = useCartStore();
+  const { items, updateQuantity, removeItem } = useCartStore();
   const [mounted, setMounted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCityOpen, setIsCityOpen] = useState(false);
@@ -44,6 +49,15 @@ export default function CheckoutPage() {
   });
   const [isZaytoonah, setIsZaytoonah] = useState(false);
   const [gender, setGender] = useState<'ذكر' | 'أنثى' | null>(null);
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discountPercent: number;
+  } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -71,7 +85,8 @@ export default function CheckoutPage() {
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const currentShippingFee = isZaytoonah ? 0 : SHIPPING_FEE;
-  const total = subtotal + currentShippingFee;
+  const couponDiscount = appliedCoupon ? Math.min((subtotal * appliedCoupon.discountPercent) / 100, 3) : 0;
+  const total = subtotal - couponDiscount + currentShippingFee;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -86,7 +101,46 @@ export default function CheckoutPage() {
         city: "عمان",
         address: "جامعة الزيتونة الاردنية"
       }));
+      setIsCityOpen(false); // Close city dropdown if open
     }
+  };
+
+  // Coupon validation handler
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError(null);
+
+    try {
+      const response = await fetch("/api/coupons/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponCode.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        setAppliedCoupon({
+          code: data.code,
+          discountPercent: data.discountPercent,
+        });
+        setCouponError(null);
+      } else {
+        setAppliedCoupon(null);
+        setCouponError(data.error || "كود الخصم غير صالح");
+      }
+    } catch {
+      setCouponError("حدث خطأ أثناء التحقق من الكود");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError(null);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -123,7 +177,8 @@ export default function CheckoutPage() {
             gender: gender || null
           },
           paymentMethod: 'cod',
-          shippingFee: currentShippingFee || 0
+          shippingFee: currentShippingFee || 0,
+          couponCode: appliedCoupon?.code || null
         })
       });
 
@@ -391,24 +446,57 @@ export default function CheckoutPage() {
                         className="object-cover group-hover:scale-110 transition-transform duration-500" 
                       />
                     </div>
-                    <div className="flex-1 min-w-0 text-right">
-                      <h4 className="font-black text-sm text-primary-foreground line-clamp-1 group-hover:text-secondary transition-colors">{item.name}</h4>
-                      <div className="flex flex-wrap justify-end gap-2 mt-1">
-                        {item.selectedColor && (
-                          <div className="flex items-center gap-1 bg-primary-foreground/5 px-1.5 py-0.5 rounded-md border border-primary-foreground/10">
-                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.code }} />
-                            <span className="text-[10px] text-primary-foreground/60">{item.selectedColor.name}</span>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                      <div className="flex justify-between items-start gap-2">
+                        <div className="flex-1 text-right">
+                          <h4 className="font-bold text-primary-foreground line-clamp-1 group-hover:text-secondary transition-colors text-sm">{item.name}</h4>
+                          <div className="flex flex-wrap justify-end gap-2 mt-1.5">
+                            {item.selectedColor && (
+                              <div className="flex items-center gap-1 bg-primary-foreground/5 px-1.5 py-0.5 rounded-md border border-primary-foreground/10">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: item.selectedColor.code }} />
+                                <span className="text-[10px] text-primary-foreground/60">{item.selectedColor.name}</span>
+                              </div>
+                            )}
+                            {item.selectedSize && (
+                              <div className="flex items-center bg-secondary/20 px-2 py-0.5 rounded-md border border-secondary/30">
+                                <span className="text-[10px] text-secondary font-black">{item.selectedSize}</span>
+                              </div>
+                            )}
                           </div>
-                        )}
-                        {item.selectedSize && (
-                          <div className="flex items-center bg-secondary/20 px-2 py-0.5 rounded-md border border-secondary/30">
-                            <span className="text-[10px] text-secondary font-black">{item.selectedSize}</span>
-                          </div>
-                        )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeItem(getCartItemKey(item))}
+                          className="p-1.5 text-primary-foreground/40 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all flex-shrink-0"
+                          title="إزالة من السلة"
+                        >
+                          <Trash2 size={16} />
+                        </button>
                       </div>
-                      <p className="text-sm font-black text-secondary mt-2">
-                        {item.quantity} × {item.price.toFixed(2)} د.ا
-                      </p>
+
+                      <div className="flex items-center justify-between mt-4">
+                        <div className="flex items-center gap-1 bg-primary-foreground/5 rounded-lg p-0.5 border border-primary-foreground/10">
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(getCartItemKey(item), item.quantity + 1)}
+                            className="p-1 hover:bg-white/10 rounded-md transition-colors text-primary-foreground"
+                          >
+                            <Plus size={14} />
+                          </button>
+                          <span className="font-bold text-sm w-6 text-center">{item.quantity}</span>
+                          <button
+                            type="button"
+                            onClick={() => updateQuantity(getCartItemKey(item), Math.max(1, item.quantity - 1))}
+                            disabled={item.quantity <= 1}
+                            className="p-1 hover:bg-white/10 rounded-md transition-colors text-primary-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                          >
+                            <Minus size={14} />
+                          </button>
+                        </div>
+                        <span className="text-sm font-black text-secondary whitespace-nowrap bg-secondary/10 border border-secondary/20 px-2 py-1 rounded-lg">
+                          {(item.price * item.quantity).toFixed(2)} د.ا
+                        </span>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -419,12 +507,103 @@ export default function CheckoutPage() {
                   <span className="text-secondary font-bold">{subtotal.toFixed(2)} د.ا</span>
                   <span className="text-primary-foreground/70">المجموع الفرعي</span>
                 </div>
+
+                {/* Coupon Input Section */}
+                <div className="py-3 border-t border-dashed border-primary-foreground/10">
+                  {appliedCoupon ? (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3"
+                    >
+                      <button
+                        onClick={handleRemoveCoupon}
+                        className="p-1 text-primary-foreground/40 hover:text-red-400 transition-colors"
+                      >
+                        <X size={14} />
+                      </button>
+                      <div className="flex items-center gap-2 text-right">
+                        <div>
+                          <p className="text-emerald-400 font-black text-sm">
+                            خصم {appliedCoupon.discountPercent}% • -{couponDiscount.toFixed(2)} د.ا
+                          </p>
+                          <p className="text-emerald-400/80 text-[10px] font-bold mt-0.5">
+                            الحد الأقصى للخصم 3 دنانير
+                          </p>
+                          <p className="text-emerald-400/60 text-[10px] font-bold font-mono tracking-widest mt-0.5">
+                            {appliedCoupon.code}
+                          </p>
+                        </div>
+                        <Ticket size={18} className="text-emerald-400" />
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <div className="space-y-2">
+                      <div className="flex gap-2" dir="rtl">
+                        <div className="relative flex-1">
+                          <input
+                            type="text"
+                            value={couponCode}
+                            onChange={(e) => {
+                              setCouponCode(e.target.value.toUpperCase());
+                              setCouponError(null);
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                handleApplyCoupon();
+                              }
+                            }}
+                            placeholder="كود الخصم"
+                            className="w-full bg-white/10 border border-primary-foreground/20 rounded-xl px-4 py-2.5 text-right text-primary-foreground text-sm placeholder:text-primary-foreground/30 focus:outline-none focus:ring-2 focus:ring-secondary/50 focus:border-secondary transition-all font-mono tracking-widest"
+                          />
+                          <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-foreground/20" size={16} />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleApplyCoupon}
+                          disabled={couponLoading || !couponCode.trim()}
+                          className="px-4 py-2.5 bg-secondary text-primary rounded-xl font-bold text-sm hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 whitespace-nowrap"
+                        >
+                          {couponLoading ? (
+                            <Loader2 size={16} className="animate-spin" />
+                          ) : (
+                            "تطبيق"
+                          )}
+                        </button>
+                      </div>
+                      {couponError ? (
+                        <motion.p
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="text-red-400 text-[11px] font-bold text-right flex items-center justify-end gap-1"
+                        >
+                          {couponError}
+                          <AlertCircle size={12} />
+                        </motion.p>
+                      ) : (
+                        <p className="text-primary-foreground/40 text-[10px] font-bold text-right pr-1">
+                          * الحد الأقصى للخصم 3 دنانير
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-between items-center text-sm font-medium">
                   <span className={`${isZaytoonah ? 'text-emerald-400 font-black' : 'text-secondary font-bold'}`}>
                     {isZaytoonah ? 'مجاناً' : `${currentShippingFee.toFixed(2)} د.ا`}
                   </span>
                   <span className="text-primary-foreground/70">تكاليف التوصيل</span>
                 </div>
+
+                {appliedCoupon && (
+                  <div className="flex justify-between items-center text-sm font-medium">
+                    <span className="text-emerald-400 font-black">-{couponDiscount.toFixed(2)} د.ا</span>
+                    <span className="text-primary-foreground/70">الخصم</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center pt-3 mt-3 border-t-2 border-dashed border-primary-foreground/20 mb-2">
                   <span className="text-2xl font-black text-secondary">{total.toFixed(2)} د.ا</span>
                   <span className="text-lg font-extrabold text-primary-foreground">الإجمالي</span>

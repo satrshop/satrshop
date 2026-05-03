@@ -56,7 +56,7 @@ export async function PUT(
 
     // Whitelist allowed fields to prevent arbitrary field injection
     const ALLOWED_FIELDS = [
-      'name', 'price', 'image', 'category', 'description',
+      'name', 'price', 'image', 'images', 'category', 'description',
       'stock', 'costPrice', 'hasColors', 'colors', 'hasSizes', 'sizes',
       'rating', 'isNew',
     ];

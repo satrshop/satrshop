@@ -35,6 +35,7 @@ export default function NewProductPage() {
     price: "",
     category: "هوديز",
     image: "",
+    images: [] as string[],
     description: "",
     rating: 5.0,
     isNew: true,
@@ -45,6 +46,8 @@ export default function NewProductPage() {
     hasSizes: false,
     sizes: ["S", "M", "L", "XL"]
   });
+
+  const [uploadKey, setUploadKey] = useState(Date.now());
 
   const [categories, setCategories] = useState<string[]>([]);
   const [isAddingNew, setIsAddingNew] = useState(false);
@@ -72,7 +75,8 @@ export default function NewProductPage() {
       hasColors: formData.hasColors,
       colors: formData.hasColors ? formData.colors : [],
       hasSizes: formData.hasSizes,
-      sizes: formData.hasSizes ? formData.sizes : []
+      sizes: formData.hasSizes ? formData.sizes : [],
+      images: formData.images
     };
 
     try {
@@ -127,6 +131,28 @@ export default function NewProductPage() {
         ? prev.sizes.filter(s => s !== size)
         : [...prev.sizes, size]
     }));
+  };
+
+  const handleAddImage = (url: string) => {
+    setFormData(prev => {
+      const newImages = [...prev.images, url];
+      return {
+        ...prev,
+        images: newImages,
+        image: newImages[0] // Set first image as main
+      };
+    });
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setFormData(prev => {
+      const newImages = prev.images.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        images: newImages,
+        image: newImages.length > 0 ? newImages[0] : ""
+      };
+    });
   };
 
   return (
@@ -375,11 +401,35 @@ export default function NewProductPage() {
               <div className="space-y-4">
                 <label className="text-white/80 font-bold text-sm mr-2 flex items-center gap-2">
                   <ImageIcon size={16} className="text-secondary" />
-                  صورة المنتج
+                  صور المنتج
                 </label>
-                <ImageUpload 
-                  onUploadComplete={(url) => setFormData(prev => ({ ...prev, image: url }))}
-                />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {formData.images.map((url, index) => (
+                    <div key={index} className="relative aspect-[4/5] bg-white/5 rounded-[2rem] overflow-hidden group border border-white/10">
+                      <Image src={url} alt={`Product ${index + 1}`} fill sizes="200px" className="object-cover" />
+                      <button 
+                        type="button"
+                        onClick={() => handleRemoveImage(index)}
+                        className="absolute top-4 left-4 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                      >
+                        <X size={16} />
+                      </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-4 right-4 bg-secondary text-primary px-3 py-1 rounded-lg text-xs font-bold shadow-lg">الرئيسية</span>
+                      )}
+                    </div>
+                  ))}
+                  
+                  <ImageUpload 
+                    key={uploadKey}
+                    onUploadComplete={(url) => {
+                      if (url) {
+                        handleAddImage(url);
+                        setUploadKey(Date.now());
+                      }
+                    }}
+                  />
+                </div>
               </div>
 
               {/* Description */}
@@ -426,12 +476,13 @@ export default function NewProductPage() {
         <div className="lg:col-span-5 space-y-6">
           <h3 className="text-white/40 font-black text-lg mr-4 uppercase tracking-widest">معاينة مباشرة</h3>
           <div className="bg-[#1e293b] p-6 rounded-[2.5rem] border border-white/10 opacity-60">
-            <div className="relative aspect-[4/5] bg-white/5 rounded-2xl overflow-hidden mb-6">
+            <div className="relative aspect-[4/5] bg-white/5 rounded-2xl overflow-hidden mb-6 border border-white/10">
               {formData.image ? (
                 <Image src={formData.image} alt="Preview" fill sizes="(max-width: 768px) 100vw, 400px" className="object-cover" />
               ) : (
-                <div className="flex items-center justify-center h-full text-white/10">
+                <div className="flex flex-col items-center justify-center h-full text-white/10 space-y-4">
                   <ImageIcon size={64} />
+                  <span className="font-bold">سيظهر المنتج هنا</span>
                 </div>
               )}
             </div>

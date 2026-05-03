@@ -20,8 +20,11 @@ import {
   ThumbsUp,
   Printer,
   Calendar,
-  Trash2
+  Trash2,
+  Ticket
 } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 import Link from "next/link";
 import Image from "next/image";
 import { exportToCSV } from "@/lib/exportUtils";
@@ -37,10 +40,13 @@ export default function AdminOrdersPage() {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [isMonthPickerOpen, setIsMonthPickerOpen] = useState(false);
   const [isExportingSheets, setIsExportingSheets] = useState(false);
+  const [isExportingListSheets, setIsExportingListSheets] = useState(false);
   const [pickerYear, setPickerYear] = useState(new Date().getFullYear());
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [activeUpdateId, setActiveUpdateId] = useState<string | null>(null);
+  const { showToast } = useToast();
   const filterRef = useRef<HTMLDivElement>(null);
   const monthPickerRef = useRef<HTMLDivElement>(null);
 
@@ -99,22 +105,21 @@ export default function AdminOrdersPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+      showToast("تم تحديث حالة الطلب بنجاح", "success");
     } catch {
-      alert("فشل تحديث حالة الطلب.");
+      showToast("فشل تحديث حالة الطلب", "error");
     }
   };
 
-  const handleDeleteOrder = async (id: string) => {
-    if (!window.confirm("هل أنت متأكد من حذف هذا الطلب الملغي بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء.")) {
-      return;
-    }
+  const executeDelete = async (id: string) => {
     setDeletingOrderId(id);
     try {
       await adminFetch(`/api/admin/orders/${id}`, { method: "DELETE" });
       setOrders(prev => prev.filter(o => o.id !== id));
       if (expandedId === id) setExpandedId(null);
+      showToast("تم حذف الطلب بنجاح", "success");
     } catch (err: any) {
-      alert("فشل الحذف: " + err.message);
+      showToast("فشل الحذف: " + err.message, "error");
     }
     setDeletingOrderId(null);
   };
@@ -158,6 +163,72 @@ export default function AdminOrdersPage() {
       { key: "customer.gender", label: "الجنس" }
     ];
     exportToCSV(filteredOrders, "orders", headers);
+  };
+
+  const handleExportToGoogleSheets = async () => {
+    if (filteredOrders.length === 0) {
+      alert("لا توجد طلبات للتصدير.");
+      return;
+    }
+    
+    setIsExportingListSheets(true);
+
+    try {
+      const exportData = filteredOrders.map(order => ({
+        id: order.id,
+        customerName: order.customer.name,
+        customerPhone: order.customer.phone,
+        customerCity: order.customer.city,
+        customerAddress: order.customer.address,
+        total: order.total,
+        shippingFee: order.shippingFee,
+        status: order.status === "pending" ? "قيد الانتظار" :
+               order.status === "confirmed" ? "تم التأكيد" :
+               order.status === "shipping" ? "جاري الشحن" :
+               order.status === "completed" ? "مكتمل" : "ملغي",
+        customerGender: order.customer.gender || "---"
+      }));
+
+      const headers = [
+        { key: "id", label: "رقم الطلب" },
+        { key: "customerName", label: "اسم العميل" },
+        { key: "customerPhone", label: "رقم الهاتف" },
+        { key: "customerCity", label: "المدينة" },
+        { key: "customerAddress", label: "العنوان" },
+        { key: "total", label: "المجموع" },
+        { key: "shippingFee", label: "رسوم التوصيل" },
+        { key: "status", label: "الحالة" },
+        { key: "customerGender", label: "الجنس" }
+      ];
+
+      const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : "";
+
+      const response = await fetch("/api/export/sheets", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          title: `تقرير الطلبات المفلترة - ${new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}`,
+          headers,
+          data: exportData
+        })
+      });
+
+      const resData = await response.json();
+
+      if (response.ok && resData.url) {
+        window.open(resData.url, "_blank");
+      } else {
+        alert("فشل في إنشاء الجداول: " + (resData.error || "مجهول"));
+      }
+    } catch (error) {
+      console.error(error);
+      alert("حدث خطأ في النظام أثناء التصدير.");
+    } finally {
+      setIsExportingListSheets(false);
+    }
   };
 
   const handleMonthlyExport = () => {
@@ -478,16 +549,31 @@ export default function AdminOrdersPage() {
           </div>
           
           {/* Current Search Export */}
-          <button 
-            onClick={handleExport}
-            className="bg-[#1e293b] hover:bg-white/10 text-white/70 hover:text-white transition-all px-5 h-14 rounded-2xl border border-white/10 hover:border-white/20 font-bold flex items-center justify-center gap-3 w-full xl:w-auto shadow-lg"
-          >
-            <FileSpreadsheet size={20} className="text-white/50" />
-            <div className="flex flex-col items-start gap-0.5">
-              <span className="text-sm">تصدير القائمة</span>
-              <span className="text-[10px] text-white/40 font-normal">حسب الفلترة والبحث</span>
-            </div>
-          </button>
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto">
+            <button 
+              onClick={handleExport}
+              title="تصدير القائمة بصيغة إكسل CSV"
+              className="bg-[#1e293b] hover:bg-white/10 text-white/70 hover:text-white transition-all px-5 h-14 rounded-2xl border border-white/10 hover:border-white/20 font-bold flex items-center justify-center gap-3 w-full sm:w-auto shadow-lg"
+            >
+              <FileSpreadsheet size={20} className="text-white/50" />
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-sm">إكسل القائمة</span>
+                <span className="text-[10px] text-white/40 font-normal">حسب الفلترة والبحث</span>
+              </div>
+            </button>
+            <button 
+              onClick={handleExportToGoogleSheets}
+              disabled={isExportingListSheets}
+              title="تصدير القائمة إلى Google Sheets"
+              className="bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white transition-all px-5 h-14 rounded-2xl border border-emerald-500/20 font-bold flex items-center justify-center gap-3 disabled:opacity-50 disabled:hover:bg-emerald-500/10 disabled:hover:text-emerald-500 disabled:cursor-not-allowed w-full sm:w-auto shadow-lg"
+            >
+              {isExportingListSheets ? <Loader2 size={20} className="animate-spin" /> : <FileSpreadsheet size={20} />}
+              <div className="flex flex-col items-start gap-0.5">
+                <span className="text-sm">شيت القائمة</span>
+                <span className="text-[10px] opacity-70 font-normal">حسب الفلترة والبحث</span>
+              </div>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -559,7 +645,17 @@ export default function AdminOrdersPage() {
                             </div>
                           </div>
                         </td>
-                        <td className="px-8 py-6 font-black text-xl text-secondary">{order.total.toFixed(2)} د.ا</td>
+                        <td className="px-8 py-6">
+                          <div className="flex flex-col items-start gap-1">
+                            <span className="font-black text-xl text-secondary">{order.total.toFixed(2)} د.ا</span>
+                            {(order as any).couponCode && (
+                              <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-black px-2 py-0.5 rounded-md border border-emerald-500/20">
+                                <Ticket size={10} />
+                                {(order as any).couponCode}
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-8 py-6 text-white/60 font-bold text-sm">
                           {order.createdAt ? new Date((order.createdAt.seconds || (order.createdAt as any)._seconds || 0) * 1000).toLocaleDateString("ar-EG") : "---"}
                         </td>
@@ -635,7 +731,10 @@ export default function AdminOrdersPage() {
                           
                           {isAdminRole === "superadmin" && order.status === "cancelled" && (
                             <button
-                              onClick={() => handleDeleteOrder(order.id)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOrderToDelete(order.id);
+                              }}
                               disabled={deletingOrderId === order.id}
                               className="bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white p-2.5 rounded-xl transition-all disabled:opacity-50 border border-red-500/20 shadow-lg shadow-red-500/5"
                               title="حذف الطلب نهائياً"
@@ -745,6 +844,29 @@ export default function AdminOrdersPage() {
                                               <span className="text-white/60 font-bold text-sm">رسوم التوصيل</span>
                                               <span className="font-black text-amber-400 text-lg">{order.shippingFee.toFixed(2)} د.ا</span>
                                             </div>
+
+                                            {/* Coupon Info */}
+                                            {(order as any).couponCode && (
+                                              <div className="bg-emerald-500/10 p-4 rounded-2xl border border-emerald-500/20 space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                  <span className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
+                                                    <Ticket size={14} />
+                                                    كود خصم مُستخدم
+                                                  </span>
+                                                  <span className="font-mono font-black text-emerald-400 text-sm tracking-widest bg-emerald-500/10 px-3 py-1 rounded-lg border border-emerald-500/20">
+                                                    {(order as any).couponCode}
+                                                  </span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                  <span className="text-white/40 font-bold text-xs">نسبة الخصم</span>
+                                                  <span className="font-black text-emerald-400">{(order as any).couponDiscountPercent || 0}%</span>
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                  <span className="text-white/40 font-bold text-xs">مبلغ الخصم</span>
+                                                  <span className="font-black text-emerald-400">-{((order as any).couponDiscount || 0).toFixed(2)} د.ا</span>
+                                                </div>
+                                              </div>
+                                            )}
                                           </div>
                                         </div>
                                       </div>
@@ -769,6 +891,16 @@ export default function AdminOrdersPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={orderToDelete !== null}
+        title="حذف الطلب نهائياً"
+        message="هل أنت متأكد من حذف هذا الطلب الملغي بشكل نهائي؟ لا يمكن التراجع عن هذا الإجراء."
+        onConfirm={() => {
+          if (orderToDelete) executeDelete(orderToDelete);
+        }}
+        onCancel={() => setOrderToDelete(null)}
+      />
     </div>
   );
 }

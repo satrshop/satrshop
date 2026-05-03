@@ -10,9 +10,11 @@ service cloud.firestore {
     }
 
     // ─── Orders ─────────────────────────────────────────────
-    // No client access at all. Created/managed via Admin SDK (checkout API route).
+    // Authenticated admins can read (for real-time dashboard listeners).
+    // No client writes — Created/managed via Admin SDK (checkout API route).
     match /orders/{orderId} {
-      allow read, write: if false;
+      allow read: if request.auth != null;
+      allow write: if false;
     }
 
     // ─── Admins ─────────────────────────────────────────────
@@ -39,6 +41,12 @@ service cloud.firestore {
         && request.resource.data.isRead == false;
       allow read: if request.auth != null;
       allow update, delete: if false;
+    }
+
+    // ─── Coupons (Discount Codes) ────────────────────────────
+    // No client access. Created/managed via Admin SDK only.
+    match /coupons/{couponId} {
+      allow read, write: if false;
     }
 
     // ─── Activity Logs ──────────────────────────────────────

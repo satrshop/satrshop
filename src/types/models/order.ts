@@ -27,5 +27,8 @@ export interface Order {
   status: 'pending' | 'confirmed' | 'shipping' | 'completed' | 'cancelled';
   paymentMethod: 'cod';
   shippingFee: number;
+  couponCode?: string;          // The discount code used (if any)
+  couponDiscount?: number;      // Discount amount in currency
+  couponDiscountPercent?: number; // Discount percentage
   createdAt: Timestamp; // Firestore Timestamp
 }

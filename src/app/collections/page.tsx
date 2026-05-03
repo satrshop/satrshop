@@ -7,26 +7,26 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 const COLLECTIONS = [
-  { 
-    id: "stickers", 
-    title: "ستكرز سطر", 
-    subtitle: "أضف لمستك الخاصة", 
-    desc: "تشكيلة من الستكرز التقنية المقاومة للماء، مصممة بدقة لتزين لابتوبك ومعداتك البرمجية.", 
-    image: "/images/herosection.JPG" 
+  {
+    id: "stickers",
+    title: "ستكرز سطر",
+    subtitle: "أضف لمستك الخاصة",
+    desc: "تشكيلة من الستكرز التقنية المقاومة للماء، مصممة بدقة لتزين لابتوبك ومعداتك البرمجية.",
+    image: "/images/herosection.JPG"
   },
-  { 
-    id: "accessories", 
-    title: "إكسسوارات تقنية", 
-    subtitle: "تكمل تفاصيلك", 
-    desc: "قطع فريدة مصممة لتناسب أسلوب حياتك البرمجي، من علاقات مفاتيح إلى ملحقات مكتبية مميزة.", 
-    image: "/images/bgblue.png" 
+  {
+    id: "accessories",
+    title: "إكسسوارات تقنية",
+    subtitle: "تكمل تفاصيلك",
+    desc: "قطع فريدة مصممة لتناسب أسلوب حياتك البرمجي، من علاقات مفاتيح إلى ملحقات مكتبية مميزة.",
+    image: "/images/click.webp"
   },
-  { 
-    id: "agenda", 
-    title: "أجندة سطر", 
-    subtitle: "خطط لمستقبلك", 
-    desc: "أجندة يومية مصممة لتساعدك على تنظيم مهامك، تدوين أفكارك البرمجية، ورفع إنتاجيتك بأسلوب سطر.", 
-    image: "/images/bg2.png" 
+  {
+    id: "agenda",
+    title: "أجندة سطر",
+    subtitle: "خطط لمستقبلك",
+    desc: "أجندة يومية مصممة لتساعدك على تنظيم مهامك، تدوين أفكارك البرمجية، ورفع إنتاجيتك بأسلوب سطر.",
+    image: "/images/ajnda.webp"
   },
 ];
 
@@ -34,12 +34,12 @@ export default function CollectionsPage() {
   return (
     <div className="min-h-screen bg-background selection:bg-secondary selection:text-white pb-20 relative">
       <Header />
-      
+
       {/* Decorative Blob */}
       <div className="absolute top-40 left-0 w-[500px] h-[500px] bg-primary/5 rounded-full filter blur-[120px] -z-10" />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-28 sm:pt-36 lg:pt-48 pb-16">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
@@ -53,7 +53,7 @@ export default function CollectionsPage() {
 
         <div className="space-y-10 sm:space-y-12 lg:space-y-24">
           {COLLECTIONS.map((col, index) => (
-            <motion.div 
+            <motion.div
               key={col.id}
               initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -80,10 +80,10 @@ export default function CollectionsPage() {
                 <p className="text-base sm:text-lg text-muted-foreground leading-relaxed mb-6 sm:mb-8 font-medium">
                   {col.desc}
                 </p>
-                
+
                 <Link href={`/shop?category=${col.id}`} passHref>
-                  <motion.button 
-                    whileHover={{ x: -10 }} 
+                  <motion.button
+                    whileHover={{ x: -10 }}
                     className="inline-flex items-center gap-3 bg-primary text-primary-foreground h-14 px-8 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 hover:bg-[#22556d] transition-all"
                   >
                     استكشف المجموعة

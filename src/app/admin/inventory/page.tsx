@@ -16,6 +16,7 @@ import {
   Plus
 } from "lucide-react";
 import Image from "next/image";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function InventoryPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,6 +27,7 @@ export default function InventoryPage() {
   const [savedId, setSavedId] = useState<string | null>(null);
   const [isSavingAll, setIsSavingAll] = useState(false);
   const [allSaved, setAllSaved] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
     loadProducts();
@@ -65,9 +67,10 @@ export default function InventoryPage() {
         return next;
       });
       setSavedId(productId);
+      showToast("تم تحديث كمية المخزون بنجاح", "success");
       setTimeout(() => setSavedId(null), 2000);
     } catch {
-      alert("فشل حفظ التعديل.");
+      showToast("فشل حفظ التعديل", "error");
     }
     setSavingId(null);
   };
@@ -91,10 +94,11 @@ export default function InventoryPage() {
       ));
       setEditedStocks({});
       setAllSaved(true);
+      showToast("تم تحديث جميع الكميات بنجاح", "success");
       setTimeout(() => setAllSaved(false), 3000);
     } catch (error) {
       console.error("Bulk save error:", error);
-      alert("حدث خطأ أثناء حفظ التعديلات.");
+      showToast("حدث خطأ أثناء حفظ التعديلات", "error");
     } finally {
       setIsSavingAll(false);
     }

@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { items, customer, paymentMethod, shippingFee } = body;
+    const { items, customer, paymentMethod, shippingFee, couponCode } = body;
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: "السلة فارغة" }, { status: 400 });
@@ -127,12 +127,54 @@ export async function POST(req: Request) {
       });
     });
 
-    // 3. Create the Order securely
+    // 3. Validate and apply coupon (if provided)
+    let couponDiscount = 0;
+    let couponDiscountPercent = 0;
+    let validatedCouponCode: string | null = null;
+    let couponDocRef: FirebaseFirestore.DocumentReference | null = null;
+
+    if (couponCode && typeof couponCode === "string" && couponCode.trim().length > 0) {
+      const normalizedCode = couponCode.trim().toUpperCase();
+      const couponSnapshot = await adminDb
+        .collection("coupons")
+        .where("code", "==", normalizedCode)
+        .where("isActive", "==", true)
+        .limit(1)
+        .get();
+
+      if (!couponSnapshot.empty) {
+        const couponDoc = couponSnapshot.docs[0];
+        const couponData = couponDoc.data();
+
+        let couponValid = true;
+
+        // Check expiration
+        if (couponData.expiresAt) {
+          const expiresAt = couponData.expiresAt.toDate();
+          if (expiresAt < new Date()) couponValid = false;
+        }
+
+        // Check usage limit
+        if (couponData.maxUses > 0 && couponData.usedCount >= couponData.maxUses) {
+          couponValid = false;
+        }
+
+        if (couponValid) {
+          couponDiscountPercent = couponData.discountPercent;
+          couponDiscount = Math.min((realSubtotal * couponDiscountPercent) / 100, 3);
+          validatedCouponCode = couponData.code;
+          couponDocRef = couponDoc.ref;
+        }
+      }
+      // If coupon is invalid, we silently ignore it (no error, just no discount)
+    }
+
+    // 4. Create the Order securely
     // Enforce Shipping Fee (2.50 or 0 for Zaytoonah) ignoring the client payload
     const finalShippingFee = customer.isZaytoonah ? 0 : 2.50;
-    const realTotal = realSubtotal + finalShippingFee;
+    const realTotal = realSubtotal - couponDiscount + finalShippingFee;
 
-    const newOrder = {
+    const newOrder: Record<string, any> = {
       items: itemsWithCost,
       customer: {
         name: customer.name,
@@ -150,7 +192,21 @@ export async function POST(req: Request) {
       createdAt: admin.firestore.Timestamp.now(),
     };
 
+    // Add coupon info to order if applied
+    if (validatedCouponCode) {
+      newOrder.couponCode = validatedCouponCode;
+      newOrder.couponDiscount = couponDiscount;
+      newOrder.couponDiscountPercent = couponDiscountPercent;
+    }
+
     const docRef = await adminDb.collection("orders").add(newOrder);
+
+    // Increment coupon usage count
+    if (couponDocRef) {
+      await couponDocRef.update({
+        usedCount: admin.firestore.FieldValue.increment(1)
+      });
+    }
 
     return NextResponse.json({ success: true, orderId: docRef.id });
 

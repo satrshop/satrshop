@@ -19,6 +19,8 @@ import {
 } from "lucide-react";
 import { exportToCSV } from "@/lib/exportUtils";
 import { Trash2 } from "lucide-react";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import { useToast } from "@/components/ui/ToastProvider";
 
 interface Customer {
   id: string; // Using phone number as ID for uniqueness in this view
@@ -40,6 +42,8 @@ export default function AdminCustomersPage() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [genderFilter, setGenderFilter] = useState("all");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [customerToDelete, setCustomerToDelete] = useState<{phone: string, name: string} | null>(null);
+  const { showToast } = useToast();
   const filterRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -122,18 +126,16 @@ export default function AdminCustomersPage() {
     return `https://wa.me/${cleanPhone}`;
   };
 
-  const handleDeleteCustomer = async (phone: string, name: string) => {
-    if (!window.confirm(`تحذير خطير: هل أنت متأكد من حذف الزبون "${name}"؟\\n\\nهذا الإجراء سيؤدي إلى مسح جميع طلباته من النظام بشكل نهائي ولا يمكن التراجع عنه!`)) {
-      return;
-    }
+  const executeDeleteCustomer = async (phone: string) => {
     setDeletingId(phone);
     try {
       await adminFetch(`/api/admin/customers/${encodeURIComponent(phone)}`, {
         method: "DELETE"
       });
       await loadCustomers();
+      showToast("تم حذف الزبون وجميع طلباته بنجاح", "success");
     } catch (err: any) {
-      alert("فشل الحذف: " + err.message);
+      showToast("فشل الحذف: " + err.message, "error");
     }
     setDeletingId(null);
   };
@@ -351,7 +353,7 @@ export default function AdminCustomersPage() {
                       {isAdminRole === "superadmin" && (
                         <td className="px-8 py-6">
                           <button
-                            onClick={() => handleDeleteCustomer(customer.phone, customer.name)}
+                            onClick={() => setCustomerToDelete({ phone: customer.phone, name: customer.name })}
                             disabled={deletingId === customer.phone}
                             className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-xl transition-all disabled:opacity-50"
                             title="حذف الزبون وجميع طلباته"
@@ -373,6 +375,16 @@ export default function AdminCustomersPage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={customerToDelete !== null}
+        title="حذف زبون"
+        message={`تحذير خطير: هل أنت متأكد من حذف الزبون "${customerToDelete?.name}"؟\n\nهذا الإجراء سيؤدي إلى مسح جميع طلباته من النظام بشكل نهائي ولا يمكن التراجع عنه!`}
+        onConfirm={() => {
+          if (customerToDelete) executeDeleteCustomer(customerToDelete.phone);
+        }}
+        onCancel={() => setCustomerToDelete(null)}
+      />
     </div>
   );
 }
