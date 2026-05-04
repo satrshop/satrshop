@@ -24,9 +24,11 @@ import {
 import Link from "next/link";
 import Image from "next/image";
 import ImageUpload from "@/components/admin/ImageUpload";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function NewProductPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   
@@ -90,11 +92,12 @@ export default function NewProductPage() {
         body: JSON.stringify(productData),
       });
       setSuccess(true);
+      showToast("تمت إضافة المنتج بنجاح", "success");
       setTimeout(() => {
         router.push("/admin/products");
       }, 1500);
-    } catch {
-      alert("فشل إضافة المنتج. حاول مرة أخرى.");
+    } catch (err: any) {
+      showToast(err.message || "فشل إضافة المنتج. حاول مرة أخرى.", "error");
       setLoading(false);
     }
   };
@@ -213,7 +216,7 @@ export default function NewProductPage() {
                     value={formData.price}
                     onChange={handleChange}
                     placeholder="25.00"
-                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
+                    className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 {/* Category */}
@@ -272,7 +275,7 @@ export default function NewProductPage() {
                   value={formData.costPrice}
                   onChange={handleChange}
                   placeholder="15.00"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
                 <p className="text-[10px] text-white/30 mr-2">هذا السعر لن يظهر للزبون، يستخدم فقط لحساب الأرباح.</p>
               </div>
@@ -291,7 +294,7 @@ export default function NewProductPage() {
                   value={formData.stock}
                   onChange={handleChange}
                   placeholder="10"
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all"
+                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-5 text-white focus:outline-none focus:border-secondary transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
 

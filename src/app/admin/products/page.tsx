@@ -19,6 +19,7 @@ export default function AdminProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filterFeatured, setFilterFeatured] = useState(false);
   const [isDeleting, setIsDeleting] = useState<string | null>(null);
 
   async function loadProducts() {
@@ -50,10 +51,12 @@ export default function AdminProductsPage() {
     setIsDeleting(null);
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          p.category.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFeatured = filterFeatured ? p.isFeatured : true;
+    return matchesSearch && matchesFeatured;
+  });
 
   return (
     <div className="space-y-8">
@@ -72,8 +75,8 @@ export default function AdminProductsPage() {
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-[#1e293b] p-4 rounded-[2rem] border border-white/5 flex items-center gap-4">
-        <div className="relative flex-1">
+      <div className="bg-[#1e293b] p-4 rounded-[2rem] border border-white/5 flex flex-col sm:flex-row items-center gap-4">
+        <div className="relative flex-1 w-full">
           <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30" size={20} />
           <input 
             type="text"
@@ -83,6 +86,16 @@ export default function AdminProductsPage() {
             className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pr-12 pl-4 text-white focus:outline-none focus:border-secondary transition-all"
           />
         </div>
+        <button
+          onClick={() => setFilterFeatured(!filterFeatured)}
+          className={`px-6 py-3 rounded-xl font-bold transition-all whitespace-nowrap border border-white/5 ${
+            filterFeatured 
+              ? 'bg-secondary text-primary' 
+              : 'bg-white/5 text-white/60 hover:bg-white/10'
+          }`}
+        >
+          في الرئيسية ({products.filter(p => p.isFeatured).length}/4)
+        </button>
       </div>
 
       {/* Products Grid */}

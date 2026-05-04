@@ -26,7 +26,7 @@ const COLLECTIONS = [
     title: "أجندة سطر",
     subtitle: "خطط لمستقبلك",
     desc: "أجندة يومية مصممة لتساعدك على تنظيم مهامك، تدوين أفكارك البرمجية، ورفع إنتاجيتك بأسلوب سطر.",
-    image: "/images/ajnda.webp"
+    image: "/images/ajndas.webp"
   },
 ];
 

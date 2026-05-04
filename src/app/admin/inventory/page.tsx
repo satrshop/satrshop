@@ -281,7 +281,7 @@ export default function InventoryPage() {
                             min="0"
                             value={currentStock}
                             onChange={(e) => handleStockChange(product.id, parseInt(e.target.value) || 0)}
-                            className={`w-16 text-center bg-white/5 border rounded-lg py-1.5 font-black text-lg focus:outline-none focus:border-secondary transition-all ${isEdited ? 'border-secondary text-secondary' : 'border-white/10 text-white'}`}
+                            className={`w-16 text-center bg-white/5 border rounded-lg py-1.5 font-black text-lg focus:outline-none focus:border-secondary transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${isEdited ? 'border-secondary text-secondary' : 'border-white/10 text-white'}`}
                           />
                           <button
                             onClick={() => handleStockChange(product.id, currentStock + 1)}

@@ -115,7 +115,10 @@ export default function AdminDashboard() {
               <Clock className="text-secondary" />
               أحدث الطلبات
             </h2>
-            <Link href="/admin/orders" className="text-secondary font-bold hover:underline py-2">
+            <Link 
+              href="/admin/orders" 
+              className="group flex items-center gap-2 bg-secondary/10 hover:bg-secondary text-secondary hover:text-primary px-5 py-2 rounded-xl font-bold transition-all border border-secondary/20"
+            >
               عرض الكل
             </Link>
           </div>

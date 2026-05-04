@@ -14,21 +14,10 @@ function ShopContent() {
   const queryParam = searchParams.get("q") || "";
   const categoryParam = searchParams.get("category") || "all";
 
-  const categories = [
-    { id: "all", name: "الكل" },
-    { id: "stickers", name: "الستيكرز" },
-    { id: "accessories", name: "الإكسسوارات" },
-    { id: "agenda", name: "الأجندة" },
-  ];
-
   const [activeCategory, setActiveCategory] = useState(categoryParam);
-
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSortOpen, setIsSortOpen] = useState(false);
-  const [selectedSort, setSelectedSort] = useState(categories.find(c => c.id === activeCategory)?.name || "كل المنتجات");
-
-  const sortOptions = categories.map(c => c.name);
 
   // Fetch products from Firestore
   useEffect(() => {
@@ -48,20 +37,41 @@ function ShopContent() {
     }
   }, [categoryParam]);
 
+  // Compute dynamic categories from products
+  const sortOptions = useMemo(() => {
+    const cats = new Set<string>();
+    products.forEach(p => {
+      if (p.category) cats.add(p.category);
+    });
+    return ["الكل", ...Array.from(cats)];
+  }, [products]);
+
+  // Convert English params to Arabic for display
+  const displayCategory = useMemo(() => {
+    if (activeCategory === "all") return "الكل";
+    if (activeCategory === "stickers") return "الستيكرز";
+    if (activeCategory === "accessories") return "الإكسسوارات";
+    if (activeCategory === "agenda") return "الأجندة";
+    return activeCategory;
+  }, [activeCategory]);
+
   // Filter by search query and category
   const filteredProducts = useMemo(() => {
     let filtered = products;
 
     // Filter by Category
-    if (activeCategory !== "all") {
+    if (activeCategory !== "all" && activeCategory !== "الكل") {
       filtered = filtered.filter(p => {
         const cat = p.category?.toLowerCase() || "";
         const target = activeCategory.toLowerCase();
-        // Match by internal ID or the specific names
-        if (target === "stickers") return cat.includes("stickers") || cat.includes("ستيكر") || cat.includes("ستكر");
-        if (target === "accessories") return cat.includes("accessories") || cat.includes("إكسسوار") || cat.includes("اكسسوار");
-        if (target === "agenda") return cat.includes("agenda") || cat.includes("أجندة") || cat.includes("اجنده");
-        return cat.includes(target);
+        
+        // Handle URL params mapped to categories
+        if (target === "stickers" || target === "الستيكرز") return cat.includes("stickers") || cat.includes("ستيكر") || cat.includes("ستكر");
+        if (target === "accessories" || target === "الإكسسوارات") return cat.includes("accessories") || cat.includes("إكسسوار") || cat.includes("اكسسوار");
+        if (target === "agenda" || target === "الأجندة") return cat.includes("agenda") || cat.includes("أجندة") || cat.includes("اجنده");
+        
+        // Exact match for dynamically added categories
+        return cat === target;
       });
     }
 
@@ -78,26 +88,12 @@ function ShopContent() {
     return filtered;
   }, [queryParam, activeCategory, products]);
 
-  // Sort the filtered products
+  // Default sorting (newest first)
   const sortedProducts = useMemo(() => {
     const sorted = [...filteredProducts];
-    switch (selectedSort) {
-      case "السعر: من الأقل للأعلى":
-        sorted.sort((a, b) => a.price - b.price);
-        break;
-      case "السعر: من الأعلى للأقل":
-        sorted.sort((a, b) => b.price - a.price);
-        break;
-      case "الأعلى تقييماً":
-        sorted.sort((a, b) => b.rating - a.rating);
-        break;
-      default:
-        // Sort by 'isNew' or just use the order from DB
-        sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-        break;
-    }
+    sorted.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
     return sorted;
-  }, [filteredProducts, selectedSort]);
+  }, [filteredProducts]);
 
   if (loading) {
     return (
@@ -118,7 +114,7 @@ function ShopContent() {
       >
         <div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground mb-3 sm:mb-4">
-            {queryParam ? `نتائج البحث` : activeCategory !== "all" ? categories.find(c => c.id === activeCategory)?.name : "المتجر التقني"}
+            {queryParam ? `نتائج البحث` : activeCategory !== "all" && activeCategory !== "الكل" ? displayCategory : "المتجر التقني"}
           </h1>
           {queryParam ? (
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
@@ -143,7 +139,7 @@ function ShopContent() {
             >
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal size={18} />
-                  <span>تصفية: {selectedSort}</span>
+                  <span>تصفية: {displayCategory}</span>
                 </div>
               <motion.div animate={{ rotate: isSortOpen ? 180 : 0 }}>
                 <ChevronDown size={18} />
@@ -163,12 +159,10 @@ function ShopContent() {
                     <button 
                       key={i}
                       onClick={() => { 
-                        setSelectedSort(opt); 
-                        const catId = categories.find(c => c.name === opt)?.id || "all";
-                        setActiveCategory(catId);
+                        setActiveCategory(opt);
                         setIsSortOpen(false); 
                       }}
-                      className={`w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${selectedSort === opt
+                      className={`w-full text-right px-4 py-3 rounded-xl text-sm font-bold transition-all duration-300 ${activeCategory === opt || displayCategory === opt
                           ? 'bg-primary text-primary-foreground shadow-md translate-x-[-4px]'
                           : 'text-primary dark:text-primary-foreground hover:bg-primary/5 hover:translate-x-[-4px]'
                         } mb-1 last:mb-0`}

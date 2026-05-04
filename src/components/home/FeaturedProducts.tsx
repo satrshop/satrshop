@@ -33,7 +33,10 @@ export default function FeaturedProducts() {
           <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground mb-3 text-right">وصل حديثاً</h2>
           <p className="text-muted-foreground text-base sm:text-lg text-right">أحدث الإصدارات الخاصة بالموسم التقني الجديد.</p>
         </div>
-        <Link href="/shop" className="hidden sm:inline-block text-primary font-bold hover:text-secondary transition-colors underline decoration-2 underline-offset-8 whitespace-nowrap">
+        <Link 
+          href="/shop" 
+          className="hidden sm:flex group items-center gap-2 bg-secondary/10 hover:bg-secondary text-secondary hover:text-primary px-6 py-2.5 rounded-2xl font-black transition-all border border-secondary/20 hover:shadow-lg hover:shadow-secondary/20"
+        >
           عرض كل المنتجات
         </Link>
       </div>
@@ -59,7 +62,10 @@ export default function FeaturedProducts() {
       )}
 
       <div className="mt-10 sm:hidden flex justify-center">
-        <Link href="/shop" className="text-primary font-bold hover:text-secondary transition-colors underline decoration-2 underline-offset-8 whitespace-nowrap">
+        <Link 
+          href="/shop" 
+          className="flex w-full group items-center justify-center gap-2 bg-secondary/10 hover:bg-secondary text-secondary hover:text-primary px-6 py-3.5 rounded-2xl font-black transition-all border border-secondary/20"
+        >
           عرض كل المنتجات
         </Link>
       </div>

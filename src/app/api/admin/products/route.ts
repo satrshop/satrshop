@@ -48,6 +48,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    if (isFeatured === true) {
+      const featuredSnapshot = await adminDb.collection(PRODUCTS_COLLECTION).where("isFeatured", "==", true).get();
+      if (featuredSnapshot.size >= 4) {
+        return NextResponse.json({ error: "لقد وصلت للحد الأقصى (4 منتجات) لقسم في الرئيسية" }, { status: 400 });
+      }
+    }
+
     const productData = {
       name,
       price,

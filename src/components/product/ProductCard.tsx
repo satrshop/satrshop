@@ -41,10 +41,10 @@ export default function ProductCard({ product, index }: ProductCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      viewport={{ once: true, margin: "-10px" }}
+      transition={{ duration: 0.3 }}
       className="group relative bg-primary rounded-2xl sm:rounded-3xl overflow-hidden shadow-md hover:shadow-2xl transition-all duration-300 border border-primary/20 flex flex-col h-full"
     >
       {/* Badges */}

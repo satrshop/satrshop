@@ -68,6 +68,14 @@ export async function PUT(
       return NextResponse.json({ error: "No valid fields to update" }, { status: 400 });
     }
 
+    if (sanitizedBody.isFeatured === true) {
+      const featuredSnapshot = await adminDb.collection(PRODUCTS_COLLECTION).where("isFeatured", "==", true).get();
+      const otherFeaturedProducts = featuredSnapshot.docs.filter(d => d.id !== id);
+      if (otherFeaturedProducts.length >= 4) {
+        return NextResponse.json({ error: "لقد وصلت للحد الأقصى (4 منتجات) لقسم في الرئيسية" }, { status: 400 });
+      }
+    }
+
     await docRef.update(sanitizedBody);
     await logAdminActivity(admin, "تعديل منتج", `تم تعديل منتج: ${sanitizedBody.name || id}`);
 

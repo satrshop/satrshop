@@ -335,9 +335,12 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
             <h2 className="text-3xl sm:text-4xl font-black text-primary border-r-8 border-secondary pr-6 leading-tight">
               منتجات قد تعجبك
             </h2>
-            <Link href="/shop" className="text-secondary font-black hover:underline flex items-center gap-2 text-lg">
+            <Link 
+              href="/shop" 
+              className="group flex items-center gap-2 bg-secondary/10 hover:bg-secondary text-secondary hover:text-primary px-6 py-3 rounded-2xl font-black transition-all border border-secondary/20 hover:shadow-lg hover:shadow-secondary/20"
+            >
               عرض الكل
-              <ArrowRight size={20} className="rotate-180" />
+              <ArrowRight size={18} className="rotate-180 transition-transform group-hover:-translate-x-1" />
             </Link>
           </div>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">

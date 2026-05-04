@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Loader2, Activity, Clock, User, Info, Trash2 } from "lucide-react";
 import { adminFetch } from "@/lib/api/admin-client";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
 
 interface ActivityLog {
   id?: string;
@@ -17,6 +18,7 @@ export default function LogsPage() {
   const [logs, setLogs] = useState<ActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [clearing, setClearing] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -34,8 +36,6 @@ export default function LogsPage() {
   };
 
   const handleClearLogs = async () => {
-    if (!confirm("هل أنت متأكد من حذف جميع سجلات النشاط؟ لا يمكن التراجع عن هذا الإجراء.")) return;
-    
     setClearing(true);
     try {
       await adminFetch("/api/admin/logs", { method: "DELETE" });
@@ -44,6 +44,7 @@ export default function LogsPage() {
       console.error("Failed to clear logs:", err);
     }
     setClearing(false);
+    setShowConfirm(false);
   };
 
   const formatDate = (timestamp: ActivityLog["createdAt"]) => {
@@ -75,7 +76,7 @@ export default function LogsPage() {
         </h1>
         <div className="flex items-center gap-2">
           <button 
-            onClick={handleClearLogs} 
+            onClick={() => setShowConfirm(true)} 
             disabled={clearing || logs.length === 0}
             className="text-sm bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 px-4 py-2 rounded-lg text-red-400 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
           >
@@ -138,6 +139,17 @@ export default function LogsPage() {
           </table>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showConfirm}
+        title="تنظيف السجل"
+        message="هل أنت متأكد من حذف جميع سجلات النشاط؟ لا يمكن التراجع عن هذا الإجراء."
+        onConfirm={handleClearLogs}
+        onCancel={() => setShowConfirm(false)}
+        confirmText="حذف الجميع"
+        cancelText="إلغاء"
+        isDangerous={true}
+      />
     </div>
   );
 }
